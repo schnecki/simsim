@@ -1,0 +1,355 @@
+
+==================== FINAL INTERFACE ====================
+2017-11-16 12:51:24.896663578 UTC
+
+interface simsim-0.1.0.0-KAtxr7wc8AtIoXggvLGZsd:SimSim.Runner.Dispatch 8002
+  interface hash: 8895a1e4945ac38e68cc947d3f8a4be5
+  ABI hash: bbe9b456576a838d20855926b9161508
+  export-list hash: 455f180cd93f59549c7d29b935d6d63d
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: ca4dfd210eb9b824aca45ce351220555
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  SimSim.Runner.Dispatch.dispatch
+module dependencies: SimSim.Block SimSim.Order SimSim.Order.Type
+                     SimSim.ProductType SimSim.Routing SimSim.Time
+package dependencies: ReadArgs-1.2.3@ReadArgs-1.2.3-FZlTw1cmwFABXd9Qu17GpK
+                      StateVar-1.1.0.4@StateVar-1.1.0.4-5dJbnTVECtEAhfJXPZKdbO
+                      adjunctions-4.3@adjunctions-4.3-A5jfd1yrmaY4DRMJuiquBp
+                      array-0.5.1.1@array-0.5.1.1
+                      async-2.1.1.1@async-2.1.1.1-8yywY4inVGRLJSCg60gBXj base-4.9.1.0
+                      base-orphans-0.6@base-orphans-0.6-AbJ3lKVXygDCG0eeQEv8Iu
+                      basic-prelude-0.6.1.1@basic-prelude-0.6.1.1-888xsTDtS2CGSoHb1JadEF
+                      bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw
+                      binary-0.8.3.0@binary-0.8.3.0
+                      bytestring-0.10.8.1@bytestring-0.10.8.1
+                      chunked-data-0.3.0@chunked-data-0.3.0-OOunTfArGE2y1nE8RKgW4
+                      classy-prelude-1.2.0.1@classy-prelude-1.2.0.1-DI7QyZr6dYQLSGY5Zda29N
+                      comonad-5.0.2@comonad-5.0.2-Fq9Xy9jdx6uIyJZn00E6Yc
+                      constraints-0.9.1@constraints-0.9.1-5mmQfXdFR8IpJ6JZxzjTB
+                      containers-0.5.7.1@containers-0.5.7.1
+                      contravariant-1.4@contravariant-1.4-29zF0Im431177ovfbHYCGv
+                      data-default-class-0.1.2.0@data-default-class-0.1.2.0-GsXqKN6o1X9jr0fF5qCVD
+                      deepseq-1.4.2.0@deepseq-1.4.2.0
+                      distributive-0.5.3@distributive-0.5.3-IX4kyVcHAyoH4uFYrsjY1R
+                      dlist-0.8.0.3@dlist-0.8.0.3-BHFBNaw8k6n9WiaUNzoXpk
+                      dlist-instances-0.1.1.1@dlist-instances-0.1.1.1-JrfDmjAHlXKJeRjjD0rY07
+                      exceptions-0.8.3@exceptions-0.8.3-ADEDRATtUrMK1JW4zMQ9U
+                      filepath-1.4.1.1@filepath-1.4.1.1
+                      free-4.12.4@free-4.12.4-C2gBQV0m8J42HxqSLTFyVx
+                      ghc-boot-th-8.0.2@ghc-boot-th-8.0.2 ghc-prim-0.5.0.0
+                      hashable-1.2.6.1@hashable-1.2.6.1-2ZLNuHq395GGIHwEHuqZol
+                      integer-gmp-1.0.0.1
+                      kan-extensions-5.0.2@kan-extensions-5.0.2-8LTJJ1zQJWB7SfewWXUuqX
+                      keys-3.11@keys-3.11-3rCPtsJiP6i6WPjfB1rcVT
+                      lifted-async-0.9.3@lifted-async-0.9.3-1Yr94BjFrURGjFULK2k39c
+                      lifted-base-0.2.3.11@lifted-base-0.2.3.11-Ei0JSPdt7KOCD2HIA5jFqV
+                      mmorph-1.0.9@mmorph-1.0.9-5bASEvmIkr5CpdAYXwPsn0
+                      monad-control-1.0.2.2@monad-control-1.0.2.2-1Ci8dYJ8Tb7E3HTcTqOb8l
+                      monad-unlift-0.2.0@monad-unlift-0.2.0-JaCplLBosjYCz9UWF6Saxw
+                      mono-traversable-1.0.2.1@mono-traversable-1.0.2.1-7cD9xrLpSxs61tMXUUbUIV
+                      mono-traversable-instances-0.1.0.0@mono-traversable-instances-0.1.0.0-cMPVlKCPiiIbLvZydxEFB
+                      mtl-2.2.1@mtl-2.2.1-BLKBelFsPB3BoFeSWSOYj6
+                      mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R
+                      pipes-4.3.6@pipes-4.3.6-3hOANll0lvQCiySRFVfAqq
+                      pointed-5@pointed-5-GlRizu1aJXO3QG4Xelc8BV
+                      prelude-extras-0.4.0.3@prelude-extras-0.4.0.3-BhL9U5k7NtGJn1itwIHt2Y
+                      primitive-0.6.2.0@primitive-0.6.2.0-4578caNkWQ54Gt1mxLF2Yh
+                      profunctors-5.2.1@profunctors-5.2.1-Ga89Nyw0d7LBEIoX4AZ6gT
+                      safe-exceptions-0.1.6.0@safe-exceptions-0.1.6.0-8HmohVTen8f1fXhFM1N1R3
+                      say-0.1.0.0@say-0.1.0.0-4kg0VW7izQr10eu93ritVO
+                      semigroupoids-5.2.1@semigroupoids-5.2.1-Db8txM8kTsI6Y49CY6g5Jn
+                      split-0.2.3.2@split-0.2.3.2-CJl40zTyCIV16Pr60nb7CT
+                      stm-2.4.4.1@stm-2.4.4.1-JQn4hNPyYjP5m9AcbI88Ve
+                      stm-chans-3.0.0.4@stm-chans-3.0.0.4-JX6Y7GVvdkg3BduVhEnPWu
+                      system-filepath-0.4.13.4@system-filepath-0.4.13.4-1Onr71muBMoJ4AF6FUpTVo
+                      tagged-0.8.5@tagged-0.8.5-1mTloBSoUxv8dqUr8XBGBt
+                      template-haskell-2.11.1.0
+                      text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00
+                      time-1.6.0.1@time-1.6.0.1
+                      time-locale-compat-0.1.1.3@time-locale-compat-0.1.1.3-KZ1jqNx8uhlHjmuPPj6V1Y
+                      transformers-0.5.2.0@transformers-0.5.2.0
+                      transformers-base-0.4.4@transformers-base-0.4.4-GKSs0LKukAL8ymq2naFmrH
+                      transformers-compat-0.5.1.4@transformers-compat-0.5.1.4-IuFogs8HAVUJBWVNMhtssu
+                      unordered-containers-0.2.8.0@unordered-containers-0.2.8.0-Bp9XgxjuHxcI4tFehVMDGC
+                      vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ
+                      vector-algorithms-0.7.0.1@vector-algorithms-0.7.0.1-1qlx0Hst1Fo5WZd0lT7Iw1
+                      vector-instances-3.4@vector-instances-3.4-6qKuR7R2wDjElztDeslDO1
+orphans: base-4.9.1.0:GHC.Base base-4.9.1.0:GHC.Float
+         base-orphans-0.6@base-orphans-0.6-AbJ3lKVXygDCG0eeQEv8Iu:Data.Orphans
+         binary-0.8.3.0@binary-0.8.3.0:Data.Binary.Generic
+         bytestring-0.10.8.1@bytestring-0.10.8.1:Data.ByteString.Builder
+         hashable-1.2.6.1@hashable-1.2.6.1-2ZLNuHq395GGIHwEHuqZol:Data.Hashable.Generic
+         mono-traversable-instances-0.1.0.0@mono-traversable-instances-0.1.0.0-cMPVlKCPiiIbLvZydxEFB:Data.MonoTraversable.Instances
+         stm-2.4.4.1@stm-2.4.4.1-JQn4hNPyYjP5m9AcbI88Ve:Control.Monad.STM
+         system-filepath-0.4.13.4@system-filepath-0.4.13.4-1Onr71muBMoJ4AF6FUpTVo:Filesystem.Path
+         system-filepath-0.4.13.4@system-filepath-0.4.13.4-1Onr71muBMoJ4AF6FUpTVo:Filesystem.Path.CurrentOS
+         text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00:Data.Text
+         text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00:Data.Text.Lazy
+         text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00:Data.Text.Show
+         time-1.6.0.1@time-1.6.0.1:Data.Time.Calendar.Gregorian
+         time-1.6.0.1@time-1.6.0.1:Data.Time.Format.Parse
+         time-1.6.0.1@time-1.6.0.1:Data.Time.LocalTime.LocalTime
+         transformers-0.5.2.0@transformers-0.5.2.0:Control.Monad.Trans.Error
+         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector.Fusion.Bundle
+         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector.Unboxed
+         vector-instances-3.4@vector-instances-3.4-6qKuR7R2wDjElztDeslDO1:Data.Vector.Instances
+family instance modules: adjunctions-4.3@adjunctions-4.3-A5jfd1yrmaY4DRMJuiquBp:Data.Functor.Rep
+                         base-4.9.1.0:Control.Applicative base-4.9.1.0:Data.Complex
+                         base-4.9.1.0:Data.Either base-4.9.1.0:Data.Functor.Compose
+                         base-4.9.1.0:Data.Functor.Const base-4.9.1.0:Data.Functor.Identity
+                         base-4.9.1.0:Data.Functor.Product base-4.9.1.0:Data.Functor.Sum
+                         base-4.9.1.0:Data.List.NonEmpty base-4.9.1.0:Data.Monoid
+                         base-4.9.1.0:Data.Semigroup base-4.9.1.0:Data.Type.Equality
+                         base-4.9.1.0:Data.Version base-4.9.1.0:Data.Void
+                         base-4.9.1.0:GHC.Exts base-4.9.1.0:GHC.Generics
+                         base-4.9.1.0:GHC.IO.Exception base-4.9.1.0:GHC.TypeLits
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Biff
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Clown
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Flip
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Join
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Joker
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Product
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Sum
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Tannen
+                         bifunctors-5.4.2@bifunctors-5.4.2-KcF2f75KyQm5BjgJ8WkHCw:Data.Bifunctor.Wrapped
+                         constraints-0.9.1@constraints-0.9.1-5mmQfXdFR8IpJ6JZxzjTB:Data.Constraint.Forall
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntMap.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntSet.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Map.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Sequence
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Set.Base
+                         dlist-0.8.0.3@dlist-0.8.0.3-BHFBNaw8k6n9WiaUNzoXpk:Data.DList
+                         ghc-boot-th-8.0.2@ghc-boot-th-8.0.2:GHC.LanguageExtensions.Type
+                         kan-extensions-5.0.2@kan-extensions-5.0.2-8LTJJ1zQJWB7SfewWXUuqX:Data.Functor.Day
+                         keys-3.11@keys-3.11-3rCPtsJiP6i6WPjfB1rcVT:Data.Key
+                         monad-control-1.0.2.2@monad-control-1.0.2.2-1Ci8dYJ8Tb7E3HTcTqOb8l:Control.Monad.Trans.Control
+                         mono-traversable-1.0.2.1@mono-traversable-1.0.2.1-7cD9xrLpSxs61tMXUUbUIV:Data.Containers
+                         mono-traversable-1.0.2.1@mono-traversable-1.0.2.1-7cD9xrLpSxs61tMXUUbUIV:Data.MonoTraversable
+                         mono-traversable-1.0.2.1@mono-traversable-1.0.2.1-7cD9xrLpSxs61tMXUUbUIV:Data.NonNull
+                         mono-traversable-1.0.2.1@mono-traversable-1.0.2.1-7cD9xrLpSxs61tMXUUbUIV:Data.Sequences
+                         mono-traversable-instances-0.1.0.0@mono-traversable-instances-0.1.0.0-cMPVlKCPiiIbLvZydxEFB:Data.MonoTraversable.Instances
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.BRef
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.Class
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.DLList
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.Deque
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.PRef
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.SRef
+                         mutable-containers-0.3.3@mutable-containers-0.3.3-LD59mBwpMYWF0vy4UyNV9R:Data.Mutable.URef
+                         primitive-0.6.2.0@primitive-0.6.2.0-4578caNkWQ54Gt1mxLF2Yh:Control.Monad.Primitive
+                         primitive-0.6.2.0@primitive-0.6.2.0-4578caNkWQ54Gt1mxLF2Yh:Data.Primitive.Array
+                         tagged-0.8.5@tagged-0.8.5-1mTloBSoUxv8dqUr8XBGBt:Data.Tagged
+                         template-haskell-2.11.1.0:Language.Haskell.TH.Syntax
+                         text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00:Data.Text
+                         text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00:Data.Text.Lazy
+                         unordered-containers-0.2.8.0@unordered-containers-0.2.8.0-Bp9XgxjuHxcI4tFehVMDGC:Data.HashMap.Base
+                         unordered-containers-0.2.8.0@unordered-containers-0.2.8.0-Bp9XgxjuHxcI4tFehVMDGC:Data.HashSet
+                         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector
+                         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector.Primitive
+                         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector.Storable
+                         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector.Unboxed
+                         vector-0.12.0.1@vector-0.12.0.1-692PQMDMB6pIQ1uGwefDcQ:Data.Vector.Unboxed.Base
+                         vector-instances-3.4@vector-instances-3.4-6qKuR7R2wDjElztDeslDO1:Data.Vector.Instances
+import  -/  base-4.9.1.0:Control.Category 74288f70105bf6db5ff51d18c3e2c349
+import  -/  base-4.9.1.0:Control.Monad a6784c5dab0d75c63dabec5a37843f98
+import  -/  base-4.9.1.0:Control.Monad.IO.Class 1a4384f66ee999caf5366398edb6ca7b
+import  -/  base-4.9.1.0:Data.Monoid 51cc9cd8c130d49ba96b7c2c2406022b
+import  -/  base-4.9.1.0:Data.Tuple 7dc4bbb45d2e69c991ffac438beeca11
+import  -/  base-4.9.1.0:Data.Void 3c797a21706a51366e113ccecc813336
+import  -/  base-4.9.1.0:Debug.Trace a9edf3aec504f4423d8ba829ab373a25
+import  -/  classy-prelude-1.2.0.1@classy-prelude-1.2.0.1-DI7QyZr6dYQLSGY5Zda29N:ClassyPrelude 3ba46d72eee6022c7e55d87d83c8d916
+import  -/  ghc-prim-0.5.0.0:GHC.Classes 0bdf3d057a415ec1b84a7b1994efbe47
+import  -/  mono-traversable-1.0.2.1@mono-traversable-1.0.2.1-7cD9xrLpSxs61tMXUUbUIV:Data.Sequences 6639289e4ae6eb1afa9374dc150089e2
+import  -/  pipes-4.3.6@pipes-4.3.6-3hOANll0lvQCiySRFVfAqq:Pipes c2fe668864ff5f1e9cd44a9240d51307
+import  -/  pipes-4.3.6@pipes-4.3.6-3hOANll0lvQCiySRFVfAqq:Pipes.Core 277d92a0fc77aa8d142be0c25e17fdf0
+import  -/  pipes-4.3.6@pipes-4.3.6-3hOANll0lvQCiySRFVfAqq:Pipes.Lift dd2613de737a2843e7956630c6bb6112
+import  -/  pipes-4.3.6@pipes-4.3.6-3hOANll0lvQCiySRFVfAqq:Pipes.Prelude b4d535dd6e46a8526a4cecbab1a8a527
+import  -/  SimSim.Block 447d9b4a5bcdc3e451450d02be5fd8a7
+  exports: c18506d2c163874b6caa718ebd66db42
+  Sink fdd17de48b9b9cf646fe7ca168279184
+import  -/  SimSim.Order.Type 022b0ef7e6d59414153ca8c56556c82b
+  exports: 95ca41037e76abdaa2f7361c1e552501
+  Order 22feff166eceac17d5a4f346a630d0b2
+  lastMachine 5e7d1b05842b39378eb3961ca0d19c3c
+  nextMachine 055e725d6b3ec3040aa8216a43b01b94
+  productType 78dfddcaccd0cbc936a857884d0f6174
+import  -/  SimSim.ProductType cfc4b176d5817aac9d3bf8b1d9f8b7bf
+  exports: 2b490d96b2c8d36c6c1adfaaeac4a78d
+import  -/  SimSim.Routing 03e997f2416365acdaaaec6ded139dd9
+  exports: dadedbd2e5cf24e48236aa37c25fa687
+  Routing ea46c7316a43fa37bcead0d61739954c
+import  -/  text-1.2.2.2@text-1.2.2.2-9UQZjEJZQFSGMffj1Z5g00:Data.Text e8aa34be3dde178f567ae461e65c988b
+import  -/  transformers-0.5.2.0@transformers-0.5.2.0:Control.Monad.Trans.Class 45530f1305724ee3931a9be21b40ca7e
+import  -/  transformers-0.5.2.0@transformers-0.5.2.0:Control.Monad.Trans.State.Strict 978f397cc30fa26d55cf117e3751a6ed
+256db37a652427740f259e82dcd76356
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   SimSim.Runner.Dispatch.$trModule2
+                   SimSim.Runner.Dispatch.$trModule1) -}
+6e952311066cd5ed9a4745279986eb53
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "SimSim.Runner.Dispatch"#) -}
+6154c9a602725814b75afda940021487
+  $trModule2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS
+                   "simsim-0.1.0.0-KAtxr7wc8AtIoXggvLGZsd"#) -}
+b9cd91a9b22d57bb66f9f999552fbb46
+  dispatch ::
+    SimSim.Routing.Routing
+    -> SimSim.Order.Type.Order -> SimSim.Order.Type.Order
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <L,U(1*U,1*U)><S(SSSSSSSSSL),1*U(U,U,U,U,U,U,U,U,U,A)>m,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: SimSim.Routing.Routing) (w1 :: SimSim.Order.Type.Order) ->
+                 case w1 of ww { SimSim.Order.Type.Order ww1 ww2 ww3 ww4 ww5 ww6 ww7 ww8 ww9 ww10 ->
+                 letrec {
+                   go :: [((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                           SimSim.Block.Block)]
+                         -> Data.Monoid.First
+                              ((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                               SimSim.Block.Block)
+                     {- Arity: 1, Strictness: <S,1*U> -}
+                   = \ (ds :: [((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                SimSim.Block.Block)]) ->
+                     case ds of wild {
+                       []
+                       -> (GHC.Base.Nothing
+                             @ ((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                SimSim.Block.Block))
+                            `cast`
+                          (Sym (Data.Monoid.N:First[0]) <((SimSim.ProductType.ProductType,
+                                                           SimSim.Block.Block),
+                                                          SimSim.Block.Block)>_N)
+                       : y ys
+                       -> case y of wild1 { (,) x ds1 ->
+                          case x of ww11 { (,) ww12 ww13 ->
+                          case ww12
+                                 `cast`
+                               (SimSim.ProductType.N:ProductType[0]) of wild2 { GHC.Types.I# x1 ->
+                          case GHC.Prim.tagToEnum#
+                                 @ GHC.Types.Bool
+                                 (GHC.Prim.==# x1 ww2) of wild3 {
+                            GHC.Types.False -> go ys
+                            GHC.Types.True
+                            -> case ww13 of wild4 {
+                                 SimSim.Block.Source
+                                 -> case ww9 of wild5 {
+                                      DEFAULT -> go ys
+                                      SimSim.Block.Source
+                                      -> (GHC.Base.Just
+                                            @ ((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                               SimSim.Block.Block)
+                                            wild1)
+                                           `cast`
+                                         (Sym (Data.Monoid.N:First[0]) <((SimSim.ProductType.ProductType,
+                                                                          SimSim.Block.Block),
+                                                                         SimSim.Block.Block)>_N) }
+                                 SimSim.Block.Sink
+                                 -> case ww9 of wild5 {
+                                      DEFAULT -> go ys
+                                      SimSim.Block.Sink
+                                      -> (GHC.Base.Just
+                                            @ ((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                               SimSim.Block.Block)
+                                            wild1)
+                                           `cast`
+                                         (Sym (Data.Monoid.N:First[0]) <((SimSim.ProductType.ProductType,
+                                                                          SimSim.Block.Block),
+                                                                         SimSim.Block.Block)>_N) }
+                                 SimSim.Block.FGI
+                                 -> case ww9 of wild5 {
+                                      DEFAULT -> go ys
+                                      SimSim.Block.FGI
+                                      -> (GHC.Base.Just
+                                            @ ((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                               SimSim.Block.Block)
+                                            wild1)
+                                           `cast`
+                                         (Sym (Data.Monoid.N:First[0]) <((SimSim.ProductType.ProductType,
+                                                                          SimSim.Block.Block),
+                                                                         SimSim.Block.Block)>_N) }
+                                 SimSim.Block.Machine a1
+                                 -> case ww9 of wild5 {
+                                      DEFAULT -> go ys
+                                      SimSim.Block.Machine b1
+                                      -> case a1 of wild6 { GHC.Types.I# x2 ->
+                                         case b1 of wild7 { GHC.Types.I# y1 ->
+                                         case GHC.Prim.tagToEnum#
+                                                @ GHC.Types.Bool
+                                                (GHC.Prim.==# x2 y1) of wild8 {
+                                           GHC.Types.False -> go ys
+                                           GHC.Types.True
+                                           -> (GHC.Base.Just
+                                                 @ ((SimSim.ProductType.ProductType,
+                                                     SimSim.Block.Block),
+                                                    SimSim.Block.Block)
+                                                 wild1)
+                                                `cast`
+                                              (Sym (Data.Monoid.N:First[0]) <((SimSim.ProductType.ProductType,
+                                                                               SimSim.Block.Block),
+                                                                              SimSim.Block.Block)>_N) } } } }
+                                 SimSim.Block.Queue a1
+                                 -> case ww9 of wild5 {
+                                      DEFAULT -> go ys
+                                      SimSim.Block.Queue b1
+                                      -> case a1 of wild6 { GHC.Types.I# x2 ->
+                                         case b1 of wild7 { GHC.Types.I# y1 ->
+                                         case GHC.Prim.tagToEnum#
+                                                @ GHC.Types.Bool
+                                                (GHC.Prim.==# x2 y1) of wild8 {
+                                           GHC.Types.False -> go ys
+                                           GHC.Types.True
+                                           -> (GHC.Base.Just
+                                                 @ ((SimSim.ProductType.ProductType,
+                                                     SimSim.Block.Block),
+                                                    SimSim.Block.Block)
+                                                 wild1)
+                                                `cast`
+                                              (Sym (Data.Monoid.N:First[0]) <((SimSim.ProductType.ProductType,
+                                                                               SimSim.Block.Block),
+                                                                              SimSim.Block.Block)>_N) } } } } } } } } } }
+                 } in
+                 case case (go
+                              (GHC.Types.:
+                                 @ ((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                    SimSim.Block.Block)
+                                 (case w of wild { Data.List.NonEmpty.:| a1 as -> a1 })
+                                 (case w of wild { Data.List.NonEmpty.:| a1 as -> as })))
+                             `cast`
+                           (Data.Monoid.N:First[0] (Sym (Data.MonoTraversable.D:R:ElementNonEmpty[0]
+                                                             <((SimSim.ProductType.ProductType,
+                                                                SimSim.Block.Block),
+                                                               SimSim.Block.Block)>_N))) of wild {
+                        GHC.Base.Nothing -> SimSim.Block.Sink
+                        GHC.Base.Just ds
+                        -> case ds
+                                  `cast`
+                                (Sub (Data.MonoTraversable.D:R:ElementNonEmpty[0]
+                                          <((SimSim.ProductType.ProductType, SimSim.Block.Block),
+                                            SimSim.Block.Block)>_N)) of wild1 { (,) ds1 n ->
+                           n } } of dt { DEFAULT ->
+                 SimSim.Order.Type.Order
+                   ww1
+                   ww2
+                   ww3
+                   ww4
+                   ww5
+                   ww6
+                   ww7
+                   ww8
+                   ww9
+                   dt } }) -}
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: none
+require own pkg trusted: False
+
