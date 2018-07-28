@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 12
+--     Update #: 37
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,14 +75,21 @@ getNextRand = do
   lift $ put $ updateTailRandNrs sim
   return $ NL.head $ randomNumbers $ simInternal sim
 
-getProcessingTime :: (Monad m) => Block -> Order
-                  -> Proxy Block Order Block Order (StateT SimSim m) (Maybe Time)
-getProcessingTime block order = do
-  r <- getNextRand
-  sim <- lift get
-  let f = do m <- M.lookup block (simProcessingTimes (simInternal sim))
-             M.lookup (productType order) m
-  return $ f <*> Just r
+getBlockTime :: (Monad m) => Block -> Proxy Block Order Block Order (StateT SimSim m) Time
+getBlockTime Sink = error "called block time for a sink"
+getBlockTime block = do
+  m <- lift $ gets (simBlockTimes . simInternal)
+  return $ fromMaybe (error $ "no block time for block: " ++ show block) (M.lookup block m)
+
+addToBlockTime :: (Monad m) => Block -> Time -> Proxy Block Order Block Order (StateT SimSim m) ()
+addToBlockTime block t = onBlockTime block (t+)
+
+
+onBlockTime :: (Monad m) => Block -> (Time -> Time) -> Proxy Block Order Block Order (StateT SimSim m) ()
+onBlockTime block f = lift $ modify (\s -> s {simInternal = (simInternal s) {simBlockTimes = M.update (return . f) block (simBlockTimes $ simInternal s)}})
+
+mapBlockTimes :: (Time -> Time) -> SimSim -> SimSim
+mapBlockTimes f s = s {simInternal = (simInternal s) {simBlockTimes = M.map f (simBlockTimes $ simInternal s)}}
 
 
 --

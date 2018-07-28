@@ -1,15 +1,15 @@
--- Ops.hs ---
+-- Server.hs ---
 --
--- Filename: Ops.hs
+-- Filename: Server.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Tue Nov 21 11:32:14 2017 (+0100)
+-- Created: Sat Jul 28 10:47:43 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 18
+--     Update #: 12
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,17 +34,17 @@
 
 -- Code:
 
-module SimSim.ProcessingTime.Ops where
+module SimSim.Runner.Server
+    ( server
+    , orderPoolSink
+    ) where
 
 import           ClassyPrelude
-
-import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.State.Strict
-import qualified Data.List.NonEmpty               as NL
-import qualified Data.Map.Strict                  as M
 import           Data.Monoid                      ((<>))
+import           Data.Sequence                    (replicate)
 import           Data.Text                        (Text)
 import           Data.Void
 import           Debug.Trace
@@ -54,31 +54,30 @@ import           Pipes.Lift
 import qualified Pipes.Prelude                    as Pipe
 import           System.Random
 
+
 import           SimSim.Block
+import           SimSim.Order
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
-import           SimSim.Runner.Dispatch
-import           SimSim.Runner.Util
+import           SimSim.Simulation
 import           SimSim.Simulation.Type
 import           SimSim.Time
 
-import           Debug.Trace
+
+server :: (MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
+server _ nr [] = lift $ modify (addNextOrderId nr) -- set new order id for upcoming orders
+server sim nr (o:os) = do
+  let t = simCurrentTime sim
+  respond $ setOrderId nr $ setOrderCurrentTime t o
+  server sim (nr+1) os
 
 
-getProcessingTime :: (Monad m) => Block -> Order
-                  -> Proxy Block Order Block Order (StateT SimSim m) Time
-getProcessingTime block order = do
-  r <- getNextRand
-  mTime <- lift $ gets (simProcessingTimes . simInternal)
-  let f = do mType <- M.lookup block mTime
-             M.lookup (productType order) mType
-  return $
-    -- trace ("block: " ++ show block)
-    -- trace ("order: " ++ show order)
-
-    fromMaybe (error "no processing time given") (f <*> Just r)
+orderPoolSink :: (MonadIO m) => Order -> Client Block Order (StateT SimSim m) ()
+orderPoolSink order = do
+  lift $ modify (addOrderToOrderPool order)
+  request OrderPool >>= orderPoolSink
 
 
 --
--- Ops.hs ends here
+-- Server.hs ends here

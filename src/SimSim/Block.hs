@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 17
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,8 +37,17 @@
 module SimSim.Block where
 
 import           ClassyPrelude
+import qualified Data.List.NonEmpty as NL
+import qualified Data.Map.Strict    as M
+import           System.Random
 
-data Block = Source | Sink | FGI | Machine Int | Queue Int
+
+data Block
+  = OrderPool                   -- ^. This block feds the orders into the system.
+  | Queue Int                   -- ^. This block queues the orders until dispatched.
+  | Machine Int                 -- ^. This block is a machine.
+  | FGI                         -- ^. This block is a finished goods inventory.
+  | Sink                        -- ^. This block removes the orders from the system.
   deriving (Show, Eq, Ord)
 
 

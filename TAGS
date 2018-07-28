@@ -1,270 +1,0 @@
-
-app/Main.hs,155
-module Main Main38,39
-routing routing58,59
-periodLen periodLen64,65
-procTimes procTimes67,68
-incomingOrders incomingOrders76,77
-main main84,85
-
-src/SimSim/Simulation/Type.hs,884
-module SimSim.Simulation.Type SimSim.Simulation.Type37,38
-data SimSim SimSim52,53
-  SimSim { simRouting simRouting53,54
-         , simBlocks simBlocks54,55
-         , simCurrentTime simCurrentTime55,56
-         , simPeriodLength simPeriodLength56,57
-         , simNextOrderId simNextOrderId57,58
-         , simInternal simInternal58,59
-data SimInternal SimInternal62,63
-  SimInternal { simBlockTimes simBlockTimes63,64
-              , simEndTime simEndTime64,65
-              , maxMachines maxMachines65,66
-              , simProcessingTimes simProcessingTimes66,67
-              , randomNumbers randomNumbers67,68
-newSimSim newSimSim71,72
-updateSimEndTime updateSimEndTime92,93
-updateSimBlockTime updateSimBlockTime95,96
-updateTailRandNrs updateTailRandNrs99,100
-updateNextOrderId updateNextOrderId103,104
-addNextOrderId addNextOrderId106,107
-
-src/SimSim/Routing.hs,109
-module SimSim.Routing SimSim.Routing36,37
-a a45,46
-type Routing Routing48,49
-type Routes Routes49,50
-
-src/SimSim/Period.hs,106
-module SimSim.Period SimSim.Period36,37
-type Period Period41,42
-type PeriodLength PeriodLength43,44
-
-src/SimSim/Order/Type.hs,628
-module SimSim.Order.Type SimSim.Order.Type36,37
-type OrderId OrderId45,46
-data Order Order48,49
-data Order = Order { orderId orderId48,49
-                   , productType productType49,50
-                   , arrivalDate arrivalDate50,51
-                   , dueDate dueDate51,52
-                   , released released52,53
-                   , prodStart prodStart53,54
-                   , prodEnd prodEnd54,55
-                   , sent sent55,56
-                   , lastMachine lastMachine56,57
-                   , nextMachine nextMachine57,58
-newOrder newOrder62,63
-setOrderId setOrderId67,68
-
-src/SimSim/ProcessingTime/Type.hs,261
-module SimSim.ProcessingTime.Type SimSim.ProcessingTime.Type36,37
-type RandomUniform RandomUniform50,51
-type ProcessingTime ProcessingTime52,53
-type ProcessingTimes ProcessingTimes55,56
-type ProcTimes ProcTimes56,57
-fromProcTimes fromProcTimes59,60
-
-src/SimSim/ProcessingTime/Ops.hs,107
-module SimSim.ProcessingTime.Ops SimSim.ProcessingTime.Ops36,37
-getProcTimeValue getProcTimeValue51,52
-
-src/SimSim/Runner.hs,41
-module SimSim.RunnerSimSim.Runner36,37
-
-src/SimSim/Runner/Dispatch.hs,84
-module SimSim.Runner.DispatchSimSim.Runner.Dispatch36,37
-dispatch dispatch62,63
-
-src/SimSim/Runner/Runner.hs,153
-module SimSim.Runner.RunnerSimSim.Runner.Runner36,37
-sink sink69,70
-server server77,78
-simulate simulate84,85
-simulateUntil simulateUntil96,97
-
-src/SimSim/Runner/Util.hs,161
-module SimSim.Runner.Util SimSim.Runner.Util36,37
-getSimEndTime getSimEndTime65,66
-getNextRand getNextRand71,72
-getProcessingTime getProcessingTime77,78
-
-src/SimSim/Runner/Block.hs,95
-module SimSim.Runner.BlockSimSim.Runner.Block36,37
-queue queue67,68
-machine machine82,83
-
-src/SimSim/Runner/Release.hs,80
-module SimSim.Runner.ReleaseSimSim.Runner.Release36,37
-release release66,67
-
-src/SimSim/Block.hs,307
-module SimSim.Block SimSim.Block36,37
-data Block Block40,41
-data Block = Source Source40,41
-data Block = Source | Sink Sink40,41
-data Block = Source | Sink | FGI FGI40,41
-data Block = Source | Sink | FGI | Machine Machine40,41
-data Block = Source | Sink | FGI | Machine Int | Queue Queue40,41
-
-src/SimSim/ProductType.hs,136
-module SimSim.ProductType SimSim.ProductType36,37
-newtype ProductType ProductType40,41
-newtype ProductType = Product Product40,41
-
-src/SimSim/Time.hs,160
-module SimSim.Time SimSim.Time36,37
-type Time Time40,41
-type CurrentTime CurrentTime41,42
-type ArrivalDate ArrivalDate45,46
-type DueDate DueDate46,47
-
-src/SimSim/ProcessingTime.hs,57
-module SimSim.ProcessingTimeSimSim.ProcessingTime36,37
-
-src/SimSim/Order.hs,39
-module SimSim.OrderSimSim.Order36,37
-
-src/SimSim/Simulation.hs,49
-module SimSim.SimulationSimSim.Simulation36,37
-
-src/SimSim.hs,27
-module SimSimSimSim36,37
-
-./src/SimSim/Simulation/Type.hs,884
-module SimSim.Simulation.Type SimSim.Simulation.Type37,38
-data SimSim SimSim52,53
-  SimSim { simRouting simRouting53,54
-         , simBlocks simBlocks54,55
-         , simCurrentTime simCurrentTime55,56
-         , simPeriodLength simPeriodLength56,57
-         , simNextOrderId simNextOrderId57,58
-         , simInternal simInternal58,59
-data SimInternal SimInternal62,63
-  SimInternal { simBlockTimes simBlockTimes63,64
-              , simEndTime simEndTime64,65
-              , maxMachines maxMachines65,66
-              , simProcessingTimes simProcessingTimes66,67
-              , randomNumbers randomNumbers67,68
-newSimSim newSimSim71,72
-updateSimEndTime updateSimEndTime92,93
-updateSimBlockTime updateSimBlockTime95,96
-updateTailRandNrs updateTailRandNrs99,100
-updateNextOrderId updateNextOrderId103,104
-addNextOrderId addNextOrderId106,107
-
-./src/SimSim/Routing.hs,109
-module SimSim.Routing SimSim.Routing36,37
-a a45,46
-type Routing Routing48,49
-type Routes Routes49,50
-
-./src/SimSim/Period.hs,106
-module SimSim.Period SimSim.Period36,37
-type Period Period41,42
-type PeriodLength PeriodLength43,44
-
-./src/SimSim/Order/Type.hs,628
-module SimSim.Order.Type SimSim.Order.Type36,37
-type OrderId OrderId45,46
-data Order Order48,49
-data Order = Order { orderId orderId48,49
-                   , productType productType49,50
-                   , arrivalDate arrivalDate50,51
-                   , dueDate dueDate51,52
-                   , released released52,53
-                   , prodStart prodStart53,54
-                   , prodEnd prodEnd54,55
-                   , sent sent55,56
-                   , lastMachine lastMachine56,57
-                   , nextMachine nextMachine57,58
-newOrder newOrder62,63
-setOrderId setOrderId67,68
-
-./src/SimSim/ProcessingTime/Type.hs,261
-module SimSim.ProcessingTime.Type SimSim.ProcessingTime.Type36,37
-type RandomUniform RandomUniform50,51
-type ProcessingTime ProcessingTime52,53
-type ProcessingTimes ProcessingTimes55,56
-type ProcTimes ProcTimes56,57
-fromProcTimes fromProcTimes59,60
-
-./src/SimSim/ProcessingTime/Ops.hs,107
-module SimSim.ProcessingTime.Ops SimSim.ProcessingTime.Ops36,37
-getProcTimeValue getProcTimeValue51,52
-
-./src/SimSim/Runner.hs,41
-module SimSim.RunnerSimSim.Runner36,37
-
-./src/SimSim/Runner/Dispatch.hs,84
-module SimSim.Runner.DispatchSimSim.Runner.Dispatch36,37
-dispatch dispatch62,63
-
-./src/SimSim/Runner/Runner.hs,153
-module SimSim.Runner.RunnerSimSim.Runner.Runner36,37
-sink sink69,70
-server server77,78
-simulate simulate84,85
-simulateUntil simulateUntil96,97
-
-./src/SimSim/Runner/Util.hs,161
-module SimSim.Runner.Util SimSim.Runner.Util36,37
-getSimEndTime getSimEndTime65,66
-getNextRand getNextRand71,72
-getProcessingTime getProcessingTime77,78
-
-./src/SimSim/Runner/Block.hs,95
-module SimSim.Runner.BlockSimSim.Runner.Block36,37
-queue queue67,68
-machine machine82,83
-
-./src/SimSim/Runner/Release.hs,80
-module SimSim.Runner.ReleaseSimSim.Runner.Release36,37
-release release66,67
-
-./src/SimSim/Block.hs,307
-module SimSim.Block SimSim.Block36,37
-data Block Block40,41
-data Block = Source Source40,41
-data Block = Source | Sink Sink40,41
-data Block = Source | Sink | FGI FGI40,41
-data Block = Source | Sink | FGI | Machine Machine40,41
-data Block = Source | Sink | FGI | Machine Int | Queue Queue40,41
-
-./src/SimSim/ProductType.hs,136
-module SimSim.ProductType SimSim.ProductType36,37
-newtype ProductType ProductType40,41
-newtype ProductType = Product Product40,41
-
-./src/SimSim/Time.hs,160
-module SimSim.Time SimSim.Time36,37
-type Time Time40,41
-type CurrentTime CurrentTime41,42
-type ArrivalDate ArrivalDate45,46
-type DueDate DueDate46,47
-
-./src/SimSim/ProcessingTime.hs,57
-module SimSim.ProcessingTimeSimSim.ProcessingTime36,37
-
-./src/SimSim/Order.hs,39
-module SimSim.OrderSimSim.Order36,37
-
-./src/SimSim/Simulation.hs,49
-module SimSim.SimulationSimSim.Simulation36,37
-
-./src/SimSim.hs,27
-module SimSimSimSim36,37
-
-./app/Main.hs,155
-module Main Main38,39
-routing routing58,59
-periodLen periodLen64,65
-procTimes procTimes67,68
-incomingOrders incomingOrders76,77
-main main84,85
-
-./Setup.hs,15
-main main1,2
-
-./test/Spec.hs,15
-main main0,1

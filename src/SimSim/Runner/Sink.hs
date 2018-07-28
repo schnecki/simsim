@@ -1,15 +1,15 @@
--- Dispatch.hs ---
+-- Sink.hs ---
 --
--- Filename: Dispatch.hs
+-- Filename: Sink.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Wed Nov  1 17:02:47 2017 (+0100)
+-- Created: Sat Jul 28 10:48:47 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 2
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,17 +34,16 @@
 
 -- Code:
 
-module SimSim.Runner.Dispatch
-    ( dispatch
+module SimSim.Runner.Sink
+    ( sink
     ) where
 
-import           ClassyPrelude
-
-import           Control.Monad
+import           ClassyPrelude                    hiding (replicate)
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.State.Strict
 import           Data.Monoid                      ((<>))
+import           Data.Sequence                    (replicate)
 import           Data.Text                        (Text)
 import           Data.Void
 import           Debug.Trace
@@ -52,20 +51,24 @@ import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude                    as Pipe
+import           System.Random
 
 
 import           SimSim.Block
+import           SimSim.Order
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
+import           SimSim.Simulation
+import           SimSim.Simulation.Type
+import           SimSim.Time
 
 
-dispatch :: Routing -> Order -> Order
-dispatch routes order =
-  case find ((== (productType order, lastBlock order)) . fst) routes of
-    Just (_, n) -> order {nextBlock = n}
-    Nothing     -> order {nextBlock = Sink, prodEnd = Just (orderCurrentTime order)}
+sink :: (MonadIO m) => Order -> Client Block Order (StateT SimSim m) ()
+sink order = do
+  liftIO $ print order
+  request Sink >>= sink
 
 
 --
--- Dispatch.hs ends here
+-- Sink.hs ends here

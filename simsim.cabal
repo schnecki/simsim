@@ -29,10 +29,16 @@ library
                      , SimSim.ProcessingTime.Type
                      , SimSim.ProcessingTime.Ops
                      , SimSim.Period
+                     , SimSim.Release
+                     , SimSim.Release.ImmediateRelease
                      , SimSim.Runner.Runner
-                     , SimSim.Runner.Block
+                     , SimSim.Runner.Fgi
+                     , SimSim.Runner.Machine
+                     , SimSim.Runner.Queue
                      , SimSim.Runner.Util
                      , SimSim.Runner.Dispatch
+                     , SimSim.Runner.Server
+                     , SimSim.Runner.Sink
                      , SimSim.Runner.Release
   build-depends:       base >= 4.7 && < 5
                      , transformers
@@ -63,6 +69,7 @@ executable simsim-exe
                      , foundation
                      , mono-traversable
                      , classy-prelude
+                     , time
 
   default-language:    Haskell2010
   extensions:          NoImplicitPrelude

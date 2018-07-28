@@ -1,15 +1,15 @@
--- Dispatch.hs ---
+-- Fgi.hs ---
 --
--- Filename: Dispatch.hs
+-- Filename: Fgi.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Wed Nov  1 17:02:47 2017 (+0100)
+-- Created: Sat Jul 28 14:03:18 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 10
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,9 +34,10 @@
 
 -- Code:
 
-module SimSim.Runner.Dispatch
-    ( dispatch
+module SimSim.Runner.Fgi
+    ( fgi
     ) where
+
 
 import           ClassyPrelude
 
@@ -52,20 +53,26 @@ import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude                    as Pipe
+import           System.Random
 
 
 import           SimSim.Block
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
+import           SimSim.Runner.Dispatch
+import           SimSim.Runner.Util
+import           SimSim.Simulation.Type
 
 
-dispatch :: Routing -> Order -> Order
-dispatch routes order =
-  case find ((== (productType order, lastBlock order)) . fst) routes of
-    Just (_, n) -> order {nextBlock = n}
-    Nothing     -> order {nextBlock = Sink, prodEnd = Just (orderCurrentTime order)}
+-- | A FGI queues orders until shipped.
+fgi :: (MonadIO m) => Order -> Proxy Block Order Block Order (StateT SimSim m) ()
+fgi order = do
+  -- TODO
+  respond order
+  nxtOrder <- request Sink
+  fgi nxtOrder
 
 
 --
--- Dispatch.hs ends here
+-- Fgi.hs ends here

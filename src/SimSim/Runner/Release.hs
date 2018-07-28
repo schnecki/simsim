@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 30
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -61,15 +61,23 @@ import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Simulation
+import           SimSim.Simulation.Type
+import           SimSim.Time
 
 import           SimSim.Runner.Dispatch
 
-release :: (MonadIO m) =>
-           Routing -> Order -> Proxy Block Order Block Order (StateT SimSim m) ()
-release routes order = do
-  liftIO $ putStr "Release of " >> print (orderId order)
-  block <- respond $ dispatch routes order -- release all
-  request Source >>= release routes
+-- | Takes as input the routes and a list of order to be released into the production system.
+release :: (MonadIO m) => SimSim -> Routing -> [Order] -> Server Block Order (StateT SimSim m) ()
+release sim routes [] = return ()
+release sim routes (o:os) = do
+  liftIO $ putStr "Release of " >> print (orderId o)
+  let t = simCurrentTime sim
+  void $ respond $ process routes t o
+  release sim routes os
+
+
+process :: Routing -> Time -> Order -> Order
+process routes t o = dispatch routes $ setOrderCurrentTime t $ setReleaseTime t o
 
 
 --

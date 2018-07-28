@@ -1,6 +1,6 @@
--- Block.hs ---
+-- Queue.hs ---
 --
--- Filename: Block.hs
+-- Filename: Queue.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 31
+--     Update #: 44
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,9 +34,8 @@
 
 -- Code:
 
-module SimSim.Runner.Block
-    ( machine
-    , queue
+module SimSim.Runner.Queue
+    ( queue
     ) where
 
 import           ClassyPrelude
@@ -68,43 +67,16 @@ import           SimSim.Simulation.Type
 queue :: (MonadIO m) =>
          Routing -> Order -> Proxy Block Order Block Order (StateT SimSim m) ()
 queue routes order = do
-  case nextMachine order of
-    q@Queue{} -> do
-      block <- respond $ dispatch routes $ order { lastMachine = q }
-      return ()
-    _ -> void $ respond order
-
-  nxtOrder <- request (lastMachine order)
+  let q = nextBlock order
+  case q of
+    Queue{} -> process routes q order >>= void . respond
+    _       -> void $ respond order
+  nxtOrder <- request q
   queue routes nxtOrder
 
 
--- | Machines push the finished orders to the dispatcher and pull order from the
--- queue.
-machine :: (MonadIO m) =>
-           Routing -> Order -> Proxy Block Order Block Order (StateT SimSim m) ()
-machine routes order = do
-
-  endTime <- getSimEndTime
-
-  case nextMachine order of
-    m@Machine{} -> do           -- for us, thus produce and then push downstream
-      -- empty machine
-      pT <- getProcessingTime m order
-
-
-      let order' = dispatch routes $ order { lastMachine = m }
-      block <- respond order'
-
-
-      -- request new order, and produce
-      return ()
-    _        -> do              -- not for us, just push downstream
-      block <- respond order
-      return ()
-
-  nxtOrder <- request (lastMachine order)
-  machine routes nxtOrder
-
+process :: (Monad m) => Routing -> Block -> Order -> m Order
+process routes q order = return $ dispatch routes $ order {lastBlock = q}
 
 --
--- Block.hs ends here
+-- Queue.hs ends here

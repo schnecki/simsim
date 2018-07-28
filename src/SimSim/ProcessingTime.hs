@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 32
+--     Update #: 33
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,6 +38,7 @@ module SimSim.ProcessingTime
   ( module P
   ) where
 
+import           SimSim.ProcessingTime.Ops  as P
 import           SimSim.ProcessingTime.Type as P
 
 

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 37
+--     Update #: 40
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,10 +50,12 @@ import           SimSim.Time
 
 type RandomUniform = Double     -- ^ Random number between 0 and 1.
 
+-- TODO decide on how to use random numbers
 type ProcessingTime = RandomUniform -> Time
 
 
 type ProcessingTimes = M.Map Block (M.Map ProductType ProcessingTime)
+
 type ProcTimes = [(Block, [(ProductType, ProcessingTime)])]
 
 
