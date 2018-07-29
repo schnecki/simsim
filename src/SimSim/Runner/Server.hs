@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 12
+--     Update #: 15
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,17 +41,17 @@ module SimSim.Runner.Server
 
 import           ClassyPrelude
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import           Data.Monoid                      ((<>))
-import           Data.Sequence                    (replicate)
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Sequence              (replicate)
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 
@@ -66,7 +66,7 @@ import           SimSim.Time
 
 
 server :: (MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
-server _ nr [] = lift $ modify (addNextOrderId nr) -- set new order id for upcoming orders
+server _ nr [] = modify (addNextOrderId nr) -- set new order id for upcoming orders
 server sim nr (o:os) = do
   let t = simCurrentTime sim
   respond $ setOrderId nr $ setOrderCurrentTime t o
@@ -75,7 +75,7 @@ server sim nr (o:os) = do
 
 orderPoolSink :: (MonadIO m) => Order -> Client Block Order (StateT SimSim m) ()
 orderPoolSink order = do
-  lift $ modify (addOrderToOrderPool order)
+  modify (addOrderToOrderPool order)
   request OrderPool >>= orderPoolSink
 
 

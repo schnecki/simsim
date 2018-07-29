@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 182
+--     Update #: 242
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,11 +39,13 @@
 module SimSim.Simulation.Type where
 
 import           ClassyPrelude
+import           Data.Graph
 import qualified Data.List.NonEmpty         as NL
 import qualified Data.Map.Strict            as M
 import           System.Random
 
 import           SimSim.Block
+import           SimSim.Dispatch
 import           SimSim.Order.Type
 import           SimSim.Period
 import           SimSim.ProcessingTime.Type
@@ -58,7 +60,8 @@ data SimSim =
          , simCurrentTime    :: !Time
          , simPeriodLength   :: !PeriodLength
          , simNextOrderId    :: !OrderId
-         , simRelease        :: !(Time -> [Order] -> IO [Order])
+         , simRelease        :: !Release
+         , simDispatch       :: !Dispatch
          , simFinishedOrders :: ![Order] -- ^ Orders which have been finished in last period.
          , simInternal       :: !SimInternal
          }
@@ -71,28 +74,38 @@ data SimInternal =
               , simProcessingTimes :: !ProcessingTimes
               , randomNumbers      :: !(NL.NonEmpty Double)
               , simOrderPoolOrders :: ![Order]
+              , simQueueOrders     :: !(M.Map Block [Order])
+              , simProductRoutes   :: !(M.Map ProductType [Block])
               }
 
 
-newSimSim :: (RandomGen g) => g -> Routes -> ProcTimes -> PeriodLength -> Release -> SimSim
-newSimSim g routesE procTimes periodLen release =
+newSimSim :: (RandomGen g) => g -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> SimSim
+newSimSim g routesE procTimes periodLen release dispatch =
   case NL.nonEmpty routesE of
-    Nothing -> error "Routing cannot be empty, and must include a Source!"
+    Nothing -> error "Routing cannot be empty, and must include an OrderPool!"
     Just routes ->
-      if hasSource
-        then SimSim routes uniqueBlocks 0 periodLen 1 release mempty (SimInternal mTimes 1 maxMachines (fromProcTimes procTimes) randomNs mempty)
-        else error "Routing must include a Source!"
-      where uniqueBlocks = NL.fromList $ ordNub $ NL.toList allBlocks
+      if check
+        then SimSim routes uniqueBlocks 0 periodLen 1 release dispatch mempty (SimInternal mTimes 1 maxMachines (fromProcTimes procTimes) randomNs mempty mempty (M.fromList topSorts))
+        else error "wrong setup"
+      where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps))
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
+            uniqueBlocks = NL.fromList $ ordNub $ NL.toList allBlocks
             maxMachines = maximum (impureNonNull $ 1 : lengths)
-            lengths = fmap length $ NL.group $ NL.sortBy (compare `on` id) $ fmap (fst . fst) routes
+            routeGroups = NL.groupBy ((==) `on` fst . fst) $ NL.sortBy (compare `on` fst . fst) routes
+            lengths = fmap length routeGroups -- every route is one step
             mTimes = M.fromList $ zip (toList allBlocks) (repeat 0)
-            uniqueBlocksWSink
-              | hasSink = uniqueBlocks
-              | otherwise = NL.cons Sink uniqueBlocks
-            hasSink = Sink `elem` uniqueBlocks
-            hasSource = OrderPool `elem` uniqueBlocksWSink
+            hasSource = OrderPool `elem` uniqueBlocks
             randomNs = NL.fromList $ randomRs (0, 1) g
+            -- graph representation of routes
+            keys = zip [0 ..] (toList allBlocks)
+            toKey bl = fromMaybe (error "could not find key in newSimSim") $ find ((== bl) . snd) keys
+            fromKey nr = allBlocks NL.!! nr
+            graphs = fmap mkGraphs routeGroups
+            mkGraphs = graphFromEdges . toList . fmap (\((pt, b1), b2) -> (b1, toKey b1, [toKey b2]))
+            comps = fmap (components . fst3) graphs
+            fst3 (x, _, _) = x
+            topSorts = zipWith associateTopSorts (fmap NL.head routeGroups) (fmap (\(g,fVert,_) -> map (fst3.fVert) (topSort g)) graphs)
+            associateTopSorts ((pt,_),_) ts = (pt,ts)
 
 
 setSimEndTime :: Time -> SimSim -> SimSim
@@ -124,6 +137,18 @@ removeOrdersFromOrderPool :: [Order] -> SimSim -> SimSim
 removeOrdersFromOrderPool os sim = sim {simInternal = internal {simOrderPoolOrders = filter (`notElem` os) (simOrderPoolOrders internal)}}
   where
     internal = simInternal sim
+
+
+addOrderToQueue :: Block -> Order -> SimSim -> SimSim
+addOrderToQueue bl o sim = sim {simInternal = internal {simQueueOrders = M.insertWith (<>) (nextBlock o) [o] (simQueueOrders internal)}}
+  where internal = simInternal sim
+
+getAndRemoveOrderFromQueue :: Block -> SimSim -> (Maybe Order, SimSim)
+getAndRemoveOrderFromQueue bl sim = maybe def f (M.lookup bl (simQueueOrders internal))
+  where internal = simInternal sim
+        def = (Nothing,sim)
+        f [] = def
+        f (x:xs) = (Just x, sim {simInternal = internal {simQueueOrders = M.insert bl xs (simQueueOrders internal)}} )
 
 
 --

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 19
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,16 +43,16 @@ import           ClassyPrelude
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import           Data.Monoid                      ((<>))
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 
@@ -66,10 +66,11 @@ import           SimSim.Simulation.Type
 
 
 -- | A FGI queues orders until shipped.
-fgi :: (MonadIO m) => Order -> Proxy Block Order Block Order (StateT SimSim m) ()
-fgi order = do
+fgi :: (MonadIO m) => Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+fgi (Left nr) = error "Nothing in fgi"
+fgi (Right order) = do
   -- TODO
-  respond order
+  respond (pure order)
   nxtOrder <- request Sink
   fgi nxtOrder
 

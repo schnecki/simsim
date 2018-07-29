@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 18
+--     Update #: 22
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,18 +40,17 @@ import           ClassyPrelude
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import qualified Data.List.NonEmpty               as NL
-import qualified Data.Map.Strict                  as M
-import           Data.Monoid                      ((<>))
-import           Data.Text                        (Text)
+import qualified Data.List.NonEmpty         as NL
+import qualified Data.Map.Strict            as M
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text)
 import           Data.Void
-import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 import           SimSim.Block
@@ -66,11 +65,10 @@ import           SimSim.Time
 import           Debug.Trace
 
 
-getProcessingTime :: (Monad m) => Block -> Order
-                  -> Proxy Block Order Block Order (StateT SimSim m) Time
+getProcessingTime :: (MonadState SimSim m) => Block -> Order -> m Time
 getProcessingTime block order = do
   r <- getNextRand
-  mTime <- lift $ gets (simProcessingTimes . simInternal)
+  mTime <- gets (simProcessingTimes . simInternal)
   let f = do mType <- M.lookup block mTime
              M.lookup (productType order) mType
   return $

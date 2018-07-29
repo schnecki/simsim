@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 11
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,6 +37,7 @@
 module SimSim
     (
       module SimSim.Block
+    , module SimSim.Dispatch
     , module SimSim.Runner
     , module SimSim.ProductType
     , module SimSim.Routing
@@ -49,6 +50,7 @@ module SimSim
     ) where
 
 import           SimSim.Block
+import           SimSim.Dispatch
 import           SimSim.Order
 import           SimSim.ProcessingTime
 import           SimSim.ProductType

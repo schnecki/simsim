@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 32
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,16 +42,16 @@ import           ClassyPrelude
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import           Data.Monoid                      ((<>))
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 
 
 import           SimSim.Block
@@ -60,11 +60,11 @@ import           SimSim.ProductType
 import           SimSim.Routing
 
 
-dispatch :: Routing -> Order -> Order
-dispatch routes order =
-  case find ((== (productType order, lastBlock order)) . fst) routes of
-    Just (_, n) -> order {nextBlock = n}
-    Nothing     -> order {nextBlock = Sink, prodEnd = Just (orderCurrentTime order)}
+dispatch :: Routing -> Block -> Order -> Order
+dispatch routes lastBl order =
+  case find ((== (productType order, lastBl)) . fst) routes of
+    Just (_, n) -> order {lastBlock = lastBl, nextBlock = n}
+    Nothing     -> order {lastBlock = lastBl, nextBlock = Sink, prodEnd = Just (orderCurrentTime order)}
 
 
 --

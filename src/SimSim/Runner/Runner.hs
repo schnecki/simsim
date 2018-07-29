@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 123
+--     Update #: 125
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,19 +39,19 @@ module SimSim.Runner.Runner
     , simulateUntil
     ) where
 
-import           ClassyPrelude                    hiding (replicate)
+import           ClassyPrelude              hiding (replicate)
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import           Data.Monoid                      ((<>))
-import           Data.Sequence                    (replicate)
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Sequence              (replicate)
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 

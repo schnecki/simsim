@@ -18,6 +18,8 @@ library
   exposed-modules:     SimSim
   other-modules:       SimSim.Order
                      , SimSim.Block
+                     , SimSim.Dispatch
+                     , SimSim.Dispatch.FirstComeFirstServe
                      , SimSim.ProductType
                      , SimSim.Routing
                      , SimSim.Simulation
@@ -48,6 +50,7 @@ library
                      , text
                      , random
                      , classy-prelude
+                     , mtl
 
   extensions:          NoImplicitPrelude
                      , OverloadedStrings

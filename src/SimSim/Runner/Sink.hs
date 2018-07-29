@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 2
+--     Update #: 7
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,19 +38,19 @@ module SimSim.Runner.Sink
     ( sink
     ) where
 
-import           ClassyPrelude                    hiding (replicate)
+import           ClassyPrelude              hiding (replicate)
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import           Data.Monoid                      ((<>))
-import           Data.Sequence                    (replicate)
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Sequence              (replicate)
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 
@@ -59,13 +59,15 @@ import           SimSim.Order
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
+import           SimSim.Runner.Util
 import           SimSim.Simulation
 import           SimSim.Simulation.Type
 import           SimSim.Time
 
 
-sink :: (MonadIO m) => Order -> Client Block Order (StateT SimSim m) ()
-sink order = do
+sink :: (MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
+sink (Left nr) = error "Nothing in sink"
+sink (Right order) = do
   liftIO $ print order
   request Sink >>= sink
 

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 91
+--     Update #: 114
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,16 +42,16 @@ import           ClassyPrelude
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
-import           Data.Monoid                      ((<>))
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 
@@ -66,27 +66,28 @@ import           SimSim.Simulation.Type
 
 
 -- | Machines push the finished orders to the dispatcher and pull order from the queue.
-machine :: (MonadIO m) => Routing -> Order -> Proxy Block Order Block Order (StateT SimSim m) ()
-machine routes order = do
+machine :: (MonadIO m) => Routing -> Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+machine _ (Left nr) = error "Nothing in machine"
+machine routes (Right order) = do
   let m = nextBlock order
   case m of
     Machine {} -> do
       endTime <- getSimEndTime
       blockTime <- getBlockTime m
       if blockTime >= endTime
-        then respond order                      -- nothing to do no more
-        else process routes m order >>= respond -- for us, process
-    _ -> respond order                          -- not for us, push through
-  nxtOrder <- request m                         -- send upstream that we are free (request new order)
-  machine routes nxtOrder                       -- process next order
+        then respond (pure order)                        -- nothing to do no more
+        else process routes m order >>= respond . pure   -- for us, process
+    _ -> respond (pure order)                            -- not for us, push through
+  nxtOrder <- request m                                  -- send upstream that we are free (request new order)
+  machine routes nxtOrder                                -- process next order
 
 
-process :: (Monad m) => Routing -> Block -> Order -> Proxy Block Order Block Order (StateT SimSim m) Order
+process :: (MonadState SimSim m) => Routing -> Block -> Order -> m Order
 process routes m order = do
   pT <- getProcessingTime m order
   tStart <- getBlockTime m
   addToBlockTime m pT
-  let order' = dispatch routes $ setLastBlock m $ setOrderCurrentTime (tStart+pT) $ setProdStartTime tStart order
+  let order' = dispatch routes m $ setOrderCurrentTime (tStart+pT) $ setProdStartTime tStart order
   return order'
 
 

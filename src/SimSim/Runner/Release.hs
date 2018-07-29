@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 30
+--     Update #: 38
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,23 +43,24 @@ import           ClassyPrelude
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
 import           Data.List
-import           Data.Monoid                      ((<>))
-import           Data.Text                        (Text)
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude                    as Pipe
+import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
 import           SimSim.Block
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
+import           SimSim.Runner.Util
 import           SimSim.Simulation
 import           SimSim.Simulation.Type
 import           SimSim.Time
@@ -67,17 +68,17 @@ import           SimSim.Time
 import           SimSim.Runner.Dispatch
 
 -- | Takes as input the routes and a list of order to be released into the production system.
-release :: (MonadIO m) => SimSim -> Routing -> [Order] -> Server Block Order (StateT SimSim m) ()
-release sim routes [] = return ()
+release :: (MonadIO m) => SimSim -> Routing -> [Order] -> Server Block Downstream (StateT SimSim m) ()
+release sim routes [] = void $ respond (Left 1)
 release sim routes (o:os) = do
   liftIO $ putStr "Release of " >> print (orderId o)
   let t = simCurrentTime sim
-  void $ respond $ process routes t o
+  void $ respond $ pure $ process routes t o
   release sim routes os
 
 
 process :: Routing -> Time -> Order -> Order
-process routes t o = dispatch routes $ setOrderCurrentTime t $ setReleaseTime t o
+process routes t o = dispatch routes OrderPool $ setOrderCurrentTime t $ setReleaseTime t o
 
 
 --

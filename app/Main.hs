@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 89
+--     Update #: 97
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -45,6 +45,7 @@ import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.State.Strict
 import qualified Data.List                        as L
+import qualified Data.Map.Strict                  as M
 import           Data.Monoid                      ((<>))
 import           Data.Text                        (Text)
 import qualified Data.Time                        as Time
@@ -56,15 +57,19 @@ import qualified Pipes.Prelude                    as Pipe
 import           System.Random
 
 import           SimSim
+import           SimSim.Order.Type
 import           SimSim.Simulation.Type
 
 
 routing :: Routes
 routing =
-  [ (Product 1, OrderPool) --> Machine 1    -- source -> 1 -> sink
+  [ (Product 1, OrderPool) --> Queue 1   -- source -> 1 -> sink
+  , (Product 1, Queue 1)   --> Machine 1
 
-  , (Product 2, OrderPool) --> Machine 2    -- source -> 2 -> 1 -> sink
-  , (Product 2, Machine 2) --> Machine 1    -- note: dispatching to sink is implicit
+  , (Product 2, OrderPool) --> Queue 2   -- source -> 2 -> 1 -> sink
+  , (Product 2, Queue 2)   --> Machine 2 -- note: dispatching to sink is implicit
+  , (Product 2, Machine 2) --> Queue 1
+  , (Product 2, Queue 1)   --> Machine 1
   ]
 
 periodLen :: Integer
@@ -98,9 +103,10 @@ measure e = do
 main :: IO ()
 main = measure $ do
   g <- newStdGen
-  let sim = newSimSim g routing procTimes periodLen immediateRelease
+  let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe
   sim' <- simulate sim incomingOrders
   print $ "OP: " ++ show (simOrderPoolOrders $ simInternal sim')
+  print $ "Queues: " ++ show (M.map (fmap orderId) $ simQueueOrders $ simInternal sim')
   print $ "Block times: " ++ show (simBlockTimes $ simInternal sim')
 
 
