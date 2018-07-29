@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 97
+--     Update #: 128
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -67,8 +67,10 @@ import           SimSim.Simulation.Type
 
 type QueueResponse = Maybe Order
 
+
 queue :: (MonadIO m) => Routing -> Downstream -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
-queue routes (Left nr) = do     -- no more orders from upstream
+queue routes (Left nr) -- no more orders from upstream, process queued orders
+ = do
   ptRoutes <- gets (simProductRoutes . simInternal)
   let getBlockNr xs
         | length xs <= nr = []
@@ -76,39 +78,39 @@ queue routes (Left nr) = do     -- no more orders from upstream
   let blocks = concatMap getBlockNr (M.elems ptRoutes)
   mQueues <- gets (simQueueOrders . simInternal)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
-  -- WHAT block?
   if null blocks || null orders
     then void $ respond $ Left (nr + 1)
-    else sendAny routes nr blocks
+    else do
+      response <- getAnyOrder nr blocks
+      bl <- respond response
+      processQueue routes nr bl
 
-    -- let order = Prelude.head orders
-    -- modify (on)
-    -- b <- respond (pure order)
-    -- M.lookup mQueues
-    -- void $ respond $ Left (nr+1)
-
-queue routes (Right order) = do -- received an order, store and continue
+queue routes (Right order) -- received an order, store and continue
+ = do
   let q = nextBlock order
   case q of
-    Queue {} -- process and add to queue list
+    Queue {}                    -- process and add to queue list
      -> do
       let order' = processOrder routes q order
       modify $ addOrderToQueue q order'
     _ -> void $ respond (pure order) -- just push through
-
   request q >>= queue routes         -- request new order and process
-
 
 processOrder :: Routing -> Block -> Order -> Order
 processOrder routes q order = dispatch routes q order
 
-sendAny routes nr [] = void $ respond $ Left (nr+1)
-sendAny routes nr (bl:bs) = do
+processQueue :: (MonadIO m) => Routing -> Int -> Block -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
+processQueue routes nr bl = do
   mOrder <- state (getAndRemoveOrderFromQueue bl)
-  maybe (sendAny bs) (\order -> do b <- respond $ pure order
-                                   request b >>= queue routes
+  case mOrder of
+    Nothing    -> queue routes (Left nr)
+    Just order -> respond (pure order) >>= processQueue routes nr
 
-                         ) mOrder
+getAnyOrder :: (MonadState SimSim m) => Int -> [Block] -> m (Either Int Order)
+getAnyOrder nr []      = return $ Left (nr+1)
+getAnyOrder nr (bl:bs) = do
+  mOrder <- state (getAndRemoveOrderFromQueue bl)
+  maybe (getAnyOrder nr bs) (return.pure) mOrder
 
 
 --
