@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 -- Queue.hs ---
@@ -11,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 225
+--     Update #: 239
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -51,6 +52,7 @@ import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
 import           Pipes
+import Control.Monad.Logger
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
@@ -69,37 +71,31 @@ import           SimSim.Simulation.Type
 type QueueResponse = Maybe Order
 
 
-queue :: (MonadIO m) => Text -> Routing -> Downstream -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
+queue :: (MonadLogger m, MonadIO m) => Text -> Routing -> Downstream -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
 queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
-  liftIO $ putStrLn ("Left in " ++ tshow name ++ " with " ++ tshow nr)
-  mQueues <- gets (simOrdersQueue . simInternal)
-  putStrLn $ "mQueues: " ++ tshow (fmap (map orderId) mQueues)
-  -- load any order
+  mQueues <- gets (simOrdersQueue . simInternal) --  load any order
+  $(logDebug) $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> tshow mQueues
   blLastOccur <- gets (simBlockLastOccur . simInternal)
   let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
   if null orders
     then void (respond $ Left (nr + 1))
     else processBlocks True blocks >> void (respond $ Left (nr + 1))
-      
 queue name routes (Right order)      -- received an order, store and continue
  = do
-  liftIO $ putStrLn ("queue " ++ name ++ " input: " ++ tshow (orderId order))
+  $(logDebug) $ "Queue " ++ name ++ " input order " ++ tshow (orderId order) 
   let q = nextBlock order
   case q of
     Queue {}                    -- process and add to queue list
      -> do
       let order' = processOrder routes q order
       modify $ addOrderToQueue q order'
-      mQueues <- gets (simOrdersQueue . simInternal)
-      putStrLn $ "mQueues: " ++ tshow (fmap (map orderId) mQueues)
-    
     _ -> void $ respond (pure order) -- just push through
   request q >>= queue name routes    -- request new order and process
 
 -- | Process blocks, by responding one order for each block and the process the new requests.
-processBlocks :: (MonadState SimSim m) => Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
+processBlocks :: (MonadLogger m, MonadState SimSim m) => Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
 processBlocks _ [] = return []
 processBlocks loop (bl:bs) = do
   mOrder <- state (getAndRemoveOrderFromQueue bl)

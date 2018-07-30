@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- Machine.hs ---
 --
 -- Filename: Machine.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 148
+--     Update #: 157
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,6 +43,7 @@ import           ClassyPrelude
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
 import           Data.Monoid                ((<>))
@@ -67,9 +69,9 @@ import           SimSim.Time
 
 
 -- | Machines push the finished orders to the dispatcher and pull order from the queue.
-machine :: (MonadIO m) => Routing -> Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+machine :: (MonadLogger m, MonadIO m) => Routing -> Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 machine _ (Left nr) = do
-  putStrLn "\n\nempty machine pipe\n\n"
+  $(logDebug) "Empty machine pipe"
   void $ respond $ Left (nr+1)
 machine routes (Right order) = do
   let bl = nextBlock order
@@ -83,27 +85,27 @@ machine routes (Right order) = do
   machine routes nxtOrder -- process next order
 
 -- | Load order from machine and process.
-processCurrentMachineWip :: (MonadIO m) => Routing -> Block -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+processCurrentMachineWip :: (MonadLogger m, MonadIO m) => Routing -> Block -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 processCurrentMachineWip routes bl = do
   mOrderTime <- state (getAndRemoveOrderFromMachine bl)
   maybe (return ()) (uncurry $ processOrder routes bl) mOrderTime
 
 
-processOrder :: (MonadIO m) => Routing -> Block -> Order -> Time -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+processOrder :: (MonadLogger m, MonadIO m) => Routing -> Block -> Order -> Time -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 processOrder routes bl order pT = do
   endTime <- getSimEndTime
   blockTime <- getBlockTime bl
   let startTime = max blockTime (orderCurrentTime order)
   if startTime >= endTime
     then void $ respond (pure order) -- just push through
-    else trace ("o: " ++ show (orderId order) ++ ", pT: " ++ show pT) $
-         trace ("bl: " ++ show bl ++ ", blockTime: " ++ show blockTime) $
-         if startTime + pT > endTime -- check if can be processed fully
+    else if startTime + pT > endTime -- check if can be processed fully
            then do
+             $(logDebug) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until SIMULATION END " ++ tshow endTime
              addToBlockTime bl (endTime - startTime)
              let order' = dispatch routes bl $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
              modify (addOrderToMachine order' (pT + startTime - endTime))
            else do
+             $(logDebug) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow (startTime + pT)
              addToBlockTime bl pT
              let order' = dispatch routes bl $ setOrderCurrentTime (startTime + pT) $ setProdStartTime startTime order
              void $ respond $ pure order' -- for us, process

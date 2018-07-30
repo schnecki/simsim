@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 16
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,6 +41,7 @@ module SimSim.Runner.Server
 
 import           ClassyPrelude
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
 import           Data.Monoid                ((<>))
@@ -65,7 +66,7 @@ import           SimSim.Simulation.Type
 import           SimSim.Time
 
 
-server :: (MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
+server :: (MonadLogger m, MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
 server _ nr [] = modify (addNextOrderId nr) -- set new order id for upcoming orders
 server sim nr (o:os) = do
   let t = simCurrentTime sim

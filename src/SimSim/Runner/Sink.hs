@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- Sink.hs ---
 --
 -- Filename: Sink.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 32
+--     Update #: 35
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +41,7 @@ module SimSim.Runner.Sink
 
 import           ClassyPrelude              hiding (replicate)
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
 import           Data.Sequence              (replicate)
@@ -64,9 +66,8 @@ import           SimSim.Simulation.Type
 import           SimSim.Time
 
 
-sink :: (MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
-sink (Left nr) =
-  print "No more orders"
+sink :: (MonadLogger m, MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
+sink (Left nr) = $(logDebug) "No more orders"
 sink (Right order) = do
   case nextBlock order of
     Sink -> do

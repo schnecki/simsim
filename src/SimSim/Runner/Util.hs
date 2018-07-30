@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 47
+--     Update #: 49
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module SimSim.Runner.Util where
 import           ClassyPrelude
 
 import           Control.Monad
+import           Control.Monad.Logger
 import           Control.Monad.IO.Class
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
@@ -65,6 +66,9 @@ import           SimSim.Time
 
 type Downstream = Either Int Order
 type Upstream = Block
+
+-- | Allow logging in a proxy
+instance (MonadLogger m) => MonadLogger (Proxy a b c d m) where
 
 
 getSimEndTime :: (MonadState SimSim m) => m Time

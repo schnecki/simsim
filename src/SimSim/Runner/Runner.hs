@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- Runner.hs ---
 --
 -- Filename: Runner.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 145
+--     Update #: 159
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,6 +42,7 @@ module SimSim.Runner.Runner
 
 import           ClassyPrelude              hiding (replicate)
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
 import qualified Data.Map.Strict            as M
@@ -78,7 +80,7 @@ import           SimSim.Runner.Util
 -- | This function simulates the production system. The simulation pipelines are split into to seperate pipes. The first
 -- one feds the orders into the system, whereas the second one releases the orders from the order pool and feds it into
 -- the production system.
-simulation :: (MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimSim
+simulation :: (MonadLogger m, MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimSim
 simulation sim simEnd incomingOrders = do
   let stSim = setSimEndTime simEnd sim
   simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
@@ -86,6 +88,7 @@ simulation sim simEnd incomingOrders = do
       time = simCurrentTime simOp
       arrivedOpOrders = filter ((<= time) . arrivalDate) opOrders
   relOrds <- liftIO $ simRelease simOp (simCurrentTime simOp) arrivedOpOrders
+  $(logDebug) "orders in queue"
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
@@ -97,25 +100,25 @@ simulation sim simEnd incomingOrders = do
 simulate :: SimSim -> [Order] -> IO SimSim
 simulate sim incomingOrders = do
   let simEnd = simCurrentTime sim + simPeriodLength sim
-  runEffect $ simulation sim simEnd incomingOrders
+  runStderrLoggingT $ runEffect $ simulation sim simEnd incomingOrders
 
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts at the specified end time.
 simulateUntil :: Time -> SimSim -> [Order] -> IO SimSim
-simulateUntil simEnd sim incomingOrders = runEffect $ simulation sim simEnd incomingOrders
+simulateUntil simEnd sim incomingOrders = runStderrLoggingT $ runEffect $ simulation sim simEnd incomingOrders
 
 
 -------------------- Helper functions --------------------
 
 
 -- | This function creates the pipe which serves the orders into the order pool.
-mkPipeOrderPool :: (MonadIO m) => SimSim -> [Order] -> Proxy X () () X (StateT SimSim m) ()
+mkPipeOrderPool :: (MonadLogger m, MonadIO m) => SimSim -> [Order] -> Proxy X () () X (StateT SimSim m) ()
 mkPipeOrderPool sim incomingOrders = server sim (simNextOrderId sim) incomingOrders >>~ orderPoolSink
 
 
 -- | This function creates the pipe which simulates the production system.
-mkPipeProdSys :: (MonadIO m) => SimSim -> [Order] -> Proxy X () () X (StateT SimSim m) ()
+mkPipeProdSys :: (MonadLogger m, MonadIO m) => SimSim -> [Order] -> Proxy X () () X (StateT SimSim m) ()
 mkPipeProdSys sim ordersToRelease =
   release sim routes ordersToRelease >>~
   foldl' -- repeat machine & queues often enough
