@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 97
+--     Update #: 107
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -85,11 +85,11 @@ procTimes = [(Machine 1,[(Product 1, const 1)
 
 -- | Order to send through the production
 incomingOrders :: [Order]
-incomingOrders = L.concat $ L.replicate 1 [
-  newOrder (Product 1) 1 2,
-  newOrder (Product 2) 1 2,
-  newOrder (Product 1) 1 2,
-  newOrder (Product 1) 1 2]
+incomingOrders = L.concat $ L.replicate 1 [ newOrder (Product 1) 1 2
+                                          , newOrder (Product 2) 1 2
+                                          , newOrder (Product 1) 1 2
+                                          , newOrder (Product 1) 1 2
+                                          ]
 
 
 measure :: (MonadIO m) => m a -> m a
@@ -105,10 +105,12 @@ main = measure $ do
   g <- newStdGen
   let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe
   sim' <- simulate sim incomingOrders
-  print $ "OP: " ++ show (simOrderPoolOrders $ simInternal sim')
-  print $ "Queues: " ++ show (M.map (fmap orderId) $ simQueueOrders $ simInternal sim')
-  print $ "Block times: " ++ show (simBlockTimes $ simInternal sim')
-
+  putStrLn $ "\n\nOP: " ++ tshow (simOrderPoolOrders $ simInternal sim')
+  putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simQueueOrders $ simInternal sim')
+  putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
+  putStrLn $ "Product routes: " ++ tshow (simProductRoutes $ simInternal sim')
+  putStrLn $ "maxM: " ++ tshow (simMaxMachines $ simInternal sim')
+  putStrLn $ "routes: " ++ tshow (simRouting sim')
 
 --
 -- Main.hs ends here

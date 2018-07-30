@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 32
+--     Update #: 39
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,8 +63,11 @@ import           SimSim.Routing
 dispatch :: Routing -> Block -> Order -> Order
 dispatch routes lastBl order =
   case find ((== (productType order, lastBl)) . fst) routes of
-    Just (_, n) -> order {lastBlock = lastBl, nextBlock = n}
-    Nothing     -> order {lastBlock = lastBl, nextBlock = Sink, prodEnd = Just (orderCurrentTime order)}
+    Just (_, n) ->
+      if n == FGI
+        then order {lastBlock = lastBl, nextBlock = n, prodEnd = Just (orderCurrentTime order)}
+        else order {lastBlock = lastBl, nextBlock = n}
+    Nothing -> order {lastBlock = lastBl, nextBlock = Sink, prodEnd = prodEnd order <|> Just (orderCurrentTime order)}
 
 
 --

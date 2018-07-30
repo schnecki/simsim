@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 17
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,6 +49,27 @@ data Block
   | FGI                         -- ^. This block is a finished goods inventory.
   | Sink                        -- ^. This block removes the orders from the system.
   deriving (Show, Eq, Ord)
+
+isMachine :: Block -> Bool
+isMachine Machine{} = True
+isMachine _         = False
+
+isQueue :: Block -> Bool
+isQueue Queue{} = True
+isQueue _       = False
+
+
+isFgi :: Block -> Bool
+isFgi FGI{} = True
+isFgi _     = False
+
+isOrderPool :: Block -> Bool
+isOrderPool OrderPool{} = True
+isOrderPool _           = False
+
+isSink :: Block -> Bool
+isSink Sink{} = True
+isSink _      = False
 
 
 --

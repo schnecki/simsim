@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 46
+--     Update #: 47
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,7 +75,7 @@ getNextRand :: (MonadState SimSim m) => m Double
 getNextRand = do
   sim <- get
   put $ updateTailRandNrs sim
-  return $ NL.head $ randomNumbers $ simInternal sim
+  return $ NL.head $ simRandomNumbers $ simInternal sim
 
 getBlockTime :: (MonadState SimSim m) => Block -> m Time
 getBlockTime Sink = error "called block time for a sink"

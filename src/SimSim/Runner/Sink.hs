@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 7
+--     Update #: 13
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -66,9 +66,10 @@ import           SimSim.Time
 
 
 sink :: (MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
-sink (Left nr) = error "Nothing in sink"
+sink (Left nr) =
+  print "No more orders"
 sink (Right order) = do
-  liftIO $ print order
+  liftIO $ putStrLn $ "Order finished: " ++ tshow order
   request Sink >>= sink
 
 

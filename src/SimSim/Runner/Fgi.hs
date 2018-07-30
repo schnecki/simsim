@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 19
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -67,7 +67,7 @@ import           SimSim.Simulation.Type
 
 -- | A FGI queues orders until shipped.
 fgi :: (MonadIO m) => Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
-fgi (Left nr) = error "Nothing in fgi"
+fgi (Left nr) = void $ respond $ Left (nr+1)
 fgi (Right order) = do
   -- TODO
   respond (pure order)

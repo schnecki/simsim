@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 125
+--     Update #: 134
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -115,12 +115,12 @@ mkPipeProdSys sim ordersToRelease =
   release sim routes ordersToRelease >>~
   foldl' -- repeat machine & queues often enough
     (>~>)
-    (queue routes >~> machine routes)
-    (replicate (maxMs - 1) (queue routes >~> machine routes)) >~>
+    (queue "QPipe1" routes >~> machine routes)
+    (map (\x -> queue ("QPipe" ++ tshow x) routes >~> machine routes) [2..maxMs]) >~>
   fgi >~>
   sink
   where
-    maxMs = maxMachines $ simInternal sim
+    maxMs = simMaxMachines $ simInternal sim
     routes = simRouting sim
     nxtOrderId = simNextOrderId sim
 

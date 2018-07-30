@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 38
+--     Update #: 56
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -45,7 +45,6 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Data.List
 import           Data.Monoid                ((<>))
 import           Data.Text                  (Text)
 import           Data.Void
@@ -69,7 +68,9 @@ import           SimSim.Runner.Dispatch
 
 -- | Takes as input the routes and a list of order to be released into the production system.
 release :: (MonadIO m) => SimSim -> Routing -> [Order] -> Server Block Downstream (StateT SimSim m) ()
-release sim routes [] = void $ respond (Left 1)
+release sim routes [] = do
+  liftIO $ putStrLn "Release of Left 1"
+  void $ respond (Left 1)
 release sim routes (o:os) = do
   liftIO $ putStr "Release of " >> print (orderId o)
   let t = simCurrentTime sim

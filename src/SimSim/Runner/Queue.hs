@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 128
+--     Update #: 198
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,9 +42,9 @@ module SimSim.Runner.Queue
 
 import           ClassyPrelude
 
-import           Control.Monad
+import           Control.Monad hiding (forM_)
 import           Control.Monad.IO.Class
-import           Control.Monad.State.Strict hiding (foldM_)
+import           Control.Monad.State.Strict hiding (foldM_,forM_)
 import           Control.Monad.Trans.Class
 import qualified Data.Map.Strict            as M
 import           Data.Text                  (Text)
@@ -68,43 +68,62 @@ import           SimSim.Simulation.Type
 type QueueResponse = Maybe Order
 
 
-queue :: (MonadIO m) => Routing -> Downstream -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
-queue routes (Left nr) -- no more orders from upstream, process queued orders
+queue :: (MonadIO m) => Text -> Routing -> Downstream -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
+queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
+  liftIO $ putStrLn ("Left in " ++ tshow name ++ " with " ++ tshow nr)
+  mQueues <- gets (simQueueOrders . simInternal)
+  putStrLn $ "mQueues: " ++ tshow (fmap (map orderId) mQueues)
+  -- load any order
   ptRoutes <- gets (simProductRoutes . simInternal)
   let getBlockNr xs
-        | length xs <= nr = []
-        | otherwise = [Prelude.head $ drop nr xs]
+        | length xs <= (nr + 1) = []
+        | otherwise = [Prelude.head $ drop (nr + 1) xs]
   let blocks = concatMap getBlockNr (M.elems ptRoutes)
-  mQueues <- gets (simQueueOrders . simInternal)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
-  if null blocks || null orders
+  if null orders
     then void $ respond $ Left (nr + 1)
-    else do
-      response <- getAnyOrder nr blocks
-      bl <- respond response
-      processQueue routes nr bl
-
-queue routes (Right order) -- received an order, store and continue
+    else void $ processBlocks True blocks
+      
+queue name routes (Right order)      -- received an order, store and continue
  = do
+  liftIO $ putStrLn ("queue " ++ name ++ " input: " ++ tshow (orderId order))
   let q = nextBlock order
   case q of
     Queue {}                    -- process and add to queue list
      -> do
       let order' = processOrder routes q order
       modify $ addOrderToQueue q order'
+      -- mQueues <- gets (simQueueOrders . simInternal)
+      -- return ()
+    
     _ -> void $ respond (pure order) -- just push through
-  request q >>= queue routes         -- request new order and process
+  request q >>= queue name routes    -- request new order and process
+
+-- | Process blocks, by responding one order for each block and the process the new requests.
+processBlocks :: (MonadState SimSim m) => Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
+processBlocks _ [] = return []
+processBlocks loop (bl:bs) = do
+  mOrder <- state (getAndRemoveOrderFromQueue bl)
+  case mOrder of
+    Nothing -> processBlocks loop bs
+    Just o -> do
+      r <- respond $ pure o
+      rs <- processBlocks False bs
+      if loop
+        then processBlocks True (r:rs)
+        else return (r:rs)
+
 
 processOrder :: Routing -> Block -> Order -> Order
 processOrder routes q order = dispatch routes q order
 
-processQueue :: (MonadIO m) => Routing -> Int -> Block -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
-processQueue routes nr bl = do
+processQueue :: (MonadIO m) => Text -> Routing -> Int -> Block -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
+processQueue name routes nr bl = trace ("processQueue") $ do
   mOrder <- state (getAndRemoveOrderFromQueue bl)
   case mOrder of
-    Nothing    -> queue routes (Left nr)
-    Just order -> respond (pure order) >>= processQueue routes nr
+    Nothing    -> queue name routes (Left nr)
+    Just order -> respond (pure order) >>= processQueue name routes nr
 
 getAnyOrder :: (MonadState SimSim m) => Int -> [Block] -> m (Either Int Order)
 getAnyOrder nr []      = return $ Left (nr+1)

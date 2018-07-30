@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 114
+--     Update #: 119
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -67,7 +67,9 @@ import           SimSim.Simulation.Type
 
 -- | Machines push the finished orders to the dispatcher and pull order from the queue.
 machine :: (MonadIO m) => Routing -> Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
-machine _ (Left nr) = error "Nothing in machine"
+machine _ (Left nr) = do
+  putStrLn "\n\nempty machine pipe\n\n"
+  void $ respond $ Left (nr+1)
 machine routes (Right order) = do
   let m = nextBlock order
   case m of
