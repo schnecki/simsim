@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 258
+--     Update #: 260
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -156,12 +156,19 @@ addOrderToQueue :: Block -> Order -> SimSim -> SimSim
 addOrderToQueue bl o sim = sim {simInternal = internal {simQueueOrders = M.insertWith (flip (<>)) (nextBlock o) [o] (simQueueOrders internal)}}
   where internal = simInternal sim
 
-getAndRemoveOrderFromQueue :: Block -> SimSim -> (Maybe Order, SimSim)
-getAndRemoveOrderFromQueue bl sim = maybe def f (M.lookup bl (simQueueOrders internal))
+getAndRemoveOrderFromQueueSim :: Block -> SimSim -> (Maybe Order, SimSim)
+getAndRemoveOrderFromQueueSim bl sim = maybe def f (M.lookup bl (simQueueOrders internal))
   where internal = simInternal sim
         def = (Nothing,sim)
         f [] = def
         f (x:xs) = (Just x, sim {simInternal = internal {simQueueOrders = M.insert bl xs (simQueueOrders internal)}} )
+
+
+getAndRemoveOrderFromQueue :: Block -> M.Map Block [Order] -> (Maybe Order, M.Map Block [Order])
+getAndRemoveOrderFromQueue bl m = maybe def f (M.lookup bl m)
+  where def = (Nothing,m)
+        f []     = def
+        f (x:xs) = (Just x,  M.insert bl xs m)
 
 
 --
