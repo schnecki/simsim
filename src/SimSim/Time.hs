@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeSynonymInstances #-}
 -- Time.hs ---
 --
 -- Filename: Time.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 9
+--     Update #: 15
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,7 +39,21 @@ module SimSim.Time where
 
 import           ClassyPrelude
 
-type Time = Integer
+newtype Time = Time Integer
+  deriving (Ord, Eq)
+
+instance Num Time where
+  fromInteger = Time
+  Time x + Time y = Time (x + y)
+  Time x - Time y = Time (x - y)
+  Time x * Time y = Time (x * y)
+  abs (Time x) = Time (abs x)
+  signum (Time x) = Time (signum x)
+
+instance Show Time where
+  show (Time t) = "t=" ++ show t
+
+
 type CurrentTime = Time
 
 

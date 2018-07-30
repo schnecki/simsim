@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 140
+--     Update #: 148
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -93,16 +93,19 @@ processOrder :: (MonadIO m) => Routing -> Block -> Order -> Time -> Proxy Block 
 processOrder routes bl order pT = do
   endTime <- getSimEndTime
   blockTime <- getBlockTime bl
-  if blockTime >= endTime
-    then void $ respond (pure order)
-    else if blockTime + pT > endTime -- check if can be processed fully
+  let startTime = max blockTime (orderCurrentTime order)
+  if startTime >= endTime
+    then void $ respond (pure order) -- just push through
+    else trace ("o: " ++ show (orderId order) ++ ", pT: " ++ show pT) $
+         trace ("bl: " ++ show bl ++ ", blockTime: " ++ show blockTime) $
+         if startTime + pT > endTime -- check if can be processed fully
            then do
-             addToBlockTime bl (endTime - blockTime)
+             addToBlockTime bl (endTime - startTime)
              let order' = dispatch routes bl $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
-             modify (addOrderToMachine order' (pT + blockTime - endTime))
+             modify (addOrderToMachine order' (pT + startTime - endTime))
            else do
              addToBlockTime bl pT
-             let order' = dispatch routes bl $ setOrderCurrentTime (blockTime + pT) $ setProdStartTime blockTime order
+             let order' = dispatch routes bl $ setOrderCurrentTime (startTime + pT) $ setProdStartTime startTime order
              void $ respond $ pure order' -- for us, process
 
 

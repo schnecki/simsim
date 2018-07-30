@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 135
+--     Update #: 145
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,6 +43,7 @@ import           ClassyPrelude              hiding (replicate)
 import           Control.Monad.IO.Class
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
+import qualified Data.Map.Strict            as M
 import           Data.Monoid                ((<>))
 import           Data.Sequence              (replicate)
 import           Data.Text                  (Text)
@@ -52,6 +53,7 @@ import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
+import qualified Prelude                    as Prelude
 import           System.Random
 
 
@@ -80,7 +82,10 @@ simulation :: (MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimS
 simulation sim simEnd incomingOrders = do
   let stSim = setSimEndTime simEnd sim
   simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
-  relOrds <- liftIO $ simRelease simOp (simCurrentTime simOp) (simOrderPoolOrders $ simInternal simOp)
+  let opOrders = simOrderPoolOrders $ simInternal simOp
+      time = simCurrentTime simOp
+      arrivedOpOrders = filter ((<= time) . arrivalDate) opOrders
+  relOrds <- liftIO $ simRelease simOp (simCurrentTime simOp) arrivedOpOrders
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
@@ -116,11 +121,12 @@ mkPipeProdSys sim ordersToRelease =
   foldl' -- repeat machine & queues often enough
     (>~>)
     (queue "QPipe1" routes >~> machine routes)
-    (map (\x -> queue ("QPipe" ++ tshow x) routes >~> machine routes) [2..maxMs]) >~>
+    (map (\x -> queue ("QPipe" ++ tshow x) routes >~> machine routes) [2..maxMs+1]) >~>
   fgi >~>
   sink
   where
     maxMs = simMaxMachines $ simInternal sim
+    lastOccur = Prelude.maximum $ M.elems (simBlockLastOccur $ simInternal sim)
     routes = simRouting sim
     nxtOrderId = simNextOrderId sim
 

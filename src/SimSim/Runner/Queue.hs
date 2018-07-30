@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 218
+--     Update #: 225
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -76,11 +76,8 @@ queue name routes (Left nr) -- no more orders from upstream, process queued orde
   mQueues <- gets (simOrdersQueue . simInternal)
   putStrLn $ "mQueues: " ++ tshow (fmap (map orderId) mQueues)
   -- load any order
-  ptRoutes <- gets (simProductRoutes . simInternal)
-  let getBlockNr xs
-        | length xs <= (nr + 1) = []
-        | otherwise = [Prelude.head $ drop (nr + 1) xs]
-  let blocks = concatMap getBlockNr (M.elems ptRoutes)
+  blLastOccur <- gets (simBlockLastOccur . simInternal)
+  let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
   if null orders
     then void (respond $ Left (nr + 1))
@@ -111,10 +108,13 @@ processBlocks loop (bl:bs) = do
     Just o -> do
       let nxtBl = nextBlock o
       endTime <- getSimEndTime
-      mBlockTime <- if isMachine bl then Just <$> getBlockTime nxtBl else return Nothing
-      if trace ("mBlockTime: " ++ show mBlockTime) $ maybe False (>= endTime) mBlockTime
-          then modify (addOrderToQueue bl o) >> return []
-          else do
+      mStartTime <-
+        if isMachine bl
+          then (\x -> Just (max (orderCurrentTime o)) <*> Just x) <$> getBlockTime nxtBl
+          else return Nothing
+      if maybe False (>= endTime) mStartTime
+        then modify (addOrderToQueue bl o) >> return []
+        else do
           r <- respond $ pure o
           rs <- processBlocks False bs
           if loop

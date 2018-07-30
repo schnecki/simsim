@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 8
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,7 +44,7 @@ import           ClassyPrelude
 import           SimSim.Dispatch.FirstComeFirstServe as FCFS
 import           SimSim.Order.Type
 
--- | Sorts the orders. The first ones will be released.
+-- | Shall sort the orders in ascending order. Thus the first ones will be dispatched first.
 type Dispatch = [Order] -> [Order]
 
 

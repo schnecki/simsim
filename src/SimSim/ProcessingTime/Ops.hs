@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 27
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -69,13 +69,10 @@ getProcessingTime :: (MonadState SimSim m) => Block -> Order -> m Time
 getProcessingTime block order = do
   r <- getNextRand
   mTime <- gets (simProcessingTimes . simInternal)
-  let f = do mType <- M.lookup block mTime
-             M.lookup (productType order) mType
-  return $
-    -- trace ("block: " ++ show block)
-    -- trace ("order: " ++ show order)
-
-    fromMaybe (error "no processing time given") (f <*> Just r)
+  let f = do
+        mType <- M.lookup block mTime
+        M.lookup (productType order) mType
+  return $ fromMaybe (error $ "no processing time specified for " ++ show (productType order) ++ " on " ++ show block) (f <*> Just r)
 
 
 --

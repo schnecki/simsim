@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 6
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,11 +37,11 @@
 module SimSim.Period where
 
 import           ClassyPrelude
-
+import           SimSim.Time
 
 type Period = Double
 
-type PeriodLength = Integer
+type PeriodLength = Time
 
 
 --

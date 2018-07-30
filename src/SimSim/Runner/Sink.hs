@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 31
+--     Update #: 32
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -72,7 +72,7 @@ sink (Right order) = do
     Sink -> do
       liftIO $ putStrLn $ "Order finished: " ++ tshow order
       modify (\s -> s {simFinishedOrders = simFinishedOrders s <> [order]})
-    bl -> error "non Sink order at sink!!!"
+    bl -> error $  "non Sink order at sink!!!: " ++ show order
   request Sink >>= sink
 
 

@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 300
+--     Update #: 304
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,8 +74,9 @@ data SimInternal =
               , simMaxMachines     :: !Int
               , simProcessingTimes :: !ProcessingTimes
               , simRandomNumbers   :: !(NL.NonEmpty Double)
-              , simOrderPoolOrders :: ![Order]
               , simProductRoutes   :: !(M.Map ProductType [Block])
+              , simBlockLastOccur  :: !(M.Map Block Int)
+              , simOrderPoolOrders :: ![Order]
               , simOrdersQueue     :: !(M.Map Block [Order])
               , simOrdersMachine   :: !(M.Map Block (Order,Time)) -- ^ Order and left over processing time for this order.
               , simOrdersFgi       :: ![Order]
@@ -97,7 +98,7 @@ newSimSim g routesE procTimes periodLen release dispatch =
                release
                dispatch
                mempty
-               (SimInternal mTimes 1 maxMachines (fromProcTimes procTimes) randomNs mempty (M.fromList topSorts) mempty  mempty mempty)
+               (SimInternal mTimes 1 maxMachines (fromProcTimes procTimes) randomNs (M.fromList topSorts) (M.fromList lastOccur) mempty mempty  mempty mempty)
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps))
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
@@ -109,6 +110,10 @@ newSimSim g routesE procTimes periodLen release dispatch =
             mTimes = M.fromList $ zip (filter isMachine $ toList allBlocks) (repeat 0)
             hasSource = OrderPool `elem` uniqueBlocks
             randomNs = NL.fromList $ randomRs (0, 1) g
+
+            lastOccur = map (Prelude.maximum . concat . occurances) (toList allBlocks)
+            occurances bl = map (maybe [] (\x -> [(bl, fst x)]) . find ((== bl) . snd) . zip [0..]) (map snd topSorts)
+
             -- graph representation of routes
             keys = zip [0 ..] (toList allBlocks ++ [Sink])
             toKey bl = fromMaybe (error "could not find key in newSimSim") $ find ((== bl) . snd) keys
