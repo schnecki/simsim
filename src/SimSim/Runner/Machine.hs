@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 119
+--     Update #: 140
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,6 +63,7 @@ import           SimSim.Routing
 import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Util
 import           SimSim.Simulation.Type
+import           SimSim.Time
 
 
 -- | Machines push the finished orders to the dispatcher and pull order from the queue.
@@ -71,26 +72,38 @@ machine _ (Left nr) = do
   putStrLn "\n\nempty machine pipe\n\n"
   void $ respond $ Left (nr+1)
 machine routes (Right order) = do
-  let m = nextBlock order
-  case m of
+  let bl = nextBlock order
+  case bl of
     Machine {} -> do
-      endTime <- getSimEndTime
-      blockTime <- getBlockTime m
-      if blockTime >= endTime
-        then respond (pure order)                        -- nothing to do no more
-        else process routes m order >>= respond . pure   -- for us, process
-    _ -> respond (pure order)                            -- not for us, push through
-  nxtOrder <- request m                                  -- send upstream that we are free (request new order)
-  machine routes nxtOrder                                -- process next order
+      processCurrentMachineWip routes bl
+      pT <- getProcessingTime bl order
+      processOrder routes bl order pT
+    _ -> void $ respond (pure order) -- not for us, push through
+  nxtOrder <- request bl -- send upstream that we are free (request new order)
+  machine routes nxtOrder -- process next order
+
+-- | Load order from machine and process.
+processCurrentMachineWip :: (MonadIO m) => Routing -> Block -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+processCurrentMachineWip routes bl = do
+  mOrderTime <- state (getAndRemoveOrderFromMachine bl)
+  maybe (return ()) (uncurry $ processOrder routes bl) mOrderTime
 
 
-process :: (MonadState SimSim m) => Routing -> Block -> Order -> m Order
-process routes m order = do
-  pT <- getProcessingTime m order
-  tStart <- getBlockTime m
-  addToBlockTime m pT
-  let order' = dispatch routes m $ setOrderCurrentTime (tStart+pT) $ setProdStartTime tStart order
-  return order'
+processOrder :: (MonadIO m) => Routing -> Block -> Order -> Time -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
+processOrder routes bl order pT = do
+  endTime <- getSimEndTime
+  blockTime <- getBlockTime bl
+  if blockTime >= endTime
+    then void $ respond (pure order)
+    else if blockTime + pT > endTime -- check if can be processed fully
+           then do
+             addToBlockTime bl (endTime - blockTime)
+             let order' = dispatch routes bl $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
+             modify (addOrderToMachine order' (pT + blockTime - endTime))
+           else do
+             addToBlockTime bl pT
+             let order' = dispatch routes bl $ setOrderCurrentTime (blockTime + pT) $ setProdStartTime blockTime order
+             void $ respond $ pure order' -- for us, process
 
 
 --

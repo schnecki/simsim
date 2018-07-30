@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 13
+--     Update #: 31
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,7 +42,6 @@ import           ClassyPrelude              hiding (replicate)
 import           Control.Monad.IO.Class
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import           Data.Monoid                ((<>))
 import           Data.Sequence              (replicate)
 import           Data.Text                  (Text)
 import           Data.Void
@@ -69,7 +68,11 @@ sink :: (MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) (
 sink (Left nr) =
   print "No more orders"
 sink (Right order) = do
-  liftIO $ putStrLn $ "Order finished: " ++ tshow order
+  case nextBlock order of
+    Sink -> do
+      liftIO $ putStrLn $ "Order finished: " ++ tshow order
+      modify (\s -> s {simFinishedOrders = simFinishedOrders s <> [order]})
+    bl -> error "non Sink order at sink!!!"
   request Sink >>= sink
 
 

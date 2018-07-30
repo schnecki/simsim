@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 202
+--     Update #: 218
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -59,6 +59,7 @@ import           System.Random
 
 import           SimSim.Block
 import           SimSim.Order.Type
+import           SimSim.ProcessingTime.Ops
 import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Runner.Dispatch
@@ -72,7 +73,7 @@ queue :: (MonadIO m) => Text -> Routing -> Downstream -> Proxy Upstream Downstre
 queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
   liftIO $ putStrLn ("Left in " ++ tshow name ++ " with " ++ tshow nr)
-  mQueues <- gets (simQueueOrders . simInternal)
+  mQueues <- gets (simOrdersQueue . simInternal)
   putStrLn $ "mQueues: " ++ tshow (fmap (map orderId) mQueues)
   -- load any order
   ptRoutes <- gets (simProductRoutes . simInternal)
@@ -82,8 +83,8 @@ queue name routes (Left nr) -- no more orders from upstream, process queued orde
   let blocks = concatMap getBlockNr (M.elems ptRoutes)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
   if null orders
-    then void $ respond $ Left (nr + 1)
-    else processBlocks True blocks >> void (respond $ Left (nr+1))
+    then void (respond $ Left (nr + 1))
+    else processBlocks True blocks >> void (respond $ Left (nr + 1))
       
 queue name routes (Right order)      -- received an order, store and continue
  = do
@@ -94,7 +95,7 @@ queue name routes (Right order)      -- received an order, store and continue
      -> do
       let order' = processOrder routes q order
       modify $ addOrderToQueue q order'
-      mQueues <- gets (simQueueOrders . simInternal)
+      mQueues <- gets (simOrdersQueue . simInternal)
       putStrLn $ "mQueues: " ++ tshow (fmap (map orderId) mQueues)
     
     _ -> void $ respond (pure order) -- just push through
@@ -104,15 +105,21 @@ queue name routes (Right order)      -- received an order, store and continue
 processBlocks :: (MonadState SimSim m) => Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
 processBlocks _ [] = return []
 processBlocks loop (bl:bs) = do
-  mOrder <- state (getAndRemoveOrderFromQueueSim bl)
+  mOrder <- state (getAndRemoveOrderFromQueue bl)
   case mOrder of
     Nothing -> processBlocks loop bs
     Just o -> do
-      r <- respond $ pure o
-      rs <- processBlocks False bs
-      if loop
-        then processBlocks True (r:rs)
-        else return (r:rs)
+      let nxtBl = nextBlock o
+      endTime <- getSimEndTime
+      mBlockTime <- if isMachine bl then Just <$> getBlockTime nxtBl else return Nothing
+      if trace ("mBlockTime: " ++ show mBlockTime) $ maybe False (>= endTime) mBlockTime
+          then modify (addOrderToQueue bl o) >> return []
+          else do
+          r <- respond $ pure o
+          rs <- processBlocks False bs
+          if loop
+            then processBlocks True (r : rs)
+            else return (r : rs)
 
 
 processOrder :: Routing -> Block -> Order -> Order

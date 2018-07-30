@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 260
+--     Update #: 300
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,8 +75,10 @@ data SimInternal =
               , simProcessingTimes :: !ProcessingTimes
               , simRandomNumbers   :: !(NL.NonEmpty Double)
               , simOrderPoolOrders :: ![Order]
-              , simQueueOrders     :: !(M.Map Block [Order])
               , simProductRoutes   :: !(M.Map ProductType [Block])
+              , simOrdersQueue     :: !(M.Map Block [Order])
+              , simOrdersMachine   :: !(M.Map Block (Order,Time)) -- ^ Order and left over processing time for this order.
+              , simOrdersFgi       :: ![Order]
               }
 
 
@@ -95,15 +97,16 @@ newSimSim g routesE procTimes periodLen release dispatch =
                release
                dispatch
                mempty
-               (SimInternal mTimes 1 maxMachines (fromProcTimes procTimes) randomNs mempty mempty (M.fromList topSorts))
+               (SimInternal mTimes 1 maxMachines (fromProcTimes procTimes) randomNs mempty (M.fromList topSorts) mempty  mempty mempty)
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps))
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
             uniqueBlocks = NL.fromList $ ordNub $ NL.toList allBlocks
             maxMachines = maximum (impureNonNull $ 1 : lengths)
             routeGroups = NL.groupBy ((==) `on` fst . fst) $ NL.sortBy (compare `on` fst . fst) routes
-            lengths = max (fmap (length . NL.filter (not . isMachine . snd)) routeGroups) (fmap (length . NL.filter (not . isQueue . snd)) routeGroups) -- every route is one step
-            mTimes = M.fromList $ zip (toList allBlocks) (repeat 0)
+            routeGroupsWoFgi = map (NL.filter (not . isFgi . snd)) routeGroups
+            lengths = max (fmap (length . filter (not . isMachine . snd)) routeGroupsWoFgi) (fmap (length . filter (not . isQueue . snd)) routeGroupsWoFgi) -- every route is one step
+            mTimes = M.fromList $ zip (filter isMachine $ toList allBlocks) (repeat 0)
             hasSource = OrderPool `elem` uniqueBlocks
             randomNs = NL.fromList $ randomRs (0, 1) g
             -- graph representation of routes
@@ -123,6 +126,9 @@ newSimSim g routesE procTimes periodLen release dispatch =
 
 setSimEndTime :: Time -> SimSim -> SimSim
 setSimEndTime t sim = sim { simInternal = (simInternal sim) { simEndTime = t }}
+
+setSimCurrentTime :: Time -> SimSim -> SimSim
+setSimCurrentTime t sim = sim { simCurrentTime = t }
 
 
 setSimBlockTime :: Block -> Time -> SimSim -> SimSim
@@ -153,22 +159,39 @@ removeOrdersFromOrderPool os sim = sim {simInternal = internal {simOrderPoolOrde
 
 
 addOrderToQueue :: Block -> Order -> SimSim -> SimSim
-addOrderToQueue bl o sim = sim {simInternal = internal {simQueueOrders = M.insertWith (flip (<>)) (nextBlock o) [o] (simQueueOrders internal)}}
+addOrderToQueue bl o sim = sim {simInternal = internal {simOrdersQueue = M.insertWith (flip (<>)) (nextBlock o) [o] (simOrdersQueue internal)}}
   where internal = simInternal sim
 
-getAndRemoveOrderFromQueueSim :: Block -> SimSim -> (Maybe Order, SimSim)
-getAndRemoveOrderFromQueueSim bl sim = maybe def f (M.lookup bl (simQueueOrders internal))
+
+getAndRemoveOrderFromQueue :: Block -> SimSim -> (Maybe Order, SimSim)
+getAndRemoveOrderFromQueue bl sim = maybe def f (M.lookup bl (simOrdersQueue internal))
   where internal = simInternal sim
         def = (Nothing,sim)
         f [] = def
-        f (x:xs) = (Just x, sim {simInternal = internal {simQueueOrders = M.insert bl xs (simQueueOrders internal)}} )
+        f xxs = case dispatchSort xxs of
+          (x:xs) -> (Just x, sim {simInternal = internal {simOrdersQueue = M.insert bl xs (simOrdersQueue internal)}} )
+        dispatchSort = simDispatch sim
+
+addOrderToMachine :: Order -> Time -> SimSim -> SimSim
+addOrderToMachine o time sim = sim { simInternal = internal {simOrdersMachine = M.insert (lastBlock o) (o,time) (simOrdersMachine internal) }}
+  where internal = simInternal sim
+
+emptyOrdersMachine :: Block -> SimSim -> SimSim
+emptyOrdersMachine bl sim = sim { simInternal = internal { simOrdersMachine = M.delete bl (simOrdersMachine internal)}}
+  where internal = simInternal sim
 
 
-getAndRemoveOrderFromQueue :: Block -> M.Map Block [Order] -> (Maybe Order, M.Map Block [Order])
-getAndRemoveOrderFromQueue bl m = maybe def f (M.lookup bl m)
-  where def = (Nothing,m)
-        f []     = def
-        f (x:xs) = (Just x,  M.insert bl xs m)
+addOrderToFGI :: Order -> SimSim -> SimSim
+addOrderToFGI o sim = sim { simInternal = internal {simOrdersFgi = simOrdersFgi internal <> [o] }}
+  where internal = simInternal sim
+
+
+getAndRemoveOrderFromMachine :: Block -> SimSim -> (Maybe (Order, Time), SimSim)
+getAndRemoveOrderFromMachine bl sim = maybe def f (M.lookup bl (simOrdersMachine internal))
+  where
+    internal = simInternal sim
+    def = (Nothing, sim)
+    f res = (Just res, sim {simInternal = internal {simOrdersMachine = M.delete bl (simOrdersMachine internal)}})
 
 
 --

@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 107
+--     Update #: 130
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -65,31 +65,34 @@ routing :: Routes
 routing =
   [ (Product 1, OrderPool) --> Queue 1   -- source -> 1 -> sink
   , (Product 1, Queue 1)   --> Machine 1
+  , (Product 1, Machine 1) --> FGI
 
   , (Product 2, OrderPool) --> Queue 2   -- source -> 2 -> 1 -> sink
   , (Product 2, Queue 2)   --> Machine 2 -- note: dispatching to sink is implicit
   , (Product 2, Machine 2) --> Queue 1
   , (Product 2, Queue 1)   --> Machine 1
+  , (Product 2, Machine 1) --> FGI
   ]
 
 periodLen :: Integer
 periodLen = 10
 
 procTimes :: ProcTimes
-procTimes = [(Machine 1,[(Product 1, const 1)
-                        ,(Product 2, const 1)])
+procTimes = [(Machine 1,[(Product 1, const 4)
+                        ,(Product 2, const 2)])
             ,(Machine 2,[-- (Product 1, error "not possible")
-                        (Product 2, const 1)])
+                        (Product 2, const 4)])
             ]
 
 
 -- | Order to send through the production
 incomingOrders :: [Order]
-incomingOrders = L.concat $ L.replicate 1 [ newOrder (Product 1) 1 2
-                                          , newOrder (Product 2) 1 2
-                                          , newOrder (Product 1) 1 2
-                                          , newOrder (Product 1) 1 2
-                                          ]
+incomingOrders = L.concat $ L.replicate 1
+  [ newOrder (Product 1) 0 1
+  , newOrder (Product 2) 0 1
+  , newOrder (Product 1) 0 1
+  , newOrder (Product 1) 0 1
+  ]
 
 
 measure :: (MonadIO m) => m a -> m a
@@ -106,11 +109,20 @@ main = measure $ do
   let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe
   sim' <- simulate sim incomingOrders
   putStrLn $ "\n\nOP: " ++ tshow (simOrderPoolOrders $ simInternal sim')
-  putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simQueueOrders $ simInternal sim')
-  putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
   putStrLn $ "Product routes: " ++ tshow (simProductRoutes $ simInternal sim')
-  putStrLn $ "maxM: " ++ tshow (simMaxMachines $ simInternal sim')
-  putStrLn $ "routes: " ++ tshow (simRouting sim')
+  putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue $ simInternal sim')
+  putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine $ simInternal sim')
+  putStrLn $ "FGI: " ++ tshow (fmap orderId $ simOrdersFgi $ simInternal sim')
+  putStrLn $ "Finished: " ++ tshow (map orderId $ simFinishedOrders sim')
+  putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
+  sim'' <- simulate sim' []
+  putStrLn $ "\n\nOP: " ++ tshow (simOrderPoolOrders $ simInternal sim'')
+  putStrLn $ "Product routes: " ++ tshow (simProductRoutes $ simInternal sim'')
+  putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue $ simInternal sim'')
+  putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine $ simInternal sim'')
+  putStrLn $ "FGI: " ++ tshow (fmap orderId $ simOrdersFgi $ simInternal sim'')
+  putStrLn $ "Finished: " ++ tshow (map orderId $ simFinishedOrders sim'')
+  putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim'')
 
 --
 -- Main.hs ends here

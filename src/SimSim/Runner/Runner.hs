@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 134
+--     Update #: 135
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -84,7 +84,7 @@ simulation sim simEnd incomingOrders = do
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
-    finalize simEnd = mapBlockTimes (max simEnd)
+    finalize simEnd = mapBlockTimes (max simEnd) . setSimCurrentTime simEnd
 
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once

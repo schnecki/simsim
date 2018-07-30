@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 4
+--     Update #: 5
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,7 +43,7 @@ import           ClassyPrelude
 import           SimSim.Order.Type
 
 firstComeFirstServe :: [Order] -> [Order]
-firstComeFirstServe = id
+firstComeFirstServe = sortBy (compare `on` orderCurrentTime)
 
 
 --

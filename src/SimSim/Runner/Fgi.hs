@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 21
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -69,8 +69,9 @@ import           SimSim.Simulation.Type
 fgi :: (MonadIO m) => Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 fgi (Left nr) = void $ respond $ Left (nr+1)
 fgi (Right order) = do
-  -- TODO
-  respond (pure order)
+  case nextBlock order of
+    FGI -> modify (addOrderToFGI order)
+    _   -> void $ respond (pure order)
   nxtOrder <- request Sink
   fgi nxtOrder
 
