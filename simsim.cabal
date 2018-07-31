@@ -24,6 +24,7 @@ library
                      , SimSim.Routing
                      , SimSim.Simulation
                      , SimSim.Simulation.Type
+                     , SimSim.Simulation.Ops
                      , SimSim.Time
                      , SimSim.Order.Type
                      , SimSim.Runner
@@ -42,6 +43,9 @@ library
                      , SimSim.Runner.Server
                      , SimSim.Runner.Sink
                      , SimSim.Runner.Release
+                     , SimSim.Statistics
+                     , SimSim.Statistics.Type
+                     , SimSim.Statistics.Ops
   build-depends:       base >= 4.7 && < 5
                      , transformers
                      , pipes

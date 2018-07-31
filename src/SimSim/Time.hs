@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 26
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,24 +38,28 @@
 module SimSim.Time where
 
 import           ClassyPrelude
+import           Data.Ratio
+import           Text.Printf
 
-newtype Time = Time Integer
+newtype Time = Time Rational
   deriving (Ord, Eq)
 
 instance Num Time where
-  fromInteger = Time
+  fromInteger x = Time (x % 1)
   Time x + Time y = Time (x + y)
   Time x - Time y = Time (x - y)
   Time x * Time y = Time (x * y)
   abs (Time x) = Time (abs x)
   signum (Time x) = Time (signum x)
 
-instance Show Time where
-  show (Time t) = "t=" ++ show t
+instance Fractional Time where
+  fromRational x = Time $ toRational x
+  (Time x) / (Time y) = Time (x/y)
 
+instance Show Time where
+  show (Time t) = "t=" ++ printf "%.3f" (fromRational t :: Double)
 
 type CurrentTime = Time
-
 
 -- Synonyms
 type ArrivalDate = Time

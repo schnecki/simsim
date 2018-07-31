@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 150
+--     Update #: 169
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -111,11 +111,11 @@ main =
     let sim = newSimSim g routing procTimes periodLen immediateRelease (prioritizeProducts [Product 2]) -- firstComeFirstServe
     sim' <- foldM simulate sim ([incomingOrders] ++ replicate 00 [])
     putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
-    putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders $ simInternal sim')
-    putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue $ simInternal sim')
-    putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine $ simInternal sim')
+    putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
+    putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue sim')
+    putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine sim')
     putStrLn $ "FGI: " ++ tshow (-- fmap orderId $
-                                 simOrdersFgi $ simInternal sim')
+                                 simOrdersFgi sim')
     putStrLn $ "Finished: " ++ tshow (map orderId $ simFinishedOrders sim')
     putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
     print $ simBlockLastOccur $ simInternal sim'

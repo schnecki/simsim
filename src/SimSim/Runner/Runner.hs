@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 159
+--     Update #: 160
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -84,7 +84,7 @@ simulation :: (MonadLogger m, MonadIO m) => SimSim -> Time -> [Order] -> Proxy X
 simulation sim simEnd incomingOrders = do
   let stSim = setSimEndTime simEnd sim
   simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
-  let opOrders = simOrderPoolOrders $ simInternal simOp
+  let opOrders = simOrderPoolOrders simOp
       time = simCurrentTime simOp
       arrivedOpOrders = filter ((<= time) . arrivalDate) opOrders
   relOrds <- liftIO $ simRelease simOp (simCurrentTime simOp) arrivedOpOrders

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 9
+--     Update #: 12
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,11 +41,12 @@ module SimSim.Dispatch
 
 import           ClassyPrelude
 
+import           SimSim.Block
 import           SimSim.Dispatch.FirstComeFirstServe as FCFS
 import           SimSim.Order.Type
 
 -- | Shall sort the orders in ascending order. Thus the first ones will be dispatched first.
-type Dispatch = [Order] -> [Order]
+type Dispatch = Block -> [Order] -> [Order]
 
 
 --

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 6
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,14 +41,15 @@ module SimSim.Dispatch.FirstComeFirstServe
 
 import           ClassyPrelude
 
+import           SimSim.Block
 import           SimSim.Order.Type
 import           SimSim.ProductType
 
-firstComeFirstServe :: [Order] -> [Order]
-firstComeFirstServe = sortBy (compare `on` orderCurrentTime)
+firstComeFirstServe :: Block -> [Order] -> [Order]
+firstComeFirstServe _ = sortBy (compare `on` orderCurrentTime)
 
-prioritizeProducts :: [ProductType] -> [Order] -> [Order]
-prioritizeProducts pts xs = concat ptsOrders ++ nonPts
+prioritizeProducts :: [ProductType] -> Block -> [Order] -> [Order]
+prioritizeProducts pts _ xs = concat ptsOrders ++ nonPts
   where ptsOrders = map (\pt -> filter ((== pt) . productType) xs) pts
         nonPts = filter ((`notElem` pts) . productType) xs
 

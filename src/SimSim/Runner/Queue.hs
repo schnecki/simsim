@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 239
+--     Update #: 245
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,14 +74,14 @@ type QueueResponse = Maybe Order
 queue :: (MonadLogger m, MonadIO m) => Text -> Routing -> Downstream -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
 queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
-  mQueues <- gets (simOrdersQueue . simInternal) --  load any order
+  mQueues <- gets simOrdersQueue --  load any order
   $(logDebug) $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> tshow mQueues
   blLastOccur <- gets (simBlockLastOccur . simInternal)
   let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
   if null orders
     then void (respond $ Left (nr + 1))
-    else processBlocks True blocks >> void (respond $ Left (nr + 1))
+    else processBlocks name True blocks >> void (respond $ Left (nr + 1))
 queue name routes (Right order)      -- received an order, store and continue
  = do
   $(logDebug) $ "Queue " ++ name ++ " input order " ++ tshow (orderId order) 
@@ -95,12 +95,12 @@ queue name routes (Right order)      -- received an order, store and continue
   request q >>= queue name routes    -- request new order and process
 
 -- | Process blocks, by responding one order for each block and the process the new requests.
-processBlocks :: (MonadLogger m, MonadState SimSim m) => Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
-processBlocks _ [] = return []
-processBlocks loop (bl:bs) = do
+processBlocks :: (MonadLogger m, MonadState SimSim m) => Text -> Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
+processBlocks _ _ [] = return []
+processBlocks name loop (bl:bs) = do
   mOrder <- state (getAndRemoveOrderFromQueue bl)
   case mOrder of
-    Nothing -> processBlocks loop bs
+    Nothing -> processBlocks name loop bs
     Just o -> do
       let nxtBl = nextBlock o
       endTime <- getSimEndTime
@@ -109,12 +109,16 @@ processBlocks loop (bl:bs) = do
           then (\x -> Just (max (orderCurrentTime o)) <*> Just x) <$> getBlockTime nxtBl
           else return Nothing
       if maybe False (>= endTime) mStartTime
-        then modify (addOrderToQueue bl o) >> return []
+        then do
+        modify (addOrderToQueue bl o)
+        mQueues <- gets simOrdersQueue
+        $(logDebug) $ "Queue " ++ name ++ " added order " ++ tshow (orderId o) ++ " to queues: " ++ tshow mQueues
+        return []
         else do
           r <- respond $ pure o
-          rs <- processBlocks False bs
+          rs <- processBlocks name False bs
           if loop
-            then processBlocks True (r : rs)
+            then processBlocks name True (r : rs)
             else return (r : rs)
 
 
