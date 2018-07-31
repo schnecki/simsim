@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 4
+--     Update #: 6
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,10 +35,14 @@
 -- Code:
 
 module SimSim.Statistics
-    ( module S
+    ( module SimSim.Statistics.Type
+    , module SimSim.Statistics.Ops
+    , module SimSim.Statistics.Pretty
     ) where
 
-import           SimSim.Statistics.Type as S
+import           SimSim.Statistics.Ops
+import           SimSim.Statistics.Pretty
+import           SimSim.Statistics.Type
 
 
 --

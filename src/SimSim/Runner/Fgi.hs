@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 24
+--     Update #: 56
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,10 +42,9 @@ module SimSim.Runner.Fgi
 
 import           ClassyPrelude
 
-import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Logger
-import           Control.Monad.State.Strict
+import           Control.Monad.State.Strict hiding (mapM_)
 import           Control.Monad.Trans.Class
 import           Data.Text                  (Text)
 import           Data.Void
@@ -64,16 +63,27 @@ import           SimSim.Routing
 import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Util
 import           SimSim.Simulation.Type
+import           SimSim.Statistics
 
 
 -- | A FGI queues orders until shipped.
 fgi :: (MonadLogger m, MonadIO m) => Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
-fgi (Left nr) = void $ respond $ Left (nr+1)
-fgi (Right order) = do
+fgi (Left nr) = do              -- period done, ship orders
+  shipment <- gets simShipment
+  os <- gets simOrdersFgi
+  t <- gets (simEndTime . simInternal)
+  setBlockTime FGI t
+  let ships = map (setSentTime t) $ filter (shipment t) os
+  modify (removeOrdersFromFgi ships . setFinishedOrders ships)
+  mapM_ (modify . statsAddShipped) ships
+  logger Nothing $ "Left " <> tshow nr <> " in FGI. Shipped orders: " <> tshow (fmap orderId ships)
+  void $ respond $ Left (nr + 1)
+fgi (Right order) = do          -- new order arrived at fgi
   case nextBlock order of
-    FGI -> do modify (addOrderToFGI order)
-              $(logDebug) $ "Added order " <> tshow (orderId order) <> " to FGI at time " <> tshow (orderCurrentTime order)
-    _   -> void $ respond (pure order)
+    FGI -> do
+      modify (statsAddEndProduction order . addOrderToFgi order)
+      logger Nothing $ "Added order " <> tshow (orderId order) <> " to FGI at time " <> tshow (orderCurrentTime order)
+    _ -> void $ respond (pure order)
   nxtOrder <- request Sink
   fgi nxtOrder
 

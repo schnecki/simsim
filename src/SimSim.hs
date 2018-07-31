@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 11
+--     Update #: 13
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,6 +42,8 @@ module SimSim
     , module SimSim.ProductType
     , module SimSim.Routing
     , module SimSim.Simulation
+    , module SimSim.Shipment
+    , module SimSim.Statistics
     , module SimSim.Time
     , module SimSim.Release
     , module SimSim.Order
@@ -57,7 +59,9 @@ import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
 import           SimSim.Runner
+import           SimSim.Shipment
 import           SimSim.Simulation
+import           SimSim.Statistics
 import           SimSim.Time
 
 

@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 327
+--     Update #: 336
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -53,23 +53,26 @@ import           SimSim.ProcessingTime.Type
 import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
-import           SimSim.Statistics
+import           SimSim.Shipment
+import           SimSim.Statistics.Type
 import           SimSim.Time
 
-data SimSim =
-  SimSim { simRouting        :: !Routing
-         , simCurrentTime    :: !Time
-         , simPeriodLength   :: !PeriodLength
-         , simNextOrderId    :: !OrderId
-         , simRelease        :: !Release
-         , simDispatch       :: !Dispatch
-         , simOrderPoolOrders :: ![Order]
-         , simOrdersQueue     :: !(M.Map Block [Order])
-         , simOrdersMachine   :: !(M.Map Block (Order,Time)) -- ^ Order and left over processing time for this order.
-         , simOrdersFgi       :: ![Order]         , simFinishedOrders :: ![Order] -- ^ Orders which have been finished in last period.
-         , simStatistics     :: SimStatistics
-         , simInternal       :: !SimInternal
-         }
+data SimSim = SimSim
+  { simRouting         :: !Routing
+  , simCurrentTime     :: !Time
+  , simPeriodLength    :: !PeriodLength
+  , simNextOrderId     :: !OrderId
+  , simRelease         :: !Release
+  , simDispatch        :: !Dispatch
+  , simShipment        :: !Shipment
+  , simOrderPoolOrders :: ![Order]
+  , simOrdersQueue     :: !(M.Map Block [Order])
+  , simOrdersMachine   :: !(M.Map Block (Order, Time)) -- ^ Order and left over processing time for this order.
+  , simOrdersFgi       :: ![Order]
+  , simOrdersFinished  :: ![Order] -- ^ Orders which have been finished in last period.
+  , simStatistics      :: SimStatistics
+  , simInternal        :: !SimInternal
+  }
 
 
 data SimInternal = SimInternal
@@ -142,8 +145,11 @@ emptyOrdersMachine :: Block -> SimSim -> SimSim
 emptyOrdersMachine bl sim = sim { simOrdersMachine = M.delete bl (simOrdersMachine sim)}
 
 
-addOrderToFGI :: Order -> SimSim -> SimSim
-addOrderToFGI o sim = sim {simOrdersFgi = simOrdersFgi sim <> [o] }
+addOrderToFgi :: Order -> SimSim -> SimSim
+addOrderToFgi o sim = sim {simOrdersFgi = simOrdersFgi sim <> [o] }
+
+removeOrdersFromFgi :: [Order] -> SimSim -> SimSim
+removeOrdersFromFgi os sim = sim {simOrdersFgi = filter (`notElem` os) (simOrdersFgi sim)}
 
 
 getAndRemoveOrderFromMachine :: Block -> SimSim -> (Maybe (Order, Time), SimSim)
@@ -153,6 +159,9 @@ getAndRemoveOrderFromMachine bl sim = maybe def f (M.lookup bl (simOrdersMachine
     def = (Nothing, sim)
     f res = (Just res, sim {simOrdersMachine = M.delete bl (simOrdersMachine sim)})
 
+
+setFinishedOrders :: [Order] -> SimSim -> SimSim
+setFinishedOrders xs sim = sim { simOrdersFinished = xs }
 
 --
 -- Type.hs ends here

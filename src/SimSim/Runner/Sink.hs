@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 35
+--     Update #: 40
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,17 +63,16 @@ import           SimSim.Routing
 import           SimSim.Runner.Util
 import           SimSim.Simulation
 import           SimSim.Simulation.Type
+import           SimSim.Statistics
 import           SimSim.Time
 
 
 sink :: (MonadLogger m, MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
-sink (Left nr) = $(logDebug) "No more orders"
+sink (Left nr) = logger Nothing "No more orders"
 sink (Right order) = do
   case nextBlock order of
-    Sink -> do
-      liftIO $ putStrLn $ "Order finished: " ++ tshow order
-      modify (\s -> s {simFinishedOrders = simFinishedOrders s <> [order]})
-    bl -> error $  "non Sink order at sink!!!: " ++ show order
+    Sink -> return ()           -- everything worked out
+    bl   -> error $  "non Sink order at sink!!!: " ++ show order
   request Sink >>= sink
 
 

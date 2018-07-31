@@ -44,8 +44,11 @@ library
                      , SimSim.Runner.Sink
                      , SimSim.Runner.Release
                      , SimSim.Statistics
-                     , SimSim.Statistics.Type
                      , SimSim.Statistics.Ops
+                     , SimSim.Statistics.Pretty
+                     , SimSim.Statistics.Type
+                     , SimSim.Shipment
+                     , SimSim.Shipment.OnDueDate
   build-depends:       base >= 4.7 && < 5
                      , transformers
                      , pipes
@@ -56,6 +59,7 @@ library
                      , classy-prelude
                      , mtl
                      , monad-logger >= 0.2.2
+                     , ansi-wl-pprint
 
   extensions:          NoImplicitPrelude
                      , OverloadedStrings
@@ -79,6 +83,7 @@ executable simsim-exe
                      , classy-prelude
                      , time
                      , monad-logger >= 0.2.2
+                     , ansi-wl-pprint
 
   default-language:    Haskell2010
   extensions:          NoImplicitPrelude

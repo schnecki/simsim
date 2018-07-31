@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 44
+--     Update #: 58
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -71,6 +71,17 @@ newOrder productType arrDate dueDate =
   Order (-1) productType  arrDate dueDate Nothing Nothing Nothing Nothing OrderPool OrderPool 0
 
 
+orderFinishedProduction :: Order -> Bool
+orderFinishedProduction order = isJust (prodEnd order)
+
+orderFinishedAndTardy :: Order -> Bool
+orderFinishedAndTardy order = maybe False (> dueDate order) (prodEnd order)
+
+orderTardiness :: Order -> Maybe Time
+orderTardiness order = maybe (fail "order not yet finished production") (packTardy . subtract (dueDate order)) (prodEnd order)
+  where packTardy x | x > 0 = return x
+                    | otherwise = fail "not tardy"
+
 setOrderId :: OrderId -> Order -> Order
 setOrderId nr o = o {orderId = nr}
 
@@ -101,6 +112,9 @@ setLastBlock b o = o {lastBlock = b}
 setNextBlock :: Block -> Order -> Order
 setNextBlock b o = o {nextBlock = b}
 
+
+setSentTime :: Time -> Order -> Order
+setSentTime t o = o {sent = Just t}
 
 --
 -- Type.hs ends here

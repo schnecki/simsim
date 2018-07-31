@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 160
+--     Update #: 162
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -88,7 +88,6 @@ simulation sim simEnd incomingOrders = do
       time = simCurrentTime simOp
       arrivedOpOrders = filter ((<= time) . arrivalDate) opOrders
   relOrds <- liftIO $ simRelease simOp (simCurrentTime simOp) arrivedOpOrders
-  $(logDebug) "orders in queue"
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where

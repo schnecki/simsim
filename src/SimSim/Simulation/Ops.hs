@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 6
+--     Update #: 8
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -55,13 +55,14 @@ import           SimSim.ProcessingTime.Type
 import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
+import           SimSim.Shipment
 import           SimSim.Simulation.Type
 import           SimSim.Statistics
 import           SimSim.Time
 
 
-newSimSim :: (RandomGen g) => g -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> SimSim
-newSimSim g routesE procTimes periodLen release dispatch =
+newSimSim :: (RandomGen g) => g -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> SimSim
+newSimSim g routesE procTimes periodLen release dispatch shipment =
   case NL.nonEmpty (filter ((/= Sink) . snd) routesE) of
     Nothing -> error "Routing cannot be empty, and must include an OrderPool! Connections to the Sink, e.g. ((Product 1, OrderPool) --> Sink), do not count."
     Just routes ->
@@ -73,6 +74,7 @@ newSimSim g routesE procTimes periodLen release dispatch =
                1
                release
                dispatch
+               shipment
                mempty
                mempty
                mempty

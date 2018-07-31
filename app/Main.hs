@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 169
+--     Update #: 176
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -54,6 +54,7 @@ import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude                    as Pipe
 import           System.Random
+import           Text.PrettyPrint.ANSI.Leijen     (putDoc)
 
 import           SimSim
 import           SimSim.Order.Type
@@ -89,10 +90,10 @@ procTimes = [(Machine 1,[(Product 1, const 4)
 -- | Order to send through the production
 incomingOrders :: [Order]
 incomingOrders = L.concat $ L.replicate 1
-  [ newOrder (Product 1) 0 1
-  , newOrder (Product 2) 0 1
-  , newOrder (Product 1) 0 1
-  , newOrder (Product 1) 0 1
+  [ newOrder (Product 1) 0 11
+  , newOrder (Product 2) 0 11
+  , newOrder (Product 1) 0 11
+  , newOrder (Product 1) 0 11
   ]
 
 
@@ -108,7 +109,7 @@ main :: IO ()
 main =
   measure $ do
     g <- newStdGen
-    let sim = newSimSim g routing procTimes periodLen immediateRelease (prioritizeProducts [Product 2]) -- firstComeFirstServe
+    let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe shipOnDueDate
     sim' <- foldM simulate sim ([incomingOrders] ++ replicate 00 [])
     putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
     putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
@@ -116,9 +117,10 @@ main =
     putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine sim')
     putStrLn $ "FGI: " ++ tshow (-- fmap orderId $
                                  simOrdersFgi sim')
-    putStrLn $ "Finished: " ++ tshow (map orderId $ simFinishedOrders sim')
+    putStrLn $ "Finished: " ++ tshow (map orderId $ simOrdersFinished sim')
     putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
-    print $ simBlockLastOccur $ simInternal sim'
+
+    putDoc $ prettySimStatistics (simStatistics sim')
 
 --
 -- Main.hs ends here

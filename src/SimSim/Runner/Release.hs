@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 63
+--     Update #: 69
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -65,6 +65,7 @@ import           SimSim.Routing
 import           SimSim.Runner.Util
 import           SimSim.Simulation
 import           SimSim.Simulation.Type
+import           SimSim.Statistics
 import           SimSim.Time
 
 import           SimSim.Runner.Dispatch
@@ -73,9 +74,11 @@ import           SimSim.Runner.Dispatch
 release :: (MonadLogger m, MonadIO m) => SimSim -> Routing -> [Order] -> Server Block Downstream (StateT SimSim m) ()
 release sim routes [] = void $ respond (Left 1)
 release sim routes (o:os) = do
-  $(logDebug) $ "Release of " ++ tshow (orderId o)
   let t = simCurrentTime sim
-  void $ respond $ pure $ process routes t o
+  let o' = process routes t o
+  logger Nothing $ "Release of " ++ tshow (orderId o)
+  modify (statsAddRelease o')
+  void $ respond $ pure o'
   release sim routes os
 
 

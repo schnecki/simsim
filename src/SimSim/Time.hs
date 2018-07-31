@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 26
+--     Update #: 28
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,6 +44,9 @@ import           Text.Printf
 newtype Time = Time Rational
   deriving (Ord, Eq)
 
+fromTime :: Time -> Double
+fromTime (Time t) = fromRational t
+
 instance Num Time where
   fromInteger x = Time (x % 1)
   Time x + Time y = Time (x + y)
@@ -57,7 +60,7 @@ instance Fractional Time where
   (Time x) / (Time y) = Time (x/y)
 
 instance Show Time where
-  show (Time t) = "t=" ++ printf "%.3f" (fromRational t :: Double)
+  show (Time t) = "t=" ++ printf "%.2f" (fromRational t :: Double)
 
 type CurrentTime = Time
 

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 22
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,7 +41,7 @@ import qualified Data.List.NonEmpty as NL
 import qualified Data.Map.Strict    as M
 import           System.Random
 
-
+-- Idea: recursive Block datatype? to model full work centers etc.
 data Block
   = OrderPool                   -- ^. This block feds the orders into the system.
   | Queue Int                   -- ^. This block queues the orders until dispatched.

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 6
+--     Update #: 40
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,44 +43,60 @@ import           SimSim.Block
 
 
 data SimStatistics = SimStatistics
-  { simStatsOrderPool  :: SimStats
-  , simStatsBlock      :: M.Map Block SimStats
-  , simStatsProduction :: SimStats
-  , simStatsSystem     :: SimStats
+  { simStatsBlock           :: M.Map Block SimStats       -- ^ Statistics for blocks, like nr of orders.
+  , simStatsBlockTimes      :: M.Map Block StatsBlockTime -- ^ Lists the (processing) times for the machines (only for machines).
+  , simStatsShopFloor       :: SimStats -- ^ Shop floor (from release until entry of finished goods inventory)
+  , simStatsShopFloorAndFgi :: SimStats -- ^ Shop floor (from release until shipping)
+  , simStatsOrderCosts      :: StatsOrderCost
   }
 
 data SimStats = SimStats
-  { statsFlowTime  :: StatsTime
-  , statsTardiness :: StatsTime
-  , statsCosts     :: StatsCost
+  { statsNrOrders       :: Integer
+  , statsOrderFlowTime  :: StatsOrderTime
+  , statsOrderTardiness :: StatsOrderTard
   }
 
-data StatsTime = StatsTime
-  { statsNrOrders      :: Integer
-  , statsSumFlowTime   :: Double
-  , statsStDevFlowTime :: Double
+data StatsOrderTime = StatsOrderTime
+  { statsSumTime    :: Double
+  , statsStdDevTime :: Double
   }
 
-data StatsCost = StatsCost
+data StatsOrderTard = StatsOrderTard
+  { statsNrTardOrders   :: Integer
+  , statsSumTardiness   :: Double
+  , statsStdDevTardTime :: Double
+  }
+
+data StatsOrderCost = StatsOrderCost
   { statsEarnings :: Double
   , statsWipCosts :: Double
   , statsBoCosts  :: Double
   , statsFgiCosts :: Double
   }
 
+data StatsBlockTime = StatsBlockTime
+  { statsProcessing :: Double
+  -- , statsBroken
+  }
+
 
 emptyStatistics :: SimStatistics
-emptyStatistics = SimStatistics emptyStats mempty emptyStats emptyStats
+emptyStatistics = SimStatistics mempty mempty emptyStats emptyStats emptyStatsOrderCost
 
 emptyStats :: SimStats
-emptyStats = SimStats emptyStatsTime emptyStatsTime emptyStatsCost
+emptyStats = SimStats 0 emptyStatsOrderTime emptyStatsOrderTard
 
-emptyStatsTime :: StatsTime
-emptyStatsTime = StatsTime 0 0 0
+emptyStatsOrderTime :: StatsOrderTime
+emptyStatsOrderTime = StatsOrderTime 0 0
 
-emptyStatsCost :: StatsCost
-emptyStatsCost = StatsCost 0 0 0 0
+emptyStatsOrderTard :: StatsOrderTard
+emptyStatsOrderTard = StatsOrderTard 0 0 0
 
+emptyStatsOrderCost :: StatsOrderCost
+emptyStatsOrderCost = StatsOrderCost 0 0 0 0
+
+emptyStatsBlockTime :: StatsBlockTime
+emptyStatsBlockTime = StatsBlockTime 0
 
 --
 -- Type.hs ends here

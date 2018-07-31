@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 245
+--     Update #: 254
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,7 +75,7 @@ queue :: (MonadLogger m, MonadIO m) => Text -> Routing -> Downstream -> Proxy Up
 queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
   mQueues <- gets simOrdersQueue --  load any order
-  $(logDebug) $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> tshow mQueues
+  logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> tshow mQueues
   blLastOccur <- gets (simBlockLastOccur . simInternal)
   let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
@@ -84,13 +84,13 @@ queue name routes (Left nr) -- no more orders from upstream, process queued orde
     else processBlocks name True blocks >> void (respond $ Left (nr + 1))
 queue name routes (Right order)      -- received an order, store and continue
  = do
-  $(logDebug) $ "Queue " ++ name ++ " input order " ++ tshow (orderId order) 
   let q = nextBlock order
   case q of
     Queue {}                    -- process and add to queue list
      -> do
       let order' = processOrder routes q order
       modify $ addOrderToQueue q order'
+      logger Nothing $ tshow (lastBlock order') ++ " (" ++ name ++ ") input order " ++ tshow (orderId order) 
     _ -> void $ respond (pure order) -- just push through
   request q >>= queue name routes    -- request new order and process
 
@@ -112,7 +112,6 @@ processBlocks name loop (bl:bs) = do
         then do
         modify (addOrderToQueue bl o)
         mQueues <- gets simOrdersQueue
-        $(logDebug) $ "Queue " ++ name ++ " added order " ++ tshow (orderId o) ++ " to queues: " ++ tshow mQueues
         return []
         else do
           r <- respond $ pure o
@@ -124,19 +123,6 @@ processBlocks name loop (bl:bs) = do
 
 processOrder :: Routing -> Block -> Order -> Order
 processOrder routes q order = dispatch routes q order
-
--- processQueue :: (MonadIO m) => Text -> Routing -> Int -> Block -> Proxy Upstream Downstream Upstream Downstream (StateT SimSim m) ()
--- processQueue name routes nr bl = trace ("processQueue") $ do
---   mOrder <- state (getAndRemoveOrderFromQueue bl)
---   case mOrder of
---     Nothing    -> queue name routes (Left nr)
---     Just order -> respond (pure order) >>= processQueue name routes nr
-
--- getAnyOrder :: (MonadState SimSim m) => Int -> [Block] -> m (Either Int Order)
--- getAnyOrder nr []      = return $ Left (nr+1)
--- getAnyOrder nr (bl:bs) = do
---   mOrder <- state (getAndRemoveOrderFromQueue bl)
---   maybe (getAnyOrder nr bs) (return.pure) mOrder
 
 
 --

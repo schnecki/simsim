@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- Util.hs ---
 --
 -- Filename: Util.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 49
+--     Update #: 61
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,6 +50,7 @@ import           Data.Monoid                ((<>))
 import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
+import           qualified Prelude as Prelude
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
@@ -90,12 +92,23 @@ getBlockTime block = do
 addToBlockTime :: (MonadState SimSim m) => Block -> Time -> m ()
 addToBlockTime block t = onBlockTime block (t+)
 
+setBlockTime :: (MonadState SimSim m) => Block -> Time -> m ()
+setBlockTime block t = onBlockTime block (const t)
+
 
 onBlockTime :: (MonadState SimSim m) => Block -> (Time -> Time) -> m () 
 onBlockTime block f = modify (\s -> s {simInternal = (simInternal s) {simBlockTimes = M.update (return . f) block (simBlockTimes $ simInternal s)}})
 
 mapBlockTimes :: (Time -> Time) -> SimSim -> SimSim
 mapBlockTimes f s = s {simInternal = (simInternal s) {simBlockTimes = M.map f (simBlockTimes $ simInternal s)}}
+
+
+logger :: (MonadLogger m, MonadState SimSim m) => Maybe Time -> Text -> Proxy a b c d m ()
+logger Nothing txt = do
+  m <- gets (simBlockTimes . simInternal)
+  let t = Prelude.maximum (M.elems m)
+  logger (Just t) txt
+logger (Just t) txt = $(logDebug) $ "Time " ++ tshow t ++ ": " ++ txt
 
 
 --

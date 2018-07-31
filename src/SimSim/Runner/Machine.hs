@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 158
+--     Update #: 161
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -71,7 +71,7 @@ import           SimSim.Time
 -- | Machines push the finished orders to the dispatcher and pull order from the queue.
 machine :: (MonadLogger m, MonadIO m) => Routing -> Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 machine _ (Left nr) = do
-  $(logDebug) "Empty machine pipe"
+  logger Nothing "Empty machine pipe"
   void $ respond $ Left (nr+1)
 machine routes (Right order) = do
   let bl = nextBlock order
@@ -100,12 +100,12 @@ processOrder routes bl order pT = do
     then void $ respond (pure order) -- just push through
     else if startTime + pT > endTime -- check if can be processed fully
            then do
-             $(logDebug) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until SIMULATION END " ++ tshow endTime
+             logger (Just startTime) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until SIMULATION END " ++ tshow endTime
              addToBlockTime bl (endTime - startTime)
              let order' = dispatch routes bl $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
              modify (addOrderToMachine order' (pT + startTime - endTime))
            else do
-             $(logDebug) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow (startTime + pT)
+             logger (Just startTime) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow (startTime + pT)
              addToBlockTime bl pT
              let order' = dispatch routes bl $ setOrderCurrentTime (startTime + pT) $ setProdStartTime startTime order
              void $ respond $ pure order' -- for us, process
