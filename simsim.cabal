@@ -23,9 +23,12 @@ library
                      , SimSim.ProductType
                      , SimSim.Routing
                      , SimSim.Simulation
+                     , SimSim.Simulation.Pretty
                      , SimSim.Simulation.Type
                      , SimSim.Simulation.Ops
                      , SimSim.Time
+                     , SimSim.Time.Type
+                     , SimSim.Time.Pretty
                      , SimSim.Order.Type
                      , SimSim.Runner
                      , SimSim.ProcessingTime

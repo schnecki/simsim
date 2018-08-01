@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 112
+--     Update #: 113
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -107,10 +107,10 @@ getBlockFt :: Update -> Order -> Double
 getBlockFt bl order = case bl of
   UpBlock bl -> case bl of
     OrderPool -> fromTime $ fromMaybe err $ (-) <$> pure (arrivalDate order) <*> released order -- released
-    FGI       -> fromTime $ fromMaybe err $ (-) <$> sent order <*> prodEnd order             -- released
+    FGI       -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
     _         -> error "not yet implemented"                                                    -- machine or queue
   EndProd    -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order             -- finished production
-  Shipped    -> fromTime $ fromMaybe err $ (-) <$> sent order <*> released order                -- shipped
+  Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order                -- shipped
 
   where err = error "Nothing in getFt"
 

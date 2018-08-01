@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 336
+--     Update #: 342
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -65,11 +65,11 @@ data SimSim = SimSim
   , simRelease         :: !Release
   , simDispatch        :: !Dispatch
   , simShipment        :: !Shipment
-  , simOrderPoolOrders :: ![Order]
+  , simOrdersOrderPool :: ![Order]
   , simOrdersQueue     :: !(M.Map Block [Order])
   , simOrdersMachine   :: !(M.Map Block (Order, Time)) -- ^ Order and left over processing time for this order.
   , simOrdersFgi       :: ![Order]
-  , simOrdersFinished  :: ![Order] -- ^ Orders which have been finished in last period.
+  , simOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
   }
@@ -114,10 +114,10 @@ addNextOrderId :: OrderId -> SimSim -> SimSim
 addNextOrderId add sim = sim { simNextOrderId = simNextOrderId sim + add }
 
 addOrderToOrderPool :: Order -> SimSim -> SimSim
-addOrderToOrderPool o sim = sim {simOrderPoolOrders = simOrderPoolOrders sim ++ [o]}
+addOrderToOrderPool o sim = sim {simOrdersOrderPool = simOrdersOrderPool sim ++ [o]}
 
 removeOrdersFromOrderPool :: [Order] -> SimSim -> SimSim
-removeOrdersFromOrderPool os sim = sim {simOrderPoolOrders = filter (`notElem` os) (simOrderPoolOrders sim)}
+removeOrdersFromOrderPool os sim = sim {simOrdersOrderPool = filter (`notElem` os) (simOrdersOrderPool sim)}
 
 addOrderToQueue :: Block -> Order -> SimSim -> SimSim
 addOrderToQueue bl o sim = sim {simOrdersQueue = M.insertWith (flip (<>)) (nextBlock o) [o] (simOrdersQueue sim)}
@@ -161,7 +161,7 @@ getAndRemoveOrderFromMachine bl sim = maybe def f (M.lookup bl (simOrdersMachine
 
 
 setFinishedOrders :: [Order] -> SimSim -> SimSim
-setFinishedOrders xs sim = sim { simOrdersFinished = xs }
+setFinishedOrders xs sim = sim { simOrdersShipped = xs }
 
 --
 -- Type.hs ends here

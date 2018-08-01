@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 56
+--     Update #: 57
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -73,7 +73,7 @@ fgi (Left nr) = do              -- period done, ship orders
   os <- gets simOrdersFgi
   t <- gets (simEndTime . simInternal)
   setBlockTime FGI t
-  let ships = map (setSentTime t) $ filter (shipment t) os
+  let ships = map (setShippedTime t) $ filter (shipment t) os
   modify (removeOrdersFromFgi ships . setFinishedOrders ships)
   mapM_ (modify . statsAddShipped) ships
   logger Nothing $ "Left " <> tshow nr <> " in FGI. Shipped orders: " <> tshow (fmap orderId ships)

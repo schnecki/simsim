@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 16
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,11 +37,13 @@
 module SimSim.Simulation
   ( module SimSim.Simulation.Type
   , module SimSim.Simulation.Ops
+  , module SimSim.Simulation.Pretty
   ) where
 
 
-import           SimSim.Simulation.Ops  (newSimSim)
-import           SimSim.Simulation.Type (SimSim (..), resetStatistics, setSimEndTime)
+import           SimSim.Simulation.Ops    (newSimSim)
+import           SimSim.Simulation.Pretty
+import           SimSim.Simulation.Type   (SimSim (..), resetStatistics, setSimEndTime)
 
 --
 -- Simulation.hs ends here

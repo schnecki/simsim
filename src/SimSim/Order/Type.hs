@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 58
+--     Update #: 59
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -55,7 +55,7 @@ data Order = Order
   , released         :: !(Maybe Time)
   , prodStart        :: !(Maybe Time)
   , prodEnd          :: !(Maybe Time)
-  , sent             :: !(Maybe Time)
+  , shipped          :: !(Maybe Time)
   , lastBlock        :: !Block
   , nextBlock        :: !Block
   , orderCurrentTime :: Time
@@ -113,8 +113,8 @@ setNextBlock :: Block -> Order -> Order
 setNextBlock b o = o {nextBlock = b}
 
 
-setSentTime :: Time -> Order -> Order
-setSentTime t o = o {sent = Just t}
+setShippedTime :: Time -> Order -> Order
+setShippedTime t o = o {shipped = Just t}
 
 --
 -- Type.hs ends here

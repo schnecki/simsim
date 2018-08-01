@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 176
+--     Update #: 187
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -80,7 +80,7 @@ periodLen :: Time
 periodLen = 10
 
 procTimes :: ProcTimes
-procTimes = [(Machine 1,[(Product 1, const 4)
+procTimes = [(Machine 1,[(Product 1, const 3)
                         ,(Product 2, const 2)])
             ,(Machine 2,[(Product 1, const 2)
                         ,(Product 2, const 4)])
@@ -89,11 +89,11 @@ procTimes = [(Machine 1,[(Product 1, const 4)
 
 -- | Order to send through the production
 incomingOrders :: [Order]
-incomingOrders = L.concat $ L.replicate 1
-  [ newOrder (Product 1) 0 11
-  , newOrder (Product 2) 0 11
-  , newOrder (Product 1) 0 11
-  , newOrder (Product 1) 0 11
+incomingOrders = L.concat $ L.replicate 2
+  [ newOrder (Product 1) 0 10
+  , newOrder (Product 2) 0 10
+  , newOrder (Product 1) 0 10
+  , newOrder (Product 1) 0 10
   ]
 
 
@@ -111,16 +111,17 @@ main =
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe shipOnDueDate
     sim' <- foldM simulate sim ([incomingOrders] ++ replicate 00 [])
-    putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
-    putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
-    putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue sim')
-    putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine sim')
-    putStrLn $ "FGI: " ++ tshow (-- fmap orderId $
-                                 simOrdersFgi sim')
-    putStrLn $ "Finished: " ++ tshow (map orderId $ simOrdersFinished sim')
-    putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
+    -- putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
+    -- putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
+    -- putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue sim')
+    -- putStrLn $ "Machines: " ++ tshow (fmap (first orderId) $ simOrdersMachine sim')
+    -- putStrLn $ "FGI: " ++ tshow (-- fmap orderId $
+    --                              simOrdersFgi sim')
+    -- putStrLn $ "Finished: " ++ tshow (map orderId $ simOrdersFinished sim')
+    -- putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
 
-    putDoc $ prettySimStatistics (simStatistics sim')
+    -- putDoc $ prettySimStatistics (simStatistics sim')
+    putStrLn $ prettySimSim sim'
 
 --
 -- Main.hs ends here
