@@ -16,7 +16,9 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     SimSim
-  other-modules:       SimSim.Order
+                     , SimSim.Order
+                     , SimSim.Order.Type
+                     , SimSim.Order.Pretty
                      , SimSim.Block
                      , SimSim.Dispatch
                      , SimSim.Dispatch.FirstComeFirstServe
@@ -29,7 +31,6 @@ library
                      , SimSim.Time
                      , SimSim.Time.Type
                      , SimSim.Time.Pretty
-                     , SimSim.Order.Type
                      , SimSim.Runner
                      , SimSim.ProcessingTime
                      , SimSim.ProcessingTime.Type
@@ -52,6 +53,7 @@ library
                      , SimSim.Statistics.Type
                      , SimSim.Shipment
                      , SimSim.Shipment.OnDueDate
+  other-modules:
   build-depends:       base >= 4.7 && < 5
                      , transformers
                      , pipes
@@ -64,7 +66,7 @@ library
                      , monad-logger >= 0.2.2
                      , ansi-wl-pprint
 
-  extensions:          NoImplicitPrelude
+  default-extensions: NoImplicitPrelude
                      , OverloadedStrings
                      , FlexibleContexts
 
@@ -89,7 +91,7 @@ executable simsim-exe
                      , ansi-wl-pprint
 
   default-language:    Haskell2010
-  extensions:          NoImplicitPrelude
+  default-extensions: NoImplicitPrelude
                      , OverloadedStrings
                      , FlexibleContexts
 
@@ -107,7 +109,7 @@ test-suite simsim-test
 
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
-  extensions:          NoImplicitPrelude
+  default-extensions: NoImplicitPrelude
                      , OverloadedStrings
                      , FlexibleContexts
 
