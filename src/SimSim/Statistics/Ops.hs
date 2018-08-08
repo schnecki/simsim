@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 129
+--     Update #: 131
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -115,8 +115,7 @@ getBlockFlowTime bl order = case bl of
     OrderPool -> fromTime $ fromMaybe err $ (-) <$> released order <*> pure (arrivalDate order) -- released
     FGI       -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
     Sink      -> error "Update of Sink not possible"
-    Machine n -> error "not yet implemented"                                                    -- machine or queue
-    Queue n   -> error "not yet implemented"
+    _         -> fromTime $ orderCurrentTime order - lastBlockStart order
   EndProd    -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order             -- finished production
   Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order             -- shipped
 

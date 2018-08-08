@@ -7,9 +7,9 @@
 -- Created: Wed Aug  8 09:34:52 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
--- Last-Updated: Wed Aug  8 15:41:20 2018 (+0200)
+-- Last-Updated: Wed Aug  8 17:16:19 2018 (+0200)
 --           By: Manuel Schneckenreither
---     Update #: 117
+--     Update #: 119
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -115,8 +115,7 @@ prop_blockFlowTime bl@EndProd o = isJust (prodEnd o) ==> reportResBlockFt bl o $
 prop_blockFlowTime bl@(UpBlock OrderPool) o = isJust (released o) ==> reportResBlockFt bl o $ \res -> fromTime (fromJust (released o) - arrivalDate o) == res
 prop_blockFlowTime bl@(UpBlock FGI) o = isJust (shipped o) ==> reportResBlockFt bl o $ \res -> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) == res
 prop_blockFlowTime bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime bl o > 0
-prop_blockFlowTime bl@(UpBlock Machine{}) o = property True -- error "not yet implemented"
-prop_blockFlowTime bl@(UpBlock Queue{}) o = property True -- error "not yet implemented"
+prop_blockFlowTime bl o = property $ reportResBlockFt bl o $ \res -> fromTime (orderCurrentTime o - lastBlockStart o) == res
 
 
 --
