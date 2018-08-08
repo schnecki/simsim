@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 59
+--     Update #: 63
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -57,6 +57,7 @@ data Order = Order
   , prodEnd          :: !(Maybe Time)
   , shipped          :: !(Maybe Time)
   , lastBlock        :: !Block
+  , lastBlockStart   :: !Time
   , nextBlock        :: !Block
   , orderCurrentTime :: Time
   } deriving (Show)
@@ -68,7 +69,7 @@ instance Eq Order where
 -- | This function creates a new order.
 newOrder :: ProductType -> ArrivalDate -> DueDate -> Order
 newOrder productType arrDate dueDate =
-  Order (-1) productType  arrDate dueDate Nothing Nothing Nothing Nothing OrderPool OrderPool 0
+  Order (-1) productType arrDate dueDate Nothing Nothing Nothing Nothing OrderPool arrDate OrderPool 0
 
 
 orderFinishedProduction :: Order -> Bool

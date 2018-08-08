@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 34
+--     Update #: 43
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,37 +49,38 @@ import           SimSim.TimeSpec        hiding (spec)
 
 
 fixTimes :: Order -> Order
-fixTimes o@(Order _ _ _ _ rel pS pE sh _ _ _) =
+fixTimes o@(Order _ _ _ _ rel pS pE sh _ _ _ _) =
   o {prodStart = bind [rel, pS], prodEnd = bind [rel, pS, pE], shipped = bind [rel, pS, pE, sh]}
   where
     bind xs = last <$> sequence xs
 
 instance Arbitrary Order where
-  arbitrary =
+  arbitrary = do
+    arrDt <- arbitrary
     fixTimes <$>
-    (Order <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*>
-     arbitrary <*>
-     arbitrary <*>
-     arbitrary <*>
-     arbitrary)
+      (Order <$> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*>
+       arbitrary)
 instance CoArbitrary Order where
-  coarbitrary (Order oid pt aD dD rT psT peT shT lB nB cT) =
-    variant 0 . coarbitrary (oid, pt, aD, (dD, rT, psT, (peT, shT, lB, nB, cT)))
+  coarbitrary (Order oid pt aD dD rT psT peT shT lB lastStart nB cT) =
+    variant 0 . coarbitrary (oid, pt, aD, (dD, rT, psT, (peT, shT, lB, (lastStart, nB, cT))))
 
 
 spec :: Spec
 spec = do
-  it "prop_newOrderNoTimes" $ once $ do
-    newOrd <- newOrder <$> arbitrary <*> arbitrary <*> arbitrary
-    return $ prop_newOrderNoTimes newOrd
-  it "prop_orderFinishedAndTardy" $ property prop_orderFinishedAndTardy
+  describe "Order getter and setter properties" $ do
+    it "prop_newOrderNoTimes" $
+      once $ do
+        newOrd <- newOrder <$> arbitrary <*> arbitrary <*> arbitrary
+        return $ prop_newOrderNoTimes newOrd
+    it "prop_orderFinishedAndTardy" $ property prop_orderFinishedAndTardy
 
 prop_newOrderNoTimes :: Order -> Bool
-prop_newOrderNoTimes o = and $ map (\f -> isNothing $ f o) [ released, prodStart, prodEnd, shipped]
+prop_newOrderNoTimes o = and $ map (\f -> isNothing $ f o) [released, prodStart, prodEnd, shipped]
 
 prop_orderFinishedAndTardy :: Order -> Bool
-prop_orderFinishedAndTardy o@(Order _ _ _ due _ _ pE _ _ _ _) | isJust pE = (fromJust pE > due) == orderFinishedAndTardy o
-                                                              | otherwise = not (orderFinishedAndTardy o)
+prop_orderFinishedAndTardy o@(Order _ _ _ due _ _ pE _ _ _ _ _)
+  | isJust pE = (fromJust pE > due) == orderFinishedAndTardy o
+  | otherwise = not (orderFinishedAndTardy o)
 
 
 --

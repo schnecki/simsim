@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 22
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,7 +34,7 @@
 
 -- Code:
 
-module SimSim.BlockSpec (spec,sizedBlocks) where
+module SimSim.BlockSpec (spec,sizedBlocks,blockSizeNr) where
 
 import qualified Data.Map.Strict as M
 import           Prelude
@@ -47,6 +47,13 @@ import           SimSim.Block
 sizedBlocks :: Int -> [Block]
 sizedBlocks 0 = [OrderPool, FGI, Sink]
 sizedBlocks n = [Queue n, Machine n] ++ sizedBlocks (n-1)
+
+blockSizeNr :: Block -> Int
+blockSizeNr OrderPool   = 0
+blockSizeNr FGI         = 0
+blockSizeNr Sink        = 0
+blockSizeNr (Queue n)   = n
+blockSizeNr (Machine n) = n
 
 instance Arbitrary Block where
   arbitrary = sized $ \n -> oneof (return <$> sizedBlocks n)

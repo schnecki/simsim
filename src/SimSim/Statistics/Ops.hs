@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 115
+--     Update #: 129
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module SimSim.Statistics.Ops
     , statsAddEndProduction
     , statsAddShipped
     , Update (..)
+    , getBlockFlowTime
     ) where
 
 import           ClassyPrelude
@@ -50,7 +51,11 @@ import           SimSim.Simulation.Type
 import           SimSim.Statistics.Type
 import           SimSim.Time
 
-data Update = UpBlock Block | EndProd | Shipped
+data Update
+  = UpBlock Block               -- ^ For flow time through given block.
+  | EndProd                     -- ^ For flow time through production.
+  | Shipped                     -- ^ For flow time through whole system.
+  deriving (Show)
 
 
 statsAddRelease :: Order -> SimSim -> SimSim
@@ -84,7 +89,7 @@ updateSimStatsOrder up order (SimStats nr ft tard) = SimStats (nr + 1) (updateOr
 
 
 updateOrderTime :: Update -> Order -> StatsOrderTime -> StatsOrderTime
-updateOrderTime up order (StatsOrderTime tSum stdDev) = StatsOrderTime (tSum + getBlockFt up order) (stdDev)
+updateOrderTime up order (StatsOrderTime tSum stdDev) = StatsOrderTime (tSum + getBlockFlowTime up order) (stdDev)
 
 
 updateTardiness :: Update -> Order -> StatsOrderTard -> StatsOrderTard
@@ -104,16 +109,18 @@ updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
     _       -> st
 
 
-getBlockFt :: Update -> Order -> Double
-getBlockFt bl order = case bl of
+getBlockFlowTime :: Update -> Order -> Double
+getBlockFlowTime bl order = case bl of
   UpBlock bl -> case bl of
-    OrderPool -> fromTime $ fromMaybe err $ (-) <$> pure (arrivalDate order) <*> released order -- released
+    OrderPool -> fromTime $ fromMaybe err $ (-) <$> released order <*> pure (arrivalDate order) -- released
     FGI       -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
-    _         -> error "not yet implemented"                                                    -- machine or queue
+    Sink      -> error "Update of Sink not possible"
+    Machine n -> error "not yet implemented"                                                    -- machine or queue
+    Queue n   -> error "not yet implemented"
   EndProd    -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order             -- finished production
   Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order             -- shipped
 
-  where err = error "Nothing in getFt"
+  where err = error "Nothing in getBlockFlowTime"
 
 
 --
