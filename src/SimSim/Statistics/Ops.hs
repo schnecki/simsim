@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 113
+--     Update #: 115
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,6 +38,7 @@ module SimSim.Statistics.Ops
     ( statsAddRelease
     , statsAddEndProduction
     , statsAddShipped
+    , Update (..)
     ) where
 
 import           ClassyPrelude
@@ -110,7 +111,7 @@ getBlockFt bl order = case bl of
     FGI       -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
     _         -> error "not yet implemented"                                                    -- machine or queue
   EndProd    -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order             -- finished production
-  Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order                -- shipped
+  Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order             -- shipped
 
   where err = error "Nothing in getFt"
 
