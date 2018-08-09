@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 342
+--     Update #: 344
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -73,6 +73,21 @@ data SimSim = SimSim
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
   }
+
+instance Eq SimSim where
+  sim1 == sim2 =
+    and
+      [ simRouting sim1 == simRouting sim2
+      , simCurrentTime sim1 == simCurrentTime sim2
+      , simPeriodLength sim1 == simPeriodLength sim2
+      , simNextOrderId sim1 == simNextOrderId sim2
+      , simOrdersOrderPool sim1 == simOrdersOrderPool sim2
+      , simOrdersFgi sim1 == simOrdersFgi sim2
+      , simOrdersMachine sim1 == simOrdersMachine sim2
+      , simOrdersQueue sim1 == simOrdersQueue sim2
+      , simOrdersShipped sim1 == simOrdersShipped sim2
+      , simStatistics sim1 == simStatistics sim2
+      ]
 
 
 data SimInternal = SimInternal

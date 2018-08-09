@@ -7,9 +7,9 @@
 -- Created: Wed Aug  8 09:34:52 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
--- Last-Updated: Wed Aug  8 17:16:19 2018 (+0200)
+-- Last-Updated: Thu Aug  9 11:17:07 2018 (+0200)
 --           By: Manuel Schneckenreither
---     Update #: 119
+--     Update #: 137
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,7 +36,7 @@
 
 module SimSim.StatisticsSpec (spec) where
 
-import qualified Data.Map.Strict        as M
+import qualified Data.Map.Strict            as M
 import           Data.Maybe
 import           Prelude
 import           Test.Hspec
@@ -44,12 +44,14 @@ import           Test.QuickCheck
 
 import           SimSim.Block
 import           SimSim.Order
+import           SimSim.Simulation.Type
+import           SimSim.Statistics.Internal
 import           SimSim.Statistics.Ops
 import           SimSim.Statistics.Type
 import           SimSim.Time
 
-import           SimSim.BlockSpec       hiding (spec)
-import           SimSim.OrderSpec       hiding (spec)
+import           SimSim.BlockSpec           hiding (spec)
+import           SimSim.OrderSpec           hiding (spec)
 
 maxVal :: Num a => a
 maxVal = 5000
@@ -100,8 +102,10 @@ instance CoArbitrary Update where
 
 
 spec :: Spec
-spec = describe "Statistics " $ do
+spec = describe "Statistics Functions" $ do
   it "prop_blockFlowTime" $ property prop_blockFlowTime
+  it "prop_updateCosts" $ property prop_updateCosts
+  it "prop_updateTardiness" $ property prop_updateTardiness
 
 
 reportResBlockFt :: Testable prop => Update -> Order -> (Double -> prop) -> Property
@@ -116,6 +120,31 @@ prop_blockFlowTime bl@(UpBlock OrderPool) o = isJust (released o) ==> reportResB
 prop_blockFlowTime bl@(UpBlock FGI) o = isJust (shipped o) ==> reportResBlockFt bl o $ \res -> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) == res
 prop_blockFlowTime bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime bl o > 0
 prop_blockFlowTime bl o = property $ reportResBlockFt bl o $ \res -> fromTime (orderCurrentTime o - lastBlockStart o) == res
+
+prop_updateCosts :: Update -> Order -> StatsOrderCost -> Property
+prop_updateCosts Shipped o st@(StatsOrderCost earn wip bo fgi) = property $ StatsOrderCost (earn+1) wip bo fgi == updateCosts Shipped o st
+prop_updateCosts up o st = property $ st == updateCosts up o st
+
+
+prop_updateTardiness :: Update -> Order -> StatsOrderTard -> Property
+prop_updateTardiness EndProd o st@(StatsOrderTard nr sum stdDev)
+  | maybe True (dueDate o >=) (prodEnd o) = property $ st == updateTardiness EndProd o st
+  | otherwise = property $ StatsOrderTard (nr+1) (sum - fromTime (dueDate o) + fromTime (fromJust (prodEnd o))) stdDev == updateTardiness EndProd o st
+prop_updateTardiness up o st = property $ st == updateTardiness up o st
+
+
+prop_statsAddRelease :: Order -> SimSim -> Property
+prop_statsAddRelease o sim =
+  isJust (released o) ==> property $
+  sim {simStatistics = stats {simStatsBlock = block', simStatsBlockTimes = times'}} == statsAddRelease o sim
+  where
+    stats = simStatistics sim
+    updateFunBlock vOld vNew =
+      Just
+        (v {statsNrOrders = statsNrOrders v + 1, statsOrderFlowTime = statsOrderFlowTime v `addStatsOrderTimeRelease` o})
+    block' = M.insertWith updateFunBlock OrderPool (simStatsBlock stats)
+    addStatsOrderTimeRelease (StatsOrderTime sm stdDev) o =
+      StatsOrderTime (sm + fromTime (fromJust (released o) - arrivalDate o)) stdDev
 
 
 --

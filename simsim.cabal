@@ -48,6 +48,7 @@ library
                      , SimSim.Runner.Sink
                      , SimSim.Runner.Release
                      , SimSim.Statistics
+                     , SimSim.Statistics.Internal
                      , SimSim.Statistics.Ops
                      , SimSim.Statistics.Pretty
                      , SimSim.Statistics.Type
@@ -109,6 +110,7 @@ test-suite simsim-test
                      , hspec
                      , QuickCheck
                      , containers
+                     , random
   other-modules:     SimSim.BlockSpec
                      SimSim.OrderSpec
                      SimSim.ProductTypeSpec

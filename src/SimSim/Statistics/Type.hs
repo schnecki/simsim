@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 42
+--     Update #: 43
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,36 +48,36 @@ data SimStatistics = SimStatistics
   , simStatsShopFloor       :: SimStats -- ^ Shop floor (from release until entry of finished goods inventory)
   , simStatsShopFloorAndFgi :: SimStats -- ^ Shop floor (from release until shipping)
   , simStatsOrderCosts      :: StatsOrderCost
-  }
+  } deriving (Eq, Show)
 
 data SimStats = SimStats
   { statsNrOrders       :: Integer
   , statsOrderFlowTime  :: StatsOrderTime
   , statsOrderTardiness :: StatsOrderTard
-  }
+  } deriving (Eq, Show)
 
 data StatsOrderTime = StatsOrderTime
   { statsSumTime    :: Double
   , statsStdDevTime :: Double
-  }
+  } deriving (Eq, Show)
 
 data StatsOrderTard = StatsOrderTard
   { statsNrTardOrders   :: Integer
   , statsSumTardiness   :: Double
   , statsStdDevTardTime :: Double
-  }
+  } deriving (Eq, Show)
 
 data StatsOrderCost = StatsOrderCost
   { statsEarnings :: Double
   , statsWipCosts :: Double
   , statsBoCosts  :: Double
   , statsFgiCosts :: Double
-  }
+  } deriving (Eq, Show)
 
 data StatsBlockTime = StatsBlockTime
   { statsProcessing :: Double
   -- , statsBroken
-  }
+  } deriving (Eq, Show)
 
 
 emptyStatistics :: SimStatistics

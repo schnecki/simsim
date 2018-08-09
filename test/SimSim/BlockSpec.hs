@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 23
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -68,7 +68,7 @@ instance CoArbitrary Block where
 spec :: Spec
 spec = do
   describe "Block type properties" $
-    do it "prop_IsMachine" $ property prop_isMachine
+    do it "prop_isMachine" $ property prop_isMachine
 
 prop_isMachine :: Block -> Bool
 prop_isMachine bl@Machine{} = isMachine bl == True
