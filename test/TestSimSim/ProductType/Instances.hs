@@ -1,15 +1,15 @@
--- ProductTypeSpec.hs ---
+-- Instances.hs ---
 --
--- Filename: ProductTypeSpec.hs
+-- Filename: Instances.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Wed Aug  8 12:03:50 2018 (+0200)
+-- Created: Thu Aug  9 22:46:34 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 23
+--     Update #: 3
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,7 +34,8 @@
 
 -- Code:
 
-module SimSim.ProductTypeSpec where
+
+module TestSimSim.ProductType.Instances where
 
 import           Prelude
 import           SimSim.ProductType
@@ -52,7 +53,7 @@ instance CoArbitrary ProductType where
 
 -- | Products to given size, where the size is the number of machines, as defined by @SimSim.BlockSpec@.
 sizedProductTypes :: Int -> [ProductType]
-sizedProductTypes n = take maxProducts $ map Product [1..product [1..n]]
+sizedProductTypes n = take maxProducts $ map Product [1..max 1 (product [1..n])]
 
 
 spec :: Spec
@@ -60,4 +61,4 @@ spec = return ()
 
 
 --
--- ProductTypeSpec.hs ends here
+-- Instances.hs ends here

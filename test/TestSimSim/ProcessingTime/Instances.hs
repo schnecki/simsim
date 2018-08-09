@@ -1,16 +1,16 @@
 {-# LANGUAGE TupleSections #-}
--- ProcessingTimeSpec.hs ---
+-- Instances.hs ---
 --
--- Filename: ProcessingTimeSpec.hs
+-- Filename: Instances.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Thu Aug  9 09:45:22 2018 (+0200)
+-- Created: Thu Aug  9 22:45:35 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
--- Last-Updated:
---           By:
---     Update #: 13
+-- Last-Updated: Thu Aug  9 22:58:37 2018 (+0200)
+--           By: Manuel Schneckenreither
+--     Update #: 5
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,9 +35,9 @@
 
 -- Code:
 
-module SimSim.ProcessingTimeSpec
-  ( spec
-  , sizedProcTimes
+
+module TestSimSim.ProcessingTime.Instances
+  ( sizedProcTimes
   ) where
 
 import           Prelude
@@ -47,9 +47,9 @@ import           Test.QuickCheck
 import           SimSim.Block
 import           SimSim.ProcessingTime.Type
 
-import           SimSim.BlockSpec           hiding (spec)
-import           SimSim.ProductTypeSpec     hiding (spec)
-import           SimSim.TimeSpec            hiding (spec)
+import           TestSimSim.Block.Instances
+import           TestSimSim.ProductType.Instances
+import           TestSimSim.Time.Instances
 
 
 sizedProcTimes :: Gen ProcTimes
@@ -62,9 +62,6 @@ sizedProcTimes = sized $ \n -> do
         return (m,ts)
   mapM mkProcTimes ms
 
-spec :: Spec
-spec = return ()
-
 
 --
--- ProcessingTimeSpec.hs ends here
+-- Instances.hs ends here

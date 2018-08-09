@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 27
+--     Update #: 28
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -64,7 +64,7 @@ prettyOrderTime nr (StatsOrderTime sumTime stdDev) =
 
 prettyOrderTardiness :: Integer -> StatsOrderTard -> Doc
 prettyOrderTardiness nr (StatsOrderTard nrTard sumTime stdDev) =
-  text "tardiness in %:" <+> double (fromInteger nrTard / fromInteger nr) <$$>
+  text "tardiness in %:" <+> double (100 * fromInteger nrTard / fromInteger nr) <$$>
   text "mean: " <+> double (sumTime / fromInteger nr) <$$>
   text "standard deviation:" <+> double stdDev
 

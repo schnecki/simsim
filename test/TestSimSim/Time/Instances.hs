@@ -1,15 +1,15 @@
--- TimeSpec.hs ---
+-- Instances.hs ---
 --
--- Filename: TimeSpec.hs
+-- Filename: Instances.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Wed Aug  8 12:10:21 2018 (+0200)
+-- Created: Thu Aug  9 22:50:39 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 2
+--     Update #: 1
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,7 +34,8 @@
 
 -- Code:
 
-module SimSim.TimeSpec (spec) where
+
+module TestSimSim.Time.Instances where
 
 import           ClassyPrelude
 import           Test.Hspec
@@ -48,9 +49,5 @@ instance CoArbitrary Time where
   coarbitrary (Time t) = variant 0 . coarbitrary t
 
 
-spec :: Spec
-spec = return ()
-
-
 --
--- TimeSpec.hs ends here
+-- Instances.hs ends here

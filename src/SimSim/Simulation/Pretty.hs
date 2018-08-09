@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 47
+--     Update #: 51
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,6 +48,10 @@ import           SimSim.Order
 import           SimSim.Simulation.Type
 import           SimSim.Statistics.Pretty
 import           SimSim.Time
+
+instance Show SimSim where
+  show = unpack . prettySimSim
+
 
 prettySimSim :: SimSim -> Text
 prettySimSim sim = pack $ displayS (renderSmart 1.0 97 $ prettySimulation prettyOrderDue sim) ""

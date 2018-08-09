@@ -4,12 +4,12 @@
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Wed Aug  8 12:00:36 2018 (+0200)
+-- Created: Thu Aug  9 22:52:56 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 43
+--     Update #: 3
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,7 +34,8 @@
 
 -- Code:
 
-module SimSim.OrderSpec where
+
+module TestSimSim.Order.OrderSpec where
 
 import           Data.Maybe
 import           Prelude
@@ -43,26 +44,10 @@ import           Test.QuickCheck
 
 import           SimSim.Order.Type
 
-import           SimSim.BlockSpec       hiding (spec)
-import           SimSim.ProductTypeSpec hiding (spec)
-import           SimSim.TimeSpec        hiding (spec)
-
-
-fixTimes :: Order -> Order
-fixTimes o@(Order _ _ _ _ rel pS pE sh _ _ _ _) =
-  o {prodStart = bind [rel, pS], prodEnd = bind [rel, pS, pE], shipped = bind [rel, pS, pE, sh]}
-  where
-    bind xs = last <$> sequence xs
-
-instance Arbitrary Order where
-  arbitrary = do
-    arrDt <- arbitrary
-    fixTimes <$>
-      (Order <$> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*>
-       arbitrary)
-instance CoArbitrary Order where
-  coarbitrary (Order oid pt aD dD rT psT peT shT lB lastStart nB cT) =
-    variant 0 . coarbitrary (oid, pt, aD, (dD, rT, psT, (peT, shT, lB, (lastStart, nB, cT))))
+import           TestSimSim.Block.Instances
+import           TestSimSim.Order.Instances
+import           TestSimSim.ProductType.Instances
+import           TestSimSim.Time.Instances
 
 
 spec :: Spec

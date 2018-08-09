@@ -1,15 +1,15 @@
--- BlockSpec.hs ---
+-- Instances.hs ---
 --
--- Filename: BlockSpec.hs
+-- Filename: Instances.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Wed Aug  8 10:44:50 2018 (+0200)
+-- Created: Thu Aug  9 13:54:43 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 23
+--     Update #: 1
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,7 +34,8 @@
 
 -- Code:
 
-module SimSim.BlockSpec (spec,sizedBlocks,blockSizeNr) where
+
+module TestSimSim.Block.Instances (sizedBlocks,blockSizeNr) where
 
 import qualified Data.Map.Strict as M
 import           Prelude
@@ -65,15 +66,5 @@ instance CoArbitrary Block where
   coarbitrary (Machine n) = variant (2*n) . coarbitrary (2*n)
 
 
-spec :: Spec
-spec = do
-  describe "Block type properties" $
-    do it "prop_isMachine" $ property prop_isMachine
-
-prop_isMachine :: Block -> Bool
-prop_isMachine bl@Machine{} = isMachine bl == True
-prop_isMachine bl           = isMachine bl == False
-
-
 --
--- BlockSpec.hs ends here
+-- Instances.hs ends here

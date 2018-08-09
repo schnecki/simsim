@@ -1,16 +1,16 @@
 {-# LANGUAGE FlexibleInstances #-}
--- ReleaseSpec.hs ---
+-- Instances.hs ---
 --
--- Filename: ReleaseSpec.hs
+-- Filename: Instances.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Thu Aug  9 09:26:47 2018 (+0200)
+-- Created: Thu Aug  9 22:46:52 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 2
+--     Update #: 3
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,7 +35,8 @@
 
 -- Code:
 
-module SimSim.ReleaseSpec (spec) where
+
+module TestSimSim.Release.Instances where
 
 import           Prelude
 import           Test.Hspec
@@ -51,9 +52,5 @@ instance Arbitrary (IO [Order]) where
     return $ xs
 
 
-spec :: Spec
-spec = return ()
-
-
 --
--- ReleaseSpec.hs ends here
+-- Instances.hs ends here

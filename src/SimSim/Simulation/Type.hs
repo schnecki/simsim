@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 344
+--     Update #: 346
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -73,6 +73,19 @@ data SimSim = SimSim
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
   }
+
+-- instance Show SimSim where
+--   show sim = prettySimSim
+    -- show (simRouting sim) ++ ", " ++
+    --   show (simCurrentTime sim) ++ ", " ++
+    --   show (simPeriodLength sim) ++ ", " ++
+    --   show (simNextOrderId sim) ++ ", " ++
+    --   show (simOrdersOrderPool sim) ++ ", " ++
+    --   show (simOrdersFgi sim) ++ ", " ++
+    --   show (simOrdersMachine sim) ++ ", " ++
+    --   show (simOrdersQueue sim) ++ ", " ++
+    --   show (simOrdersShipped sim) ++ ", " ++
+    --   show (simStatistics sim)
 
 instance Eq SimSim where
   sim1 == sim2 =
