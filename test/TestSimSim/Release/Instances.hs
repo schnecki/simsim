@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 3
+--     Update #: 8
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,18 +38,33 @@
 
 module TestSimSim.Release.Instances where
 
-import           Prelude
+import           ClassyPrelude
+import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
 
 import           SimSim.Order
 import           SimSim.Release
+import           SimSim.Time
+
+import           TestSimSim.Block.Instances
+import           TestSimSim.Order.Instances
+import           TestSimSim.Time.Instances
 
 
 instance Arbitrary (IO [Order]) where
   arbitrary = do
     xs <- arbitrary
     return $ xs
+instance CoArbitrary (IO [Order]) where
+  coarbitrary xIO = let xs = unsafePerformIO xIO
+                    in variant 0 . coarbitrary xs
+
+instance Arbitrary Release where
+  arbitrary = Release <$> arbitrary <*> (pack <$> arbitrary)
+
+instance CoArbitrary Release where
+  coarbitrary (Release a b) = variant 0 . coarbitrary (a, unpack b)
 
 
 --

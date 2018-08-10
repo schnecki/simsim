@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 196
+--     Update #: 197
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -109,7 +109,7 @@ main :: IO ()
 main =
   measure $ do
     g <- newStdGen
-    let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe shipOnDueDate
+    let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
     sim' <- foldM simulate sim ([incomingOrders] ++ replicate 1 [])
     -- putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
     -- putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')

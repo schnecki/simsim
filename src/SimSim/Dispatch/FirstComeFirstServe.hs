@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 64
+--     Update #: 66
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,7 +37,7 @@
 -- Code:
 
 module SimSim.Dispatch.FirstComeFirstServe
-    ( firstComeFirstServe
+    ( dispatchFirstComeFirstServe
     ) where
 
 import           ClassyPrelude
@@ -48,8 +48,8 @@ import           SimSim.Order.Type
 import           SimSim.ProductType
 
 
-firstComeFirstServe :: Dispatch
-firstComeFirstServe = Dispatch firstComeFirstServe' name
+dispatchFirstComeFirstServe :: Dispatch
+dispatchFirstComeFirstServe = Dispatch firstComeFirstServe' name
 
 name :: Text
 name = "FCFS"

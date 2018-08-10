@@ -39,6 +39,7 @@ library
                      , SimSim.ProcessingTime.Ops
                      , SimSim.Period
                      , SimSim.Release
+                     , SimSim.Release.Type
                      , SimSim.Release.ImmediateRelease
                      , SimSim.Runner.Runner
                      , SimSim.Runner.Fgi
@@ -55,6 +56,7 @@ library
                      , SimSim.Statistics.Pretty
                      , SimSim.Statistics.Type
                      , SimSim.Shipment
+                     , SimSim.Shipment.Type
                      , SimSim.Shipment.OnDueDate
   other-modules:
   build-depends:       base >= 4.7 && < 5

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 8
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -53,6 +53,7 @@ import           TestSimSim.Order.Instances
 import           TestSimSim.ProcessingTime.Instances
 import           TestSimSim.Release.Instances
 import           TestSimSim.Routing.Instances
+import           TestSimSim.Shipment.Instances
 import           TestSimSim.Statistics.Instances
 import           TestSimSim.Time.Instances
 

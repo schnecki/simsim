@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 18
+--     Update #: 19
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -100,7 +100,7 @@ incomingOrders = L.concat $ L.replicate 2
 prop_simulation1 :: Property
 prop_simulation1 = ioProperty $ do
   g <- newStdGen
-  let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe shipOnDueDate
+  let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
   sim' <- simulate sim incomingOrders
   return (error "not yet implemented" :: Bool)
 

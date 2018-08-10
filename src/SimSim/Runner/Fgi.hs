@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 59
+--     Update #: 60
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -62,6 +62,7 @@ import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Util
+import           SimSim.Shipment
 import           SimSim.Simulation.Type
 import           SimSim.Statistics
 
@@ -69,11 +70,11 @@ import           SimSim.Statistics
 -- | A FGI queues orders until shipped.
 fgi :: (MonadLogger m, MonadIO m) => Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 fgi (Left nr) = do              -- period done, ship orders
-  shipment <- gets simShipment
+  shipper <- shipment <$> gets simShipment
   os <- gets simOrdersFgi
   t <- gets (simEndTime . simInternal)
   setBlockTime FGI t
-  let ships = map (setShippedTime t) $ filter (shipment t) os
+  let ships = map (setShippedTime t) $ filter (shipper t) os
   modify (removeOrdersFromFgi ships . setFinishedOrders ships)
   mapM_ (modify . statsAddShipped) ships
   logger Nothing $ "Left " <> tshow nr <> " in FGI. Shipped orders: " <> tshow (fmap orderId ships)

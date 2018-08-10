@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 7
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,17 +37,15 @@
 
 module SimSim.Release
     ( module ImRe
-    , Release
+    , module SimSim.Release.Type
     ) where
 
 import           ClassyPrelude
 
 import           SimSim.Order
 import           SimSim.Release.ImmediateRelease as ImRe
+import           SimSim.Release.Type
 import           SimSim.Time
-
-
-type Release = Time -> [Order] -> IO [Order]
 
 
 --

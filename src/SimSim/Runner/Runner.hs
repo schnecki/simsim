@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 165
+--     Update #: 175
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,6 +38,7 @@
 module SimSim.Runner.Runner
     ( simulate
     , simulateUntil
+    , simulateLogging
     ) where
 
 import           ClassyPrelude              hiding (replicate)
@@ -63,6 +64,7 @@ import           SimSim.Block
 import           SimSim.Order
 import           SimSim.Order.Type
 import           SimSim.ProductType
+import           SimSim.Release
 import           SimSim.Routing
 import           SimSim.Simulation
 import           SimSim.Simulation.Type
@@ -88,7 +90,7 @@ simulation sim simEnd incomingOrders = do
   let opOrders = simOrdersOrderPool simOp
       time = simCurrentTime simOp
       arrivedOpOrders = filter ((<= time) . arrivalDate) opOrders
-  relOrds <- liftIO $ simRelease simOp (simCurrentTime simOp) arrivedOpOrders
+  relOrds <- liftIO $ releaser (simRelease simOp) (simCurrentTime simOp) arrivedOpOrders
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
@@ -100,13 +102,32 @@ simulation sim simEnd incomingOrders = do
 simulate :: SimSim -> [Order] -> IO SimSim
 simulate sim incomingOrders = do
   let simEnd = simCurrentTime sim + simPeriodLength sim
-  runStderrLoggingT $ runEffect $ simulation sim simEnd incomingOrders
+  runNoLoggingT $ runEffect $ simulation sim simEnd incomingOrders
+
+
+-- | This function simulates the system. For this the incoming orders are first put into the order pool and once
+-- released they are fed into the production system. The simulation halts after one period.
+simulateLogging :: (LoggingT IO SimSim -> IO SimSim) -> SimSim -> [Order] -> IO SimSim
+simulateLogging loggingFun sim incomingOrders = do
+  let simEnd = simCurrentTime sim + simPeriodLength sim
+  simulateLoggingEnd loggingFun simEnd sim incomingOrders
+
+-- | This function simulates the system. For this the incoming orders are first put into the order pool and once
+-- released they are fed into the production system. The simulation halts after one period.
+simulateLoggingEnd :: (LoggingT IO SimSim -> IO SimSim) -> Time -> SimSim -> [Order] -> IO SimSim
+simulateLoggingEnd loggingFun simEnd sim incomingOrders = do
+  loggingFun $ runEffect $ simulation sim simEnd incomingOrders
 
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts at the specified end time.
 simulateUntil :: Time -> SimSim -> [Order] -> IO SimSim
-simulateUntil simEnd sim incomingOrders = runStderrLoggingT $ runEffect $ simulation sim simEnd incomingOrders
+simulateUntil simEnd sim incomingOrders = runNoLoggingT $ runEffect $ simulation sim simEnd incomingOrders
+
+-- | This function simulates the system. For this the incoming orders are first put into the order pool and once
+-- released they are fed into the production system. The simulation halts at the specified end time.
+simulateUntilLogging :: (LoggingT IO SimSim -> IO SimSim) -> Time -> SimSim -> [Order] -> IO SimSim
+simulateUntilLogging loggingFun simEnd sim incomingOrders = simulateLoggingEnd loggingFun simEnd sim incomingOrders
 
 
 -------------------- Helper functions --------------------

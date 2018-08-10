@@ -7,9 +7,9 @@
 -- Created: Tue Jul 31 15:35:04 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
--- Last-Updated: Tue Jul 31 16:04:00 2018 (+0200)
+-- Last-Updated: Fri Aug 10 19:44:36 2018 (+0200)
 --           By: Manuel Schneckenreither
---     Update #: 15
+--     Update #: 17
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,17 +36,18 @@
 
 module SimSim.Shipment
     ( module SimSim.Shipment.OnDueDate
-    , Shipment
+    , module SimSim.Shipment.Type
     ) where
 
-import           SimSim.Shipment.OnDueDate
 
 import           ClassyPrelude
+
+import           SimSim.Shipment.OnDueDate
+import           SimSim.Shipment.Type
+
 import           SimSim.Order.Type
 import           SimSim.Time
 
--- | Specifies whether or not the order shall be shipped.
-type Shipment = Time -> Order -> Bool
 
 --
 -- Shipment.hs ends here

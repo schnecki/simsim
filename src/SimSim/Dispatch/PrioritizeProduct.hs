@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 7
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,7 +35,7 @@
 -- Code:
 
 module SimSim.Dispatch.PrioritizeProduct
-    ( prioritizeProduct
+    ( dispatchPrioritizeProduct
     ) where
 
 import           ClassyPrelude
@@ -46,8 +46,8 @@ import           SimSim.Order.Type
 import           SimSim.ProductType
 
 
-prioritizeProduct :: [ProductType] -> Dispatch
-prioritizeProduct pts = Dispatch (prioritizeProducts pts) (name pts)
+dispatchPrioritizeProduct :: [ProductType] -> Dispatch
+dispatchPrioritizeProduct pts = Dispatch (prioritizeProducts pts) (name pts)
 
 prioritizeProducts :: [ProductType] -> DispatchFunction
 prioritizeProducts pts _ xs = concat ptsOrders ++ nonPts

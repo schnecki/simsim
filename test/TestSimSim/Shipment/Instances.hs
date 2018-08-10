@@ -4,12 +4,12 @@
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Fri Aug 10 17:57:15 2018 (+0200)
+-- Created: Fri Aug 10 19:51:45 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 4
+--     Update #: 7
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -34,22 +34,24 @@
 
 -- Code:
 
-module TestSimSim.Dispatch.Instances where
+module TestSimSim.Shipment.Instances where
 
 import           ClassyPrelude
 import           Test.Hspec
 import           Test.QuickCheck
 
-import           SimSim.Dispatch.Type
+import           SimSim.Shipment.Type
 
 import           TestSimSim.Block.Instances
 import           TestSimSim.Order.Instances
+import           TestSimSim.Time.Instances
 
-instance Arbitrary Dispatch where
-  arbitrary = Dispatch <$> arbitrary <*> (pack <$> arbitrary)
 
-instance CoArbitrary Dispatch where
-  coarbitrary (Dispatch a b) = variant 0 . coarbitrary (a, unpack b)
+instance Arbitrary Shipment where
+  arbitrary = Shipment <$> arbitrary <*> (pack <$> arbitrary)
+
+instance CoArbitrary Shipment where
+  coarbitrary (Shipment a b) = variant 0 . coarbitrary (a, unpack b)
 
 
 --

@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 366
+--     Update #: 369
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -72,12 +72,12 @@ data SimSim = SimSim
   , simOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
-  }
+  } deriving (Show)
 
-instance Show SimSim where
-  show sim =
-    show (simRouting sim) ++ ", " ++ show (simCurrentTime sim) ++ ", " ++ show (simPeriodLength sim) ++ ", " ++ show (simNextOrderId sim) ++ ", " ++ show (simOrdersOrderPool sim) ++ ", " ++
-    show (simOrdersFgi sim) ++ ", " ++ show (simOrdersMachine sim) ++ ", " ++ show (simOrdersQueue sim) ++ ", " ++ show (simOrdersShipped sim) ++ ", " ++ show (simStatistics sim)
+-- instance Show SimSim where
+--   show sim =
+--     show (simRouting sim) ++ ", " ++ show (simCurrentTime sim) ++ ", " ++ show (simPeriodLength sim) ++ ", " ++ show (simNextOrderId sim) ++ ", " ++ show (simOrdersOrderPool sim) ++ ", " ++
+--     show (simOrdersFgi sim) ++ ", " ++ show (simOrdersMachine sim) ++ ", " ++ show (simOrdersQueue sim) ++ ", " ++ show (simOrdersShipped sim) ++ ", " ++ show (simStatistics sim)
 
 instance Eq SimSim where
   sim1 == sim2 =
@@ -104,7 +104,7 @@ data SimInternal = SimInternal
   , simRandomNumbers   :: !(NL.NonEmpty Double)
   , simProductRoutes   :: !(M.Map ProductType [Block])
   , simBlockLastOccur  :: !(M.Map Block Int)
-  }
+  } deriving (Show)
 
 
 setSimEndTime :: Time -> SimSim -> SimSim

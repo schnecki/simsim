@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 3
+--     Update #: 10
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,7 +35,7 @@
 -- Code:
 
 module SimSim.Release.ImmediateRelease
-    ( immediateRelease
+    ( releaseImmediate
     ) where
 
 import           ClassyPrelude
@@ -48,12 +48,19 @@ import           SimSim.Order.Type
 import           SimSim.Period
 import           SimSim.ProcessingTime.Type
 import           SimSim.ProductType
+import           SimSim.Release.Type
 import           SimSim.Routing
 import           SimSim.Time
 
 
-immediateRelease :: Time -> [Order] -> IO [Order]
-immediateRelease _ = return
+releaseImmediate :: Release
+releaseImmediate = Release immediateRelease' name
+
+immediateRelease' :: Time -> [Order] -> IO [Order]
+immediateRelease' _ = return
+
+name :: Text
+name = "ImmediateRelease"
 
 
 --

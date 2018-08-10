@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 146
+--     Update #: 147
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -52,12 +52,12 @@ import           SimSim.Order.Type
 type DispatchFunction = Block -> [Order] -> [Order]
 
 data Dispatch = Dispatch
-  { dispatcher :: DispatchFunction
-  , uniqueName :: Text
+  { dispatcher         :: DispatchFunction
+  , uniqueDispatchName :: Text
   }
 
 instance Show Dispatch where
-  show = unpack . uniqueName
+  show = unpack . uniqueDispatchName
 
 
 --
