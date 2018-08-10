@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 69
+--     Update #: 70
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -83,7 +83,7 @@ release sim routes (o:os) = do
 
 
 process :: Routing -> Time -> Order -> Order
-process routes t o = dispatch routes OrderPool $ setOrderCurrentTime t $ setReleaseTime t o
+process routes t o = dispatch routes OrderPool $ setOrderLastBlockStart t $ setOrderCurrentTime t $ setReleaseTime t o
 
 
 --

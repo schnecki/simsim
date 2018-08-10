@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 54
+--     Update #: 56
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,6 +42,11 @@ import           Text.PrettyPrint.ANSI.Leijen
 
 import           SimSim.Statistics.Type
 import           SimSim.Time
+
+
+time :: Rational -> Doc
+time = double . fromRational
+
 
 prettySimStatistics :: Time -> SimStatistics -> Doc
 prettySimStatistics curTime (SimStatistics bls blTimes sf sfFgi costs) =
@@ -96,8 +101,6 @@ prettyBlockTime curTime (StatsBlockTime pr) = text "Processing in %:" <+> time (
 prettyOrderCosts :: StatsOrderCost -> Doc
 prettyOrderCosts (StatsOrderCost ear wip bo fgi) =
   text "Earnings (nr of occurrences):" <+> integer ear <$$> text "WIP costs:" <+> integer wip <$$> text "Back order costs:" <+> integer bo <$$> text "FGI Holding costs:" <+> integer fgi
-
-time = double . fromRational
 
 
 --

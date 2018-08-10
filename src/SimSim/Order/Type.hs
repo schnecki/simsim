@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 67
+--     Update #: 68
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -97,6 +97,10 @@ setOrderId nr o = o {orderId = nr}
 
 setOrderCurrentTime :: Time -> Order -> Order
 setOrderCurrentTime t o = o {orderCurrentTime = t}
+
+setOrderLastBlockStart :: Time -> Order -> Order
+setOrderLastBlockStart t o = o { lastBlockStart = t}
+
 
 addToOrderCurrentTime :: Time -> Order -> Order
 addToOrderCurrentTime t o = o {orderCurrentTime = orderCurrentTime o + t}

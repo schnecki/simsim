@@ -21,7 +21,9 @@ library
                      , SimSim.Order.Pretty
                      , SimSim.Block
                      , SimSim.Dispatch
+                     , SimSim.Dispatch.Type
                      , SimSim.Dispatch.FirstComeFirstServe
+                     , SimSim.Dispatch.PrioritizeProduct
                      , SimSim.ProductType
                      , SimSim.Routing
                      , SimSim.Simulation

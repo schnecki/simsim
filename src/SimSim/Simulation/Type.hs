@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 346
+--     Update #: 366
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,18 +74,10 @@ data SimSim = SimSim
   , simInternal        :: !SimInternal
   }
 
--- instance Show SimSim where
---   show sim = prettySimSim
-    -- show (simRouting sim) ++ ", " ++
-    --   show (simCurrentTime sim) ++ ", " ++
-    --   show (simPeriodLength sim) ++ ", " ++
-    --   show (simNextOrderId sim) ++ ", " ++
-    --   show (simOrdersOrderPool sim) ++ ", " ++
-    --   show (simOrdersFgi sim) ++ ", " ++
-    --   show (simOrdersMachine sim) ++ ", " ++
-    --   show (simOrdersQueue sim) ++ ", " ++
-    --   show (simOrdersShipped sim) ++ ", " ++
-    --   show (simStatistics sim)
+instance Show SimSim where
+  show sim =
+    show (simRouting sim) ++ ", " ++ show (simCurrentTime sim) ++ ", " ++ show (simPeriodLength sim) ++ ", " ++ show (simNextOrderId sim) ++ ", " ++ show (simOrdersOrderPool sim) ++ ", " ++
+    show (simOrdersFgi sim) ++ ", " ++ show (simOrdersMachine sim) ++ ", " ++ show (simOrdersQueue sim) ++ ", " ++ show (simOrdersShipped sim) ++ ", " ++ show (simStatistics sim)
 
 instance Eq SimSim where
   sim1 == sim2 =
@@ -157,7 +149,7 @@ getAndRemoveOrderFromQueue bl sim = maybe def f (M.lookup bl (simOrdersQueue sim
   where
     def = (Nothing, sim)
     blTime = fromMaybe (error $ "no blocktime for " ++ show bl) $ M.lookup bl (simBlockTimes $ simInternal sim)
-    dispatchSort = simDispatch sim
+    dispatchSort = dispatcher (simDispatch sim)
     arrivedUntilDecision = (<= blTime) . orderCurrentTime
     f [] = def
     f xxs =

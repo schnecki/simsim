@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 164
+--     Update #: 166
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module SimSim.Statistics.Ops
     , statsAddEndProduction
     , statsAddShipped
     , statsEndPeriodAddCosts
+    , statsAddBlock
     ) where
 
 import           ClassyPrelude
@@ -66,6 +67,10 @@ statsAddEndProduction order sim = sim {simStatistics = updateShopFloorOrder EndP
 statsAddShipped :: Order -> SimSim -> SimSim
 statsAddShipped order sim =
   sim {simStatistics = updateBlockOrder (UpBlock FGI) order $ updateShopFloorAndFgiOrder Shipped order (simStatistics sim)}
+
+statsAddBlock :: Block -> Order -> SimSim -> SimSim
+statsAddBlock bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrder (UpBlock bl) o (simStatistics sim) }
+statsAddBlock bl _ _  = error $ "statsAddBlock is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
 
 -- | This function accumulates the costs at the end of the period.
 statsEndPeriodAddCosts :: SimSim -> SimSim

@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 254
+--     Update #: 255
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -94,7 +94,7 @@ queue name routes (Right order)      -- received an order, store and continue
     _ -> void $ respond (pure order) -- just push through
   request q >>= queue name routes    -- request new order and process
 
--- | Process blocks, by responding one order for each block and the process the new requests.
+-- | Process blocks, by responding one order for each block and then process the new requests.
 processBlocks :: (MonadLogger m, MonadState SimSim m) => Text -> Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
 processBlocks _ _ [] = return []
 processBlocks name loop (bl:bs) = do

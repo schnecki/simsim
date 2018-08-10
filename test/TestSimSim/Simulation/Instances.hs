@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 7
+--     Update #: 8
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,6 +48,7 @@ import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Time
 
+import           TestSimSim.Dispatch.Instances
 import           TestSimSim.Order.Instances
 import           TestSimSim.ProcessingTime.Instances
 import           TestSimSim.Release.Instances

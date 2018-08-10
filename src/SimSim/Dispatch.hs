@@ -1,3 +1,8 @@
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
+{-# LANGUAGE UndecidableInstances  #-}
 -- Dispatch.hs ---
 --
 -- Filename: Dispatch.hs
@@ -9,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 12
+--     Update #: 27
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,18 +40,17 @@
 -- Code:
 
 module SimSim.Dispatch
-    ( module FCFS
-    , Dispatch
-    ) where
+  ( module SimSim.Dispatch.Type
+  , module FCFS
+  -- , Dispatch
+  ) where
 
 import           ClassyPrelude
 
 import           SimSim.Block
 import           SimSim.Dispatch.FirstComeFirstServe as FCFS
+import           SimSim.Dispatch.Type
 import           SimSim.Order.Type
-
--- | Shall sort the orders in ascending order. Thus the first ones will be dispatched first.
-type Dispatch = Block -> [Order] -> [Order]
 
 
 --

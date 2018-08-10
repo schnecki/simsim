@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 16
+--     Update #: 17
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -70,7 +70,7 @@ server :: (MonadLogger m, MonadIO m) => SimSim -> OrderId -> [Order] -> Server B
 server _ nr [] = modify (addNextOrderId nr) -- set new order id for upcoming orders
 server sim nr (o:os) = do
   let t = simCurrentTime sim
-  respond $ setOrderId nr $ setOrderCurrentTime t o
+  respond $ setOrderId nr $ setOrderLastBlockStart t $ setOrderCurrentTime t o
   server sim (nr+1) os
 
 

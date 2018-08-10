@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 187
+--     Update #: 196
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,14 +63,14 @@ import           SimSim.Simulation.Type
 
 routing :: Routes
 routing =
-  [ (Product 1, OrderPool) --> Queue 1   -- source -> 1 -> sink
-  , (Product 1, Queue 1)   --> Machine 1
+  [ (Product 1, OrderPool) --> Queue 1   -- source -> 1 -> 2 -> sink
+  , (Product 1, Queue 1)   --> Machine 1 -- note: route to sink is not necessary
   , (Product 1, Machine 1) --> Queue 2
-  , (Product 1, Queue 2) --> Machine 2
+  , (Product 1, Queue 2)   --> Machine 2
   , (Product 1, Machine 2) --> FGI
 
   , (Product 2, OrderPool) --> Queue 2   -- source -> 2 -> 1 -> sink
-  , (Product 2, Queue 2)   --> Machine 2 -- note: dispatching to sink is implicit
+  , (Product 2, Queue 2)   --> Machine 2 -- note: route to sink is not necessary
   , (Product 2, Machine 2) --> Queue 1
   , (Product 2, Queue 1)   --> Machine 1
   , (Product 2, Machine 1) --> FGI
@@ -110,7 +110,7 @@ main =
   measure $ do
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe shipOnDueDate
-    sim' <- foldM simulate sim ([incomingOrders] ++ replicate 00 [])
+    sim' <- foldM simulate sim ([incomingOrders] ++ replicate 1 [])
     -- putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
     -- putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
     -- putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue sim')

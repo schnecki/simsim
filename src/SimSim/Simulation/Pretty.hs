@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 53
+--     Update #: 54
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,8 +49,8 @@ import           SimSim.Simulation.Type
 import           SimSim.Statistics.Pretty
 import           SimSim.Time
 
-instance Show SimSim where
-  show = unpack . prettySimSim
+-- instance Show SimSim where
+--   show = unpack . prettySimSim
 
 
 prettySimSim :: SimSim -> Text

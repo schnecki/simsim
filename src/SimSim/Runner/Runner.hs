@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 163
+--     Update #: 165
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -66,6 +66,7 @@ import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Simulation
 import           SimSim.Simulation.Type
+import           SimSim.Statistics.Ops
 import           SimSim.Time
 
 
@@ -91,11 +92,11 @@ simulation sim simEnd incomingOrders = do
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
-    finalize simEnd = mapBlockTimes (max simEnd) . setSimCurrentTime simEnd
+    finalize simEnd = statsEndPeriodAddCosts . mapBlockTimes (max simEnd) . setSimCurrentTime simEnd
 
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
--- released they are fed into the production system. The simulation is run for one period.
+-- released they are fed into the production system. The simulation halts after one period.
 simulate :: SimSim -> [Order] -> IO SimSim
 simulate sim incomingOrders = do
   let simEnd = simCurrentTime sim + simPeriodLength sim

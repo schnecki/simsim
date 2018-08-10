@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 1
+--     Update #: 3
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -56,7 +56,8 @@ import           TestSimSim.Time.Instances
 
 
 spec :: Spec
-spec = return ()
+spec = describe "Simulation runs" $ do
+  return ()
 
 
 --

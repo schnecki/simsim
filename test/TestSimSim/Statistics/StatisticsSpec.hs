@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 67
+--     Update #: 70
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -59,13 +59,15 @@ import           TestSimSim.Statistics.Instances
 
 
 spec :: Spec
-spec = describe "Statistics Functions" $ do
-  it "prop_blockFlowTime" $ property prop_blockFlowTime
-  it "prop_updateCosts" $ property prop_updateCosts
-  it "prop_updateTardiness" $ property prop_updateTardiness
-  it "prop_statsAddRelease" $ property prop_statsAddRelease
-  it "prop_statsAddEndProduction" $ property prop_statsAddEndProduction
-  it "prop_statsAddShipped" $ property prop_statsAddShipped
+spec = do
+  describe "Statistics Internal Functions" $ do
+    it "prop_blockFlowTime" $ property prop_blockFlowTime
+    it "prop_updateCosts" $ property prop_updateCosts
+    it "prop_updateTardiness" $ property prop_updateTardiness
+  describe "Statistics Exports" $ do
+    it "prop_statsAddRelease" $ property prop_statsAddRelease
+    it "prop_statsAddEndProduction" $ property prop_statsAddEndProduction
+    it "prop_statsAddShipped" $ property prop_statsAddShipped
 
 
 prop_blockFlowTime :: Update -> Order -> Property
