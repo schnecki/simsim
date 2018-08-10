@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 18
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,27 +40,12 @@ module TestSimSim.Simulation.Sim1
   ) where
 
 import           ClassyPrelude
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.State.Strict
 import qualified Data.List                           as L
 import qualified Data.Map.Strict                     as M
-import qualified Data.Map.Strict                     as M
-import           Data.Monoid                         ((<>))
-import           Data.Text                           (Text)
-import qualified Data.Time                           as Time
 import           Debug.Trace
-import           Pipes
-import           Pipes.Core
-import           Pipes.Lift
-import qualified Pipes.Prelude                       as Pipe
-import           System.IO.Unsafe
-import           System.IO.Unsafe
-import           System.Random
 import           System.Random
 import           Test.Hspec
 import           Test.QuickCheck
-import           Text.PrettyPrint.ANSI.Leijen        (putDoc)
 
 import           SimSim
 import           SimSim.Order.Type
@@ -117,7 +102,7 @@ prop_simulation1 = ioProperty $ do
   g <- newStdGen
   let sim = newSimSim g routing procTimes periodLen immediateRelease firstComeFirstServe shipOnDueDate
   sim' <- simulate sim incomingOrders
-  return $ True
+  return (error "not yet implemented" :: Bool)
 
 
 --

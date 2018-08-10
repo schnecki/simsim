@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 3
+--     Update #: 4
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -54,10 +54,12 @@ import           TestSimSim.Routing.Instances
 import           TestSimSim.Statistics.Instances
 import           TestSimSim.Time.Instances
 
+import           TestSimSim.Simulation.Sim1
+
 
 spec :: Spec
 spec = describe "Simulation runs" $ do
-  return ()
+  it "prop_simulation1" $ prop_simulation1
 
 
 --
