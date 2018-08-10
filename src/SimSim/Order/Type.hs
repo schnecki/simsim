@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 63
+--     Update #: 67
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,13 +75,22 @@ newOrder productType arrDate dueDate =
 orderFinishedProduction :: Order -> Bool
 orderFinishedProduction order = isJust (prodEnd order)
 
-orderFinishedAndTardy :: Order -> Bool
-orderFinishedAndTardy order = maybe False (> dueDate order) (prodEnd order)
+orderFinishedAndTardyProduction :: Order -> Bool
+orderFinishedAndTardyProduction order = maybe False (> dueDate order) (prodEnd order)
 
-orderTardiness :: Order -> Maybe Time
-orderTardiness order = maybe (fail "order not yet finished production") (packTardy . subtract (dueDate order)) (prodEnd order)
+orderFinishedAndTardyShipped :: Order -> Bool
+orderFinishedAndTardyShipped order = maybe False (> dueDate order) (shipped order)
+
+orderTardinessProduction :: Order -> Maybe Time
+orderTardinessProduction order = maybe (fail "order not yet finished production") (packTardy . subtract (dueDate order)) (prodEnd order)
   where packTardy x | x > 0 = return x
                     | otherwise = fail "not tardy"
+
+orderTardinessShipped :: Order -> Maybe Time
+orderTardinessShipped order = maybe (fail "order not yet finished production") (packTardy . subtract (dueDate order)) (shipped order)
+  where packTardy x | x > 0 = return x
+                    | otherwise = fail "not tardy"
+
 
 setOrderId :: OrderId -> Order -> Order
 setOrderId nr o = o {orderId = nr}

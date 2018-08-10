@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 1
+--     Update #: 3
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,8 +44,8 @@ import           Text.Printf
 newtype Time = Time Rational
   deriving (Ord, Eq)
 
-fromTime :: Time -> Double
-fromTime (Time t) = fromRational t
+fromTime :: Time -> Rational
+fromTime (Time t) = t
 
 instance Num Time where
   fromInteger x = Time (x % 1)

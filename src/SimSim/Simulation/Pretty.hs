@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 51
+--     Update #: 53
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -68,7 +68,7 @@ prettySimulation prettyOrder sim =
   nest 2 (prettyOrderMachine prettyOrder (simOrdersMachine sim)) <$$>
   nest 2 (prettyOrderFgi prettyOrder (simOrdersFgi sim)) <$$>
   nest 2 (prettyOrderFinishedOrders prettyOrder (simOrdersShipped sim)) <$$>
-  nest 2 (prettySimStatistics (simStatistics sim)) <$$> empty
+  nest 2 (prettySimStatistics (simCurrentTime sim) (simStatistics sim)) <$$> empty
 
 
 prettyOrderPool :: (Order -> Doc) -> [Order] -> Doc

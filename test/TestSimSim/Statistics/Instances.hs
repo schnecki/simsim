@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 2
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,7 +36,7 @@
 
 
 module TestSimSim.Statistics.Instances
-  (
+  ( sizedUpdate
   ) where
 
 
@@ -60,8 +60,11 @@ import           TestSimSim.Order.Instances
 maxVal :: Num a => a
 maxVal = 5000
 
+toR :: Double -> Rational
+toR = toRational
+
 instance Arbitrary StatsBlockTime where
-  arbitrary = StatsBlockTime <$> choose (0, maxVal)
+  arbitrary = StatsBlockTime . toR <$> choose (0, maxVal)
 instance CoArbitrary StatsBlockTime where
   coarbitrary (StatsBlockTime pr) = variant 0 . coarbitrary pr
 
@@ -71,12 +74,12 @@ instance CoArbitrary StatsOrderCost where
   coarbitrary (StatsOrderCost ear wip bo fgi) = variant 0 . coarbitrary (ear, wip, bo, fgi)
 
 instance Arbitrary StatsOrderTime where
-  arbitrary = StatsOrderTime <$> choose (0, maxVal) <*> choose (0, maxVal)
+  arbitrary = StatsOrderTime <$> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal))
 instance CoArbitrary StatsOrderTime where
   coarbitrary (StatsOrderTime sumT stdDevT) = variant 0 . coarbitrary (sumT, stdDevT)
 
 instance Arbitrary StatsOrderTard where
-  arbitrary = StatsOrderTard <$> choose (0, maxVal) <*> choose (0, maxVal) <*> choose (0, maxVal)
+  arbitrary = StatsOrderTard <$> choose (0, maxVal) <*> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal))
 instance CoArbitrary StatsOrderTard where
   coarbitrary (StatsOrderTard nr s stdDev) = variant 0 . coarbitrary (nr, s, stdDev)
 
@@ -97,8 +100,11 @@ instance CoArbitrary SimStatistics where
   coarbitrary (SimStatistics bl blTimes fl flFgi csts) = variant 0 . coarbitrary (bl, blTimes, fl, flFgi, csts)
 
 
+sizedUpdate :: Gen [Update]
+sizedUpdate = sized $ \n -> return $ Shipped : EndProd : concatMap (map UpBlock . sizedBlocks) [1 .. n]
+
 instance Arbitrary Update where
-  arbitrary = sized $ \n -> oneof $ map return $ Shipped : EndProd : concatMap (map UpBlock . sizedBlocks) [1 .. n]
+  arbitrary = sized $ \n -> map return <$> sizedUpdate >>= oneof
 instance CoArbitrary Update where
   coarbitrary Shipped     = variant 0
   coarbitrary EndProd     = variant 1

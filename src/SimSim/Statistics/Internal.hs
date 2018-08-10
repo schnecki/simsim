@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 4
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -58,9 +58,13 @@ updateTardiness :: Update -> Order -> StatsOrderTard -> StatsOrderTard
 updateTardiness up order st@(StatsOrderTard nr tardSum stdDev) =
   case up of
     EndProd ->
-      case orderTardiness order of
+      case orderTardinessProduction order of
         Nothing -> st
-        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (stdDev)
+        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (stdDev) -- TODO
+    Shipped ->
+      case orderTardinessShipped order of
+        Nothing -> st
+        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (stdDev) -- TODO
     _ -> st
 
 
@@ -71,7 +75,7 @@ updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
     _       -> st
 
 
-getBlockFlowTime :: Update -> Order -> Double
+getBlockFlowTime :: Update -> Order -> Rational
 getBlockFlowTime bl order = case bl of
   UpBlock bl -> case bl of
     OrderPool -> fromTime $ fromMaybe err $ (-) <$> released order <*> pure (arrivalDate order) -- released

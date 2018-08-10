@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 149
+--     Update #: 164
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,6 +38,7 @@ module SimSim.Statistics.Ops
     ( statsAddRelease
     , statsAddEndProduction
     , statsAddShipped
+    , statsEndPeriodAddCosts
     ) where
 
 import           ClassyPrelude
@@ -63,7 +64,21 @@ statsAddEndProduction order sim = sim {simStatistics = updateShopFloorOrder EndP
 
 -- | This function reports an order as shipped (leaving the FGI). The corresponding statistical information is updated.
 statsAddShipped :: Order -> SimSim -> SimSim
-statsAddShipped order sim = sim {simStatistics = updateBlockOrder (UpBlock FGI) order $ updateShopFloorAndFgiOrder Shipped order (simStatistics sim)}
+statsAddShipped order sim =
+  sim {simStatistics = updateBlockOrder (UpBlock FGI) order $ updateShopFloorAndFgiOrder Shipped order (simStatistics sim)}
+
+-- | This function accumulates the costs at the end of the period.
+statsEndPeriodAddCosts :: SimSim -> SimSim
+statsEndPeriodAddCosts sim =
+  sim {simStatistics = updateCostsEndPeriod (simCurrentTime sim) (simOrdersOrderPool sim) (simOrdersQueue sim) (simOrdersMachine sim) (simOrdersFgi sim) (simStatistics sim)}
+
+
+updateCostsEndPeriod :: Time -> [Order] -> M.Map Block [Order] -> M.Map Block (Order,Time) -> [Order] -> SimStatistics -> SimStatistics
+updateCostsEndPeriod curTime opOrds queueOrds machineOrds fgiOrds simStatistics = simStatistics { simStatsOrderCosts = addCosts (simStatsOrderCosts simStatistics) }
+  where addCosts (StatsOrderCost ear wip bo fgi) = StatsOrderCost ear (wip + fromIntegral (length wipOrds)) (bo + fromIntegral (length boOrds)) (fgi + fromIntegral (length fgiOrds))
+        isBackOrder o = curTime >= dueDate o
+        boOrds = filter isBackOrder (opOrds ++ wipOrds ++ fgiOrds)
+        wipOrds = map fst (M.elems machineOrds) ++ concat (M.elems queueOrds)
 
 
 updateShopFloorAndFgiOrder :: Update -> Order -> SimStatistics -> SimStatistics
@@ -85,14 +100,16 @@ updateBlockOrder up@(UpBlock bl) order simStatistics =
   where
     stats = fromMaybe emptyStats (M.lookup bl $ simStatsBlock simStatistics)
     blTimes = fromMaybe emptyStatsBlockTime (M.lookup bl $ simStatsBlockTimes simStatistics)
-
+updateBlockOrder bl _ _ = error ("called updateBlockOrder on a non block: " ++ show bl)
 
 updateStatsBlockTime :: Update -> Order -> StatsBlockTime -> StatsBlockTime
 updateStatsBlockTime up order (StatsBlockTime pT) = StatsBlockTime (pT + getBlockFlowTime up order)
 
 
 updateSimStatsOrder :: Update -> Order  -> SimStats -> SimStats
-updateSimStatsOrder up order (SimStats nr ft tard) = SimStats (nr + 1) (updateOrderTime up order ft) (updateTardiness up order tard)
+updateSimStatsOrder up order (SimStats nr ft mTard) = case up of
+  UpBlock{} -> SimStats (nr + 1) (updateOrderTime up order ft) Nothing
+  _ ->  SimStats (nr + 1) (updateOrderTime up order ft) (Just $ updateTardiness up order (fromMaybe emptyStatsOrderTard mTard))
 
 
 updateOrderTime :: Update -> Order -> StatsOrderTime -> StatsOrderTime
