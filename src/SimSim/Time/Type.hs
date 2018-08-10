@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 3
+--     Update #: 7
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,8 +41,14 @@ import           ClassyPrelude
 import           Data.Ratio
 import           Text.Printf
 
+-- Synonyms
+type CurrentTime = Time
+type ArrivalDate = Time
+type DueDate = Time
+
+
 newtype Time = Time Rational
-  deriving (Ord, Eq)
+  deriving (Ord, Eq, Show, Read)
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t
@@ -58,15 +64,6 @@ instance Num Time where
 instance Fractional Time where
   fromRational x = Time $ toRational x
   (Time x) / (Time y) = Time (x/y)
-
-instance Show Time where
-  show (Time t) = "t=" ++ printf "%.2f" (fromRational t :: Double)
-
-type CurrentTime = Time
-
--- Synonyms
-type ArrivalDate = Time
-type DueDate = Time
 
 
 --

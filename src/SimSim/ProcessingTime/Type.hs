@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 43
+--     Update #: 47
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -56,19 +56,6 @@ type RandomUniform = Double     -- ^ Random number between 0 and 1.
 
 -- TODO decide on how to use random numbers
 type ProcessingTime = RandomUniform -> Time
-
-instance Show ProcessingTime where
-  show = show . toDyn
-
--- remember:
--- readsPrec :: Read a => Int -> ReadS a
--- type ReadS a = String -> [(a,String)]
-
--- instance Read ProcessingTime where
-
---   readsPrec n str = case (readsPrec n str :: [(Dynamic,String)]) of
---     [(d,str')] -> [(fromDyn d (error "Read not possible for ProcessingTime"), str')]
-
 
 type ProcessingTimes = M.Map Block (M.Map ProductType ProcessingTime)
 

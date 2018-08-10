@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 175
+--     Update #: 179
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module SimSim.Runner.Runner
     ( simulate
     , simulateUntil
     , simulateLogging
+    , simulateUntilLogging
     ) where
 
 import           ClassyPrelude              hiding (replicate)
@@ -106,11 +107,13 @@ simulate sim incomingOrders = do
 
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
--- released they are fed into the production system. The simulation halts after one period.
+-- released they are fed into the production system. The simulation halts after one period. The specified logging
+-- function from `Control.Monad.Logger` is applied.
 simulateLogging :: (LoggingT IO SimSim -> IO SimSim) -> SimSim -> [Order] -> IO SimSim
 simulateLogging loggingFun sim incomingOrders = do
   let simEnd = simCurrentTime sim + simPeriodLength sim
   simulateLoggingEnd loggingFun simEnd sim incomingOrders
+
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts after one period.
@@ -124,8 +127,10 @@ simulateLoggingEnd loggingFun simEnd sim incomingOrders = do
 simulateUntil :: Time -> SimSim -> [Order] -> IO SimSim
 simulateUntil simEnd sim incomingOrders = runNoLoggingT $ runEffect $ simulation sim simEnd incomingOrders
 
+
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
--- released they are fed into the production system. The simulation halts at the specified end time.
+-- released they are fed into the production system. The simulation halts at the specified end time. The specified
+-- logging function from `Control.Monad.Logger` is applied.
 simulateUntilLogging :: (LoggingT IO SimSim -> IO SimSim) -> Time -> SimSim -> [Order] -> IO SimSim
 simulateUntilLogging loggingFun simEnd sim incomingOrders = simulateLoggingEnd loggingFun simEnd sim incomingOrders
 

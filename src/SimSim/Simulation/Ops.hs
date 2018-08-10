@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 13
+--     Update #: 14
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -109,6 +109,9 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
             topSorts = zipWith associateTopSorts (fmap NL.head routeGroups) (fmap (\(g, fVert, _) -> map (fst3 . fVert) (topSort g)) graphs)
             associateTopSorts ((pt, _), _) ts = (pt, ts)
 
+
+readSimSim :: (RandomGen g) => g -> ProcTimes -> Release -> Dispatch -> Shipment -> String -> SimSim
+readSimSim g procTimes periodLen release dispatch str = error "not yet implemented"
 
 --
 -- Ops.hs ends here

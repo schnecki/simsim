@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 6
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -55,6 +55,9 @@ data Release = Release
 
 instance Show Release where
   show = unpack . uniqueReleaseName
+
+-- instance Read Release where
+--   readsPrec =
 
 
 --

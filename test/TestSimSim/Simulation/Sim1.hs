@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 19
+--     Update #: 26
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -102,6 +102,7 @@ prop_simulation1 = ioProperty $ do
   g <- newStdGen
   let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
   sim' <- simulate sim incomingOrders
+  print sim'
   return (error "not yet implemented" :: Bool)
 
 
