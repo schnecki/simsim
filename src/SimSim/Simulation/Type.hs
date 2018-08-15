@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 371
+--     Update #: 372
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -72,7 +72,7 @@ data SimSim = SimSim
   , simOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
-  } -- deriving (Show)
+  }
 
 instance Show SimSim where
   show sim =
@@ -104,8 +104,7 @@ data SimInternal = SimInternal
   , simRandomNumbers   :: !(NL.NonEmpty Double)
   , simProductRoutes   :: !(M.Map ProductType [Block])
   , simBlockLastOccur  :: !(M.Map Block Int)
-  } deriving (Show)
-
+  }
 
 setSimEndTime :: Time -> SimSim -> SimSim
 setSimEndTime t sim = sim { simInternal = (simInternal sim) { simEndTime = t }}

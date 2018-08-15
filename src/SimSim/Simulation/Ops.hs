@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 14
+--     Update #: 15
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -111,7 +111,10 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
 
 
 readSimSim :: (RandomGen g) => g -> ProcTimes -> Release -> Dispatch -> Shipment -> String -> SimSim
-readSimSim g procTimes periodLen release dispatch str = error "not yet implemented"
+readSimSim g procTimes periodLen release dispatch str =
+
+
+  error "not yet implemented"
 
 --
 -- Ops.hs ends here

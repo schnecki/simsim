@@ -1,15 +1,15 @@
--- SimulationSpec.hs ---
+-- Simulation1.hs ---
 --
--- Filename: SimulationSpec.hs
+-- Filename: Simulation1.hs
 -- Description:
 -- Author: Manuel Schneckenreither
 -- Maintainer:
--- Created: Thu Aug  9 22:54:33 2018 (+0200)
+-- Created: Wed Aug 15 18:42:51 2018 (+0200)
 -- Version:
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 26
+--     Update #: 1
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -35,7 +35,7 @@
 -- Code:
 
 
-module TestSimSim.Simulation.Sim1
+module TestSimSim.Simulation.Simulation1
   ( prop_simulation1
   ) where
 
@@ -107,4 +107,4 @@ prop_simulation1 = ioProperty $ do
 
 
 --
--- SimulationSpec.hs ends here
+-- Simulation1.hs ends here
