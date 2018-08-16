@@ -104,7 +104,7 @@ executable simsim-exe
 test-suite simsim-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Spec.hs
+  main-is:             Main.hs
   build-depends:       base
                      , transformers
                      , simsim
@@ -115,11 +115,12 @@ test-suite simsim-test
                      , QuickCheck
                      , containers
                      , random
+                     , ansi-wl-pprint
+                     , Diff
   other-modules:
                      TestSimSim.Block.Instances
                      TestSimSim.Block.BlockSpec
                      TestSimSim.Simulation.Instances
-                     TestSimSim.Simulation.SimulationSpec
                      TestSimSim.ProcessingTime.Instances
                      TestSimSim.Routing.Instances
                      TestSimSim.Statistics.Instances
@@ -129,7 +130,9 @@ test-suite simsim-test
                      TestSimSim.Time.Instances
                      TestSimSim.Order.Instances
                      TestSimSim.Order.OrderSpec
-                     TestSimSim.Simulation.Sim1
+                     TestSimSim.Simulation.Simulation1Spec
+                     TestSimSim.Util
+                     Main
 
 
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N

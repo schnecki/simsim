@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 55
+--     Update #: 56
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,7 +40,6 @@ import           ClassyPrelude
 import qualified Data.Map.Strict as M
 
 import           SimSim.Block
-
 
 data SimStatistics = SimStatistics
   { simStatsBlock           :: M.Map Block SimStats       -- ^ Statistics for blocks, like nr of orders.

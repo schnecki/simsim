@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 61
+--     Update #: 68
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,12 +50,13 @@ import           Data.Monoid                ((<>))
 import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
-import           qualified Prelude as Prelude
+import qualified Prelude
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
 import           System.Random
+import           Text.PrettyPrint.ANSI.Leijen
 
 import           SimSim.Block
 import           SimSim.Order.Type
@@ -108,7 +109,7 @@ logger Nothing txt = do
   m <- gets (simBlockTimes . simInternal)
   let t = Prelude.maximum (M.elems m)
   logger (Just t) txt
-logger (Just t) txt = $(logDebug) $ "Time " ++ tshow t ++ ": " ++ txt
+logger (Just t) txt = $(logDebug) $ "t=" ++ tshow (pretty t) ++ ": " ++ txt
 
 
 --

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 6
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,6 +42,8 @@ import           Text.PrettyPrint.ANSI.Leijen
 
 import           SimSim.Time.Type
 
+instance Pretty Time where
+  pretty = prettyTime
 
 prettyTime :: Time -> Doc
 prettyTime (Time t) = double (fromRational t)

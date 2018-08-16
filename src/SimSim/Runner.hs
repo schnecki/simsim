@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 245
+--     Update #: 246
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,6 +36,9 @@
 
 module SimSim.Runner
   ( simulate
+  , simulateLogging
+  , simulateUntil
+  , simulateUntilLogging
   ) where
 
 import           SimSim.Runner.Runner

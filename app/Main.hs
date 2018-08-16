@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 197
+--     Update #: 202
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,6 +41,7 @@ module Main where
 
 import           ClassyPrelude
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.State.Strict
 import qualified Data.List                        as L
@@ -89,7 +90,7 @@ procTimes = [(Machine 1,[(Product 1, const 3)
 
 -- | Order to send through the production
 incomingOrders :: [Order]
-incomingOrders = L.concat $ L.replicate 2
+incomingOrders = L.concat $ L.replicate 1
   [ newOrder (Product 1) 0 10
   , newOrder (Product 2) 0 10
   , newOrder (Product 1) 0 10
@@ -110,7 +111,7 @@ main =
   measure $ do
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
-    sim' <- foldM simulate sim ([incomingOrders] ++ replicate 1 [])
+    sim' <- foldM (simulateLogging runStderrLoggingT) sim ([incomingOrders] ++ replicate 1 [])
     -- putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
     -- putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
     -- putStrLn $ "Queues: " ++ tshow (M.map (fmap orderId) $ simOrdersQueue sim')
