@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 79
+--     Update #: 81
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -82,7 +82,8 @@ prop_blockFlowTime bl@EndProd o = isJust (prodEnd o) ==> fromTime (fromJust (pro
 prop_blockFlowTime bl@(UpBlock OrderPool) o = isJust (released o) ==> fromTime (fromJust (released o) - arrivalDate o) === getBlockFlowTime bl o
 prop_blockFlowTime bl@(UpBlock FGI) o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) === getBlockFlowTime bl o
 prop_blockFlowTime bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime bl o > 0
-prop_blockFlowTime bl o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime bl o
+prop_blockFlowTime bl@(UpBlock Machine{}) o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime bl o
+prop_blockFlowTime bl@(UpBlock Queue{}) o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime bl o
 
 prop_updateCosts :: Update -> Order -> StatsOrderCost -> Property
 prop_updateCosts Shipped o st@(StatsOrderCost earn wip bo fgi) = property $ StatsOrderCost (earn+1) wip bo fgi === updateCosts Shipped o st

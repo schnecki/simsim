@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 194
+--     Update #: 205
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -99,21 +99,24 @@ processOrder name routes bl order pT = do
   endTime <- getSimEndTime
   blockTime <- getBlockTime bl
   let startTime = max blockTime (orderCurrentTime order)
-  when (startTime > endTime) $ error $ "Machine " ++ show bl ++ " at " ++ unpack name ++ "falsely received order " ++ show order
-  if startTime + pT > endTime -- check if can be processed fully
+  when (startTime > endTime) $ error $ "Machine " ++ show bl ++ " (" ++ unpack name ++ ") falsely received following order (startTime was greater than the endTime) " ++ show order
+  if startTime + pT > endTime   -- check if can be processed fully or only partially
     then do
-      logger (Just startTime) $ tshow bl ++ " ("++ name ++") processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until SIMULATION END " ++ tshow endTime
+      logger (Just startTime) $
+        tshow bl ++ " (" ++ name ++ ") processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until SIMULATION END " ++ tshow endTime ++
+        ". Full Processing time: " ++ tshow pT ++ " (until " ++ tshow (startTime + pT) ++ ")."
       modify (addToBlockTime bl (endTime - startTime))
       let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
       modify (statsAddBlockPartialUpdate bl order')
-      modify (addOrderToMachine order' (pT + startTime - endTime))
-             -- do not update statistics. Current load will be added in prettyStatistics
+      modify (addOrderToMachine order' (startTime + pT - endTime))
     else do
-      logger (Just startTime) $ tshow bl ++ " ("++ name ++") processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow (startTime + pT)
+      let procEndTime = startTime + pT
+      logger (Just startTime) $
+        tshow bl ++ " (" ++ name ++ ") processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow procEndTime
       modify (addToBlockTime bl pT)
-      let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime (startTime + pT) $ setProdStartTime startTime order
+      let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime procEndTime $ setProdStartTime startTime order
       modify (statsAddBlock bl order')
-      let order'' = setOrderBlockStartTime endTime order'
+      let order'' = setOrderBlockStartTime procEndTime order' -- start time for next block queue
       void $ respond $ pure order'' -- for us, process
 
 

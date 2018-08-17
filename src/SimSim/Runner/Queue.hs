@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 290
+--     Update #: 295
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -105,26 +105,23 @@ processBlocks name loop (nxtBl:bs) = do
     Nothing -> processBlocks name loop bs
     Just o -> do
       endTime <- getSimEndTime
-      mStartTime <-
+      startTime <-
         if isMachine nxtBl
-          then (\x -> Just $ max (orderCurrentTime o) x) <$> getBlockTime nxtBl
-          else return $ Just $ orderCurrentTime o
+          then (\x -> max (orderCurrentTime o) x) <$> getBlockTime nxtBl
+          else return $ orderCurrentTime o
       isFree <- isNothing . M.lookup nxtBl <$> gets simOrdersMachine
-      case mStartTime of
-        Nothing -> reset oldQueues -- reset queue state to prevent re-ordering of queues
-        Just startTime ->
-          if startTime > endTime || not isFree
-            then reset oldQueues   -- reset queue state to prevent re-ordering of queues
-            else do
-              let o' = setOrderCurrentTime startTime o
-              let thisBl = lastBlock o
-              logger (Just startTime) $ "Order " ++ tshow (orderId o) ++ " just left " ++ tshow thisBl
-              modify (statsAddBlockBlockOnly False thisBl o' . setBlockTime thisBl startTime)
-              r <- respond $ pure o'
-              rs <- processBlocks name False bs
-              if loop
-                then processBlocks name True (r : rs)
-                else return (r : rs)
+      if startTime > endTime || not isFree
+        then reset oldQueues    -- reset queue state to prevent re-ordering of queues
+        else do
+          let o' = setOrderCurrentTime startTime o
+          let thisBl = lastBlock o'
+          logger (Just startTime) $ "Order " ++ tshow (orderId o') ++ " just left " ++ tshow thisBl ++ ". Order: " ++ tshow o'
+          modify (statsAddBlockBlockOnly False thisBl o' . setBlockTime thisBl startTime)
+          r <- respond $ pure o'
+          rs <- processBlocks name False bs
+          if loop
+            then processBlocks name True (r : rs)
+            else return (r : rs)
   where
     reset oldQueues = modify (setOrderQueue oldQueues) >> return []
 

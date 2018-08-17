@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 87
+--     Update #: 103
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -107,6 +107,9 @@ spec = describe "Simulation runs" $ do
   it "prop_simulation1 Time=1" $ prop_simulation1AtTime 1 simAtTime1
   it "prop_simulation1 Time=2" $ prop_simulation1AtTime 2 simAtTime2
   it "prop_simulation1 Time=3" $ prop_simulation1AtTime 3 simAtTime3
+  it "prop_simulation1 Time=4" $ prop_simulation1AtTime 4 simAtTime4
+  it "prop_simulation1 Time=5" $ prop_simulation1AtTime 5 simAtTime5
+  it "prop_simulation1 Time=6" $ prop_simulation1AtTime 6 simAtTime6
   -- it "prop_simulation1 Time=10" $ prop_simulation1AtTime 10 simAtTime10
 
 
@@ -243,6 +246,140 @@ simAtTime3 sim =
           SimStats
           { statsNrOrders = 0
           , statsOrderFlowTime = StatsOrderTime 0 0 Nothing , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsShopFloorAndFgi =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing
+          , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsOrderCost = StatsOrderCost 0 0 0 0
+
+simAtTime4 :: SimSim -> SimSim
+simAtTime4 sim =
+  sim
+  { simCurrentTime = 4
+  , simNextOrderId = 5
+  , simOrdersOrderPool = []
+  , simOrdersQueue = M.fromList [(Machine 1, drop 3 orders ++ [orders !! 1]), (Machine 2, [])]
+  , simOrdersMachine = M.fromList [(Machine 1, (orders !! 2, 2)), (Machine 2, (orders !! 0, 2))]
+  , simOrdersFgi = []
+  , simOrdersShipped = []
+  , simStatistics = statsAtTime1
+  }
+  where
+    statsAtTime1 :: SimStatistics
+    statsAtTime1 =
+      SimStatistics
+      { simStatsBlock =
+          M.fromList            -- fully finished queue orders only, but full machine processing times
+            [ (OrderPool, SimStats 4 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Queue 1,   SimStats 2 (StatsOrderTime 3 0 Nothing) Nothing)
+            , (Queue 2,   SimStats 2 (StatsOrderTime 1 0 Nothing) Nothing)
+            , (Machine 1, SimStats 1 (StatsOrderTime 4 0 Nothing) Nothing)
+            , (Machine 2, SimStats 1 (StatsOrderTime 4 0 Nothing) Nothing)
+            ]
+      ,  simStatsBlockTimes =   -- processing times
+          M.fromList [(OrderPool, StatsBlockTime 0), (Queue 1, StatsBlockTime 0), (Queue 2, StatsBlockTime 0), (Machine 1, StatsBlockTime 4), (Machine 2, StatsBlockTime 4)]
+      , simStatsShopFloor = statsShopFloor
+      , simStatsShopFloorAndFgi = statsShopFloorAndFgi
+      , simStatsOrderCosts = statsOrderCost
+      }
+      where
+        statsShopFloor =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsShopFloorAndFgi =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing
+          , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsOrderCost = StatsOrderCost 0 0 0 0
+
+simAtTime5 :: SimSim -> SimSim
+simAtTime5 sim =
+  sim
+  { simCurrentTime = 5
+  , simNextOrderId = 5
+  , simOrdersOrderPool = []
+  , simOrdersQueue = M.fromList [(Machine 1, drop 3 orders ++ [orders !! 1]), (Machine 2, [])]
+  , simOrdersMachine = M.fromList [(Machine 1, (orders !! 2, 1)), (Machine 2, (orders !! 0, 1))]
+  , simOrdersFgi = []
+  , simOrdersShipped = []
+  , simStatistics = statsAtTime1
+  }
+  where
+    statsAtTime1 :: SimStatistics
+    statsAtTime1 =
+      SimStatistics
+      { simStatsBlock =
+          M.fromList            -- fully finished queue orders only, but full machine processing times
+            [ (OrderPool, SimStats 4 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Queue 1,   SimStats 2 (StatsOrderTime 3 0 Nothing) Nothing)
+            , (Queue 2,   SimStats 2 (StatsOrderTime 1 0 Nothing) Nothing)
+            , (Machine 1, SimStats 1 (StatsOrderTime 5 0 (Just $ StatsOrderTime 3 0 Nothing)) Nothing)
+            , (Machine 2, SimStats 1 (StatsOrderTime 5 0 (Just $ StatsOrderTime 3 0 Nothing)) Nothing)
+            ]
+      ,  simStatsBlockTimes =   -- idle times for queues, processing times for machines and orderpool
+          M.fromList [(OrderPool, StatsBlockTime 0), (Queue 1, StatsBlockTime 0), (Queue 2, StatsBlockTime 0), (Machine 1, StatsBlockTime 5), (Machine 2, StatsBlockTime 5)]
+      , simStatsShopFloor = statsShopFloor
+      , simStatsShopFloorAndFgi = statsShopFloorAndFgi
+      , simStatsOrderCosts = statsOrderCost
+      }
+      where
+        statsShopFloor =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsShopFloorAndFgi =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing
+          , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsOrderCost = StatsOrderCost 0 0 0 0
+
+
+simAtTime6 :: SimSim -> SimSim
+simAtTime6 sim =
+  sim
+  { simCurrentTime = 6
+  , simNextOrderId = 5
+  , simOrdersOrderPool = []
+  , simOrdersQueue = M.fromList [(Machine 1, [orders !! 1]), (Machine 2, [])]
+  , simOrdersMachine = M.fromList [(Machine 1, (orders !! 3, 3)), (Machine 2, (orders !! 2, 2))]
+  , simOrdersFgi = [orders !! 0]
+  , simOrdersShipped = []
+  , simStatistics = statsAtTime1
+  }
+  where
+    statsAtTime1 :: SimStatistics
+    statsAtTime1 =
+      SimStatistics
+      { simStatsBlock =
+          M.fromList -- flow time of  fully finished queue orders only, but full machine processing times
+            [ (OrderPool, SimStats 4 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Queue 1, SimStats 3 (StatsOrderTime 9 0 Nothing) Nothing)
+            , (Queue 2, SimStats 3 (StatsOrderTime 1 0 Nothing) Nothing)
+            , (Machine 1, SimStats 2 (StatsOrderTime 6 0 Nothing) Nothing)
+            , (Machine 2, SimStats 2 (StatsOrderTime 6 0 Nothing) Nothing)
+            ]
+      , simStatsBlockTimes -- idle times for queues, processing times for machines and orderpool
+         = M.fromList [(OrderPool, StatsBlockTime 0), (Queue 1, StatsBlockTime 0), (Queue 2, StatsBlockTime 0), (Machine 1, StatsBlockTime 6), (Machine 2, StatsBlockTime 6)]
+      , simStatsShopFloor = statsShopFloor
+      , simStatsShopFloorAndFgi = statsShopFloorAndFgi
+      , simStatsOrderCosts = statsOrderCost
+      }
+      where
+        statsShopFloor =
+          SimStats
+          { statsNrOrders = 1
+          , statsOrderFlowTime = StatsOrderTime 6 0 Nothing
+          , statsOrderTardiness = Just $ StatsOrderTard 0 0 0
           }
         statsShopFloorAndFgi =
           SimStats
