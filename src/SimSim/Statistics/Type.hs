@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 66
+--     Update #: 73
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,7 +48,17 @@ data SimStatistics = SimStatistics
   , simStatsShopFloorAndFgi :: SimStats       -- ^ Shop floor (from release until shipping)
   , simStatsOrderCosts      :: StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
                                               -- holding.
-  } deriving (Eq, Show)
+  } deriving (Show)
+
+instance Eq SimStatistics where
+  stats1 == stats2 =
+    and
+      [ simStatsBlock stats1 == simStatsBlock stats2
+      , simStatsBlockTimes stats1 == simStatsBlockTimes stats2
+      , simStatsShopFloor stats1 == simStatsShopFloor stats2
+      , simStatsShopFloorAndFgi stats1 == simStatsShopFloorAndFgi stats2
+      , simStatsOrderCosts stats1 == simStatsOrderCosts stats2
+      ]
 
 data SimStats = SimStats
   { statsNrOrders       :: Integer              -- ^ Nr of orders.
@@ -61,7 +71,11 @@ data StatsOrderTime = StatsOrderTime
   , statsStdDevTime        :: Rational
   , statsLastUpdatePartial :: Maybe StatsOrderTime -- ^ Only used if last update was partial. Holds the previous
                                                    -- ``StatsOrderTime``.
-  } deriving (Eq, Show)
+  } deriving (Show)
+
+instance Eq StatsOrderTime where
+  (StatsOrderTime sum1 stdDev1 _) == (StatsOrderTime sum2 stdDev2 _) = sum1 == sum2 && stdDev1 == stdDev2
+
 
 data StatsOrderTard = StatsOrderTard
   { statsNrTardOrders   :: Integer

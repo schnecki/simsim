@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 276
+--     Update #: 290
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -77,22 +77,21 @@ queue :: (MonadLogger m, MonadIO m) => Text -> Routing -> Downstream -> Proxy Up
 queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
   mQueues <- gets simOrdersQueue --  load any order
-  logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> tshow mQueues
+  logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> (tshow $ map orderId <$> mQueues)
   blLastOccur <- gets (simBlockLastOccur . simInternal)
   let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
   if null orders
     then void (respond $ Left (nr + 1))
     else processBlocks name True blocks >> void (respond $ Left (nr + 1))
-queue name routes (Right order)      -- received an order, store and continue
- = do
+-- received an order, store and continue
+queue name routes (Right order) = do
   let q = nextBlock order
   case q of
-    Queue {}                    -- process and add to queue list
-     -> do
+    Queue {} -> do
       let order' = processOrder routes q order
       modify $ addOrderToQueue q order'
-      logger Nothing $ tshow (lastBlock order') ++ " (" ++ name ++ ") input order " ++ tshow (orderId order) 
+      logger Nothing $ tshow (lastBlock order') ++ " (" ++ name ++ ") input order " ++ tshow (orderId order')
     _ -> void $ respond (pure order) -- just push through
   request q >>= queue name routes    -- request new order and process
 
@@ -110,16 +109,17 @@ processBlocks name loop (nxtBl:bs) = do
         if isMachine nxtBl
           then (\x -> Just $ max (orderCurrentTime o) x) <$> getBlockTime nxtBl
           else return $ Just $ orderCurrentTime o
+      isFree <- isNothing . M.lookup nxtBl <$> gets simOrdersMachine
       case mStartTime of
         Nothing -> reset oldQueues -- reset queue state to prevent re-ordering of queues
         Just startTime ->
-          if startTime >= endTime
+          if startTime > endTime || not isFree
             then reset oldQueues   -- reset queue state to prevent re-ordering of queues
             else do
               let o' = setOrderCurrentTime startTime o
               let thisBl = lastBlock o
               logger (Just startTime) $ "Order " ++ tshow (orderId o) ++ " just left " ++ tshow thisBl
-              modify (setBlockTime thisBl startTime)
+              modify (statsAddBlockBlockOnly False thisBl o' . setBlockTime thisBl startTime)
               r <- respond $ pure o'
               rs <- processBlocks name False bs
               if loop

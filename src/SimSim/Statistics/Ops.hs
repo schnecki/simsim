@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 179
+--     Update #: 192
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,10 +41,13 @@ module SimSim.Statistics.Ops
     , statsEndPeriodAddCosts
     , statsAddBlock
     , statsAddBlockPartialUpdate
+    , statsAddBlockBlockOnly
+    , statsAddBlockTimesOnly
     ) where
 
 import           ClassyPrelude
 import qualified Data.Map.Strict            as M
+import           Data.Ratio                 (denominator)
 
 import           SimSim.Block
 import           SimSim.Order.Type
@@ -80,11 +83,21 @@ statsAddBlockInternal :: Bool -> Block -> Order -> SimSim -> SimSim
 statsAddBlockInternal isPartial bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrder isPartial (UpBlock bl) o (simStatistics sim) }
 statsAddBlockInternal _ bl _ _  = error $ "statsAddBlock is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
 
+statsAddBlockTimesOnly :: Bool -> Block -> Order -> SimSim -> SimSim
+statsAddBlockTimesOnly isPartial bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrderTimesOnly isPartial (UpBlock bl) o (simStatistics sim) }
+statsAddBlockTimesOnly _ bl _ _  = error $ "statsAddBlockTimesOnly is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
 
--- | This function accumulates the costs at the end of the period.
+statsAddBlockBlockOnly :: Bool -> Block -> Order -> SimSim -> SimSim
+statsAddBlockBlockOnly isPartial bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrderBlockOnly isPartial (UpBlock bl) o (simStatistics sim) }
+statsAddBlockBlockOnly _ bl _ _  = error $ "statsAddBlockBlockOnly is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+
+
+-- | This function accumulates the costs at the end of the period. If it is not the end of the period, then nothing is done.
 statsEndPeriodAddCosts :: SimSim -> SimSim
-statsEndPeriodAddCosts sim =
-  sim {simStatistics = updateCostsEndPeriod (simCurrentTime sim) (simOrdersOrderPool sim) (simOrdersQueue sim) (simOrdersMachine sim) (simOrdersFgi sim) (simStatistics sim)}
+statsEndPeriodAddCosts sim
+  | denominator (fromTime (simCurrentTime sim) / fromTime (simPeriodLength sim)) == 0 =
+    sim {simStatistics = updateCostsEndPeriod (simCurrentTime sim) (simOrdersOrderPool sim) (simOrdersQueue sim) (simOrdersMachine sim) (simOrdersFgi sim) (simStatistics sim)}
+  | otherwise = sim
 
 
 updateCostsEndPeriod :: Time -> [Order] -> M.Map Block [Order] -> M.Map Block (Order,Time) -> [Order] -> SimStatistics -> SimStatistics
@@ -107,14 +120,31 @@ updateShopFloorOrder up order simStatistics = simStatistics {simStatsShopFloor =
 
 updateBlockOrder :: Bool -> Update -> Order -> SimStatistics -> SimStatistics
 updateBlockOrder isPartial up@(UpBlock bl) order simStatistics =
-  simStatistics
-  { simStatsBlock = M.insert bl (updateSimStatsOrder isPartial up order stats) (simStatsBlock simStatistics)
-  , simStatsBlockTimes = M.insert bl (updateStatsBlockTime up order blTimes) (simStatsBlockTimes simStatistics)
-  }
+  simStatistics { simStatsBlock = M.insert bl (updateSimStatsOrder isPartial up order stats) (simStatsBlock simStatistics)
+                , simStatsBlockTimes = M.insert bl (updateStatsBlockTime up order blTimes) (simStatsBlockTimes simStatistics)
+                }
   where
     stats = fromMaybe emptyStats (M.lookup bl $ simStatsBlock simStatistics)
     blTimes = fromMaybe emptyStatsBlockTime (M.lookup bl $ simStatsBlockTimes simStatistics)
+
 updateBlockOrder _ bl _ _ = error ("called updateBlockOrder on a non block: " ++ show bl)
+
+
+updateBlockOrderBlockOnly :: Bool -> Update -> Order -> SimStatistics -> SimStatistics
+updateBlockOrderBlockOnly isPartial up@(UpBlock bl) order simStatistics =
+  simStatistics {simStatsBlock = M.insert bl (updateSimStatsOrder isPartial up order stats) (simStatsBlock simStatistics)}
+  where
+    stats = fromMaybe emptyStats (M.lookup bl $ simStatsBlock simStatistics)
+updateBlockOrderBlockOnly _ bl _ _ = error ("called updateBlockOrderBlockOnly on a non block: " ++ show bl)
+
+
+updateBlockOrderTimesOnly :: Bool -> Update -> Order -> SimStatistics -> SimStatistics
+updateBlockOrderTimesOnly isPartial up@(UpBlock bl) order simStatistics =
+  simStatistics {simStatsBlockTimes = M.insert bl (updateStatsBlockTime up order blTimes) (simStatsBlockTimes simStatistics)}
+  where
+    blTimes = fromMaybe emptyStatsBlockTime (M.lookup bl $ simStatsBlockTimes simStatistics)
+updateBlockOrderTimesOnly _ bl _ _ = error ("called updateBlockOrderTimesOnly on a non block: " ++ show bl)
+
 
 updateStatsBlockTime :: Update -> Order -> StatsBlockTime -> StatsBlockTime
 updateStatsBlockTime up order (StatsBlockTime pT) = StatsBlockTime (pT + getBlockFlowTime up order)

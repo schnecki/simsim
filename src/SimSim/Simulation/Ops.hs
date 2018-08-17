@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 28
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -147,7 +147,7 @@ addOrderToQueue bl o sim = updateBlockTime $ sim {simOrdersQueue = M.insertWith 
     queueStateBefore = M.lookup (nextBlock o) (simOrdersQueue sim)
     wasEmpty = maybe True null queueStateBefore
     updateBlockTime sim
-      | wasEmpty = statsAddBlock bl o $ setBlockTime bl (orderCurrentTime o) sim
+      | wasEmpty = statsAddBlockTimesOnly False bl o $ setBlockTime bl (orderCurrentTime o) sim
       | otherwise = id sim
 
 
