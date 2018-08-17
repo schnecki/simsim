@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 39
+--     Update #: 42
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,6 +36,7 @@
 
 module SimSim.Runner.Dispatch
     ( dispatch
+    , dispatchReverse
     ) where
 
 import           ClassyPrelude
@@ -68,6 +69,12 @@ dispatch routes lastBl order =
         then order {lastBlock = lastBl, nextBlock = n, prodEnd = Just (orderCurrentTime order)}
         else order {lastBlock = lastBl, nextBlock = n}
     Nothing -> order {lastBlock = lastBl, nextBlock = Sink, prodEnd = prodEnd order <|> Just (orderCurrentTime order)}
+
+
+dispatchReverse :: Routing -> Block -> [Block]
+dispatchReverse routes nxtBl = map fst $ filter ((== nxtBl) . snd) routesWoProducts
+  where
+    routesWoProducts = toList $ map (first snd) routes
 
 
 --

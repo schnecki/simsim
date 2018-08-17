@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 81
+--     Update #: 86
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,8 +50,10 @@ import           Text.PrettyPrint.ANSI.Leijen
 import           SimSim.Block
 import           SimSim.Order
 import           SimSim.Simulation
+import           SimSim.Simulation.Type
 import           SimSim.Statistics.Internal
 import           SimSim.Statistics.Ops
+import           SimSim.Statistics.Pretty
 import           SimSim.Statistics.Type
 import           SimSim.Time
 
@@ -69,21 +71,21 @@ spec = do
     it "prop_updateCosts" $ property prop_updateCosts
     it "prop_updateTardiness" $ property prop_updateTardiness
   describe "Statistics Exports" $ do
-    it "prop_statsAddRelease" $ property prop_statsAddRelease
+    -- it "prop_statsAddRelease" $ property prop_statsAddRelease
     it "prop_statsAddEndProduction" $ property prop_statsAddEndProduction
-    it "prop_statsAddShipped" $ property prop_statsAddShipped
+    -- it "prop_statsAddShipped" $ property prop_statsAddShipped
 
 instance Pretty Rational where
   pretty = text . show
 
-prop_blockFlowTime :: Update -> Order -> Property
-prop_blockFlowTime bl@Shipped o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (released o)) === getBlockFlowTime bl o
-prop_blockFlowTime bl@EndProd o = isJust (prodEnd o) ==> fromTime (fromJust (prodEnd o) - fromJust (released o)) === getBlockFlowTime bl o
-prop_blockFlowTime bl@(UpBlock OrderPool) o = isJust (released o) ==> fromTime (fromJust (released o) - arrivalDate o) === getBlockFlowTime bl o
-prop_blockFlowTime bl@(UpBlock FGI) o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) === getBlockFlowTime bl o
-prop_blockFlowTime bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime bl o > 0
-prop_blockFlowTime bl@(UpBlock Machine{}) o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime bl o
-prop_blockFlowTime bl@(UpBlock Queue{}) o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime bl o
+prop_blockFlowTime :: BlockTimes -> Update -> Order -> Property
+prop_blockFlowTime blTimes bl@Shipped o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (released o)) === getBlockFlowTime blTimes bl o
+prop_blockFlowTime blTimes bl@EndProd o = isJust (prodEnd o) ==> fromTime (fromJust (prodEnd o) - fromJust (released o)) === getBlockFlowTime blTimes bl o
+prop_blockFlowTime blTimes bl@(UpBlock OrderPool) o = isJust (released o) ==> fromTime (fromJust (released o) - arrivalDate o) === getBlockFlowTime blTimes bl o
+prop_blockFlowTime blTimes bl@(UpBlock FGI) o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) === getBlockFlowTime blTimes bl o
+prop_blockFlowTime blTimes bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime blTimes bl o > 0
+prop_blockFlowTime blTimes bl o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime blTimes bl o
+-- prop_blockFlowTime blTimes bl@(UpBlock q@Queue{}) o = property $ fromTime (orderCurrentTime o - M.findWithDefault 0 q blTimes) === getBlockFlowTime blTimes bl o
 
 prop_updateCosts :: Update -> Order -> StatsOrderCost -> Property
 prop_updateCosts Shipped o st@(StatsOrderCost earn wip bo fgi) = property $ StatsOrderCost (earn+1) wip bo fgi === updateCosts Shipped o st
@@ -103,7 +105,7 @@ prop_updateTardiness o st = forAll sizedUpdate (\us -> conjoin $ map (\u -> prop
 
 
 prop_statsAddRelease :: Order -> SimSim -> Property
-prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> property $ sim {simStatistics = stats {simStatsBlock = block', simStatsBlockTimes = times'}} === statsAddRelease o sim
+prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> property $ eqPretty (sim {simStatistics = stats {simStatsBlock = block', simStatsBlockTimes = times'}}) (prettySimStatistics True True) (statsAddRelease o sim) (prettySimStatistics True False)
   where
     stats = simStatistics sim
     addStatsOrderTime (StatsOrderTime s1 stdDev1 partial1) (StatsOrderTime s2 stdDev2 partial2) = StatsOrderTime (s1 + s2) 0  Nothing -- TODO stdDev
@@ -118,7 +120,7 @@ prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> 
       SimStats
         1
         (StatsOrderTime (f o) 0 Nothing)
-        Nothing -- emptyStatsOrderTard     -- only reported when shipped
+        Nothing
       where
         tard = maybe 0 (fromTime . max 0 . subtract (dueDate o)) (shipped o)
     singRel = simStatsSingleton (\o -> fromTime (fromJust (released o)) - fromTime (arrivalDate o)) o

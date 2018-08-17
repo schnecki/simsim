@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 81
+--     Update #: 83
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -77,12 +77,8 @@ prettyOrderPool prettyOrder xs =
 
 prettyOrderQueue :: Bool -> Bool -> (Order -> Doc) -> M.Map Block [Order] -> Doc
 prettyOrderQueue isTest updateStats prettyOrder m =
-  text "Queues:" <$$> prettyMap (text . show) (prettyOrderList prettyOrder) m
+  text "Queues for:" <$$> prettyMap (text . show) (prettyOrderList prettyOrder) m
 
-  where m' | not isTest && updateStats = M.fromList $ concatMap toPair $ M.elems m
-           | otherwise = m
-        toPair []     = []
-        toPair (x:xs) = [(lastBlock x, (x:xs))]
 
 prettyMap :: (a -> Doc) -> (t -> Doc) -> Map a t -> Doc
 prettyMap prettyKey prettyValue m =

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,14 +75,14 @@ updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
     _       -> st
 
 
-getBlockFlowTime :: Update -> Order -> Rational
-getBlockFlowTime bl order = case bl of
+getBlockFlowTime :: BlockTimes -> Update -> Order -> Rational
+getBlockFlowTime blTimes bl order = case bl of
   UpBlock bl -> case bl of
     OrderPool -> fromTime $ fromMaybe err $ (-) <$> released order <*> pure (arrivalDate order) -- released
     FGI       -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
     Sink      -> error "Update of Sink not possible"
     Machine{}   -> fromTime $ orderCurrentTime order - blockStartTime order
-    Queue{}     -> fromTime $ orderCurrentTime order - blockStartTime order
+    Queue{}    -> fromTime $ orderCurrentTime order - blockStartTime order -- M.findWithDefault 0 bl blTimes
   EndProd    -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order             -- finished production
   Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order             -- shipped
 

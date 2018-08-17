@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 100
+--     Update #: 102
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -78,20 +78,18 @@ prettyStats isTest (SimStats nr time mTard) =
 
 
 prettyOrderTime :: Bool -> Integer -> StatsOrderTime -> Doc
-prettyOrderTime isTest nr stats@(StatsOrderTime _ _ partial) =
+prettyOrderTime False nr stats@(StatsOrderTime _ _ partial) =
   text "mean: " <+>
   time
     (if nr == 0
        then 0
        else sumTime / fromInteger nr) <+>
-  (if isTest
-     then parens (time sumTime <+> char '/' <+> integer nr <> ";" <+> text (show $ stats {statsLastUpdatePartial = Nothing}))
-     else empty) <$$>
-  text "standard deviation:" <+>
-  time stdDev
+  text "standard deviation:" <+> time stdDev
   where
     sumTime = maybe (statsSumTime stats) statsSumTime partial
     stdDev = maybe (statsStdDevTime stats) statsStdDevTime partial
+prettyOrderTime True nr stats@(StatsOrderTime sumTime stdDev _) =
+  parens (time sumTime <+> char '/' <+> integer nr <> ";" <+> text (show $ stats {statsLastUpdatePartial = Nothing})) <$$> text "standard deviation:" <+> time stdDev
 
 
 prettyOrderTardiness :: Bool -> Integer -> StatsOrderTard -> Doc

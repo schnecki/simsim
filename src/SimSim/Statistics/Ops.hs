@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 193
+--     Update #: 203
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -60,17 +60,20 @@ import           SimSim.Time
 -- | This function reports the given order as released. The invariant is that the release date is set, otherwise an
 -- error will be called.
 statsAddRelease :: Order -> SimSim -> SimSim
-statsAddRelease order sim = sim {simStatistics = updateBlockOrder False (UpBlock OrderPool) order (simStatistics sim)}
+statsAddRelease order sim = sim {simStatistics = updateBlockOrder False blTimes (UpBlock OrderPool) order (simStatistics sim)}
+  where blTimes = simBlockTimes $ simInternal sim
 
 -- | This function reports an order as finished with production (now entering the FGI). It updates the statistics
 -- according to the given order.
 statsAddEndProduction :: Order -> SimSim -> SimSim
-statsAddEndProduction order sim = sim {simStatistics = updateShopFloorOrder EndProd order (simStatistics sim)}
+statsAddEndProduction order sim = sim {simStatistics = updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
+  where blTimes = simBlockTimes $ simInternal sim
 
 -- | This function reports an order as shipped (leaving the FGI). The corresponding statistical information is updated.
 statsAddShipped :: Order -> SimSim -> SimSim
 statsAddShipped order sim =
-  sim {simStatistics = updateBlockOrder False (UpBlock FGI) order $ updateShopFloorAndFgiOrder Shipped order (simStatistics sim)}
+  sim {simStatistics = updateBlockOrder False blTimes (UpBlock FGI) order $ updateShopFloorAndFgiOrder blTimes Shipped order (simStatistics sim)}
+  where blTimes = simBlockTimes $ simInternal sim
 
 statsAddBlock :: Block -> Order -> SimSim -> SimSim
 statsAddBlock bl o sim = statsAddBlockInternal False bl o sim
@@ -80,16 +83,24 @@ statsAddBlockPartialUpdate :: Block -> Order -> SimSim -> SimSim
 statsAddBlockPartialUpdate bl o sim = statsAddBlockInternal True bl o sim
 
 statsAddBlockInternal :: Bool -> Block -> Order -> SimSim -> SimSim
-statsAddBlockInternal isPartial bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrder isPartial (UpBlock bl) o (simStatistics sim) }
-statsAddBlockInternal _ bl _ _  = error $ "statsAddBlock is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+statsAddBlockInternal isPartial bl o sim
+  | isMachine bl || isQueue bl = sim {simStatistics = updateBlockOrder isPartial blTimes (UpBlock bl) o (simStatistics sim)}
+  | otherwise = error $ "statsAddBlock is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+    where blTimes = simBlockTimes $ simInternal sim
 
-statsAddBlockTimesOnly :: Bool -> Block -> Order -> SimSim -> SimSim
-statsAddBlockTimesOnly isPartial bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrderTimesOnly isPartial (UpBlock bl) o (simStatistics sim) }
-statsAddBlockTimesOnly _ bl _ _  = error $ "statsAddBlockTimesOnly is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+statsAddBlockTimesOnly :: Block -> Order -> SimSim -> SimSim
+statsAddBlockTimesOnly bl o sim
+  | isMachine bl || isQueue bl = sim {simStatistics = updateBlockOrderTimesOnly blTimes (UpBlock bl) o (simStatistics sim)}
+  | otherwise = error $ "statsAddBlockTimesOnly is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+  where
+    blTimes = simBlockTimes $ simInternal sim
 
 statsAddBlockBlockOnly :: Bool -> Block -> Order -> SimSim -> SimSim
-statsAddBlockBlockOnly isPartial bl o sim | isMachine bl || isQueue bl = sim { simStatistics = updateBlockOrderBlockOnly isPartial (UpBlock bl) o (simStatistics sim) }
-statsAddBlockBlockOnly _ bl _ _  = error $ "statsAddBlockBlockOnly is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+statsAddBlockBlockOnly isPartial bl o sim
+  | isMachine bl || isQueue bl = sim {simStatistics = updateBlockOrderBlockOnly isPartial blTimes (UpBlock bl) o (simStatistics sim)}
+  | otherwise = error $ "statsAddBlockBlockOnly is only for machines and queues, but was used for block " ++ show bl ++ ". Use the other functions instead."
+  where
+    blTimes = simBlockTimes $ simInternal sim
 
 
 -- | This function accumulates the costs at the end of the period. If it is not the end of the period, then nothing is done.
@@ -108,61 +119,55 @@ updateCostsEndPeriod curTime opOrds queueOrds machineOrds fgiOrds simStatistics 
         wipOrds = map fst (M.elems machineOrds) ++ concat (M.elems queueOrds)
 
 
-updateShopFloorAndFgiOrder :: Update -> Order -> SimStatistics -> SimStatistics
-updateShopFloorAndFgiOrder up order simStatistics =
+updateShopFloorAndFgiOrder :: BlockTimes -> Update -> Order -> SimStatistics -> SimStatistics
+updateShopFloorAndFgiOrder blTimes up order simStatistics =
   simStatistics
-  {simStatsShopFloorAndFgi = updateSimStatsOrder False up order (simStatsShopFloorAndFgi simStatistics), simStatsOrderCosts = updateCosts up order (simStatsOrderCosts simStatistics)}
+  {simStatsShopFloorAndFgi = updateSimStatsOrder False blTimes up order (simStatsShopFloorAndFgi simStatistics), simStatsOrderCosts = updateCosts up order (simStatsOrderCosts simStatistics)}
 
 
-updateShopFloorOrder :: Update -> Order -> SimStatistics -> SimStatistics
-updateShopFloorOrder up order simStatistics = simStatistics {simStatsShopFloor = updateSimStatsOrder False up order (simStatsShopFloor simStatistics)}
+updateShopFloorOrder :: BlockTimes -> Update -> Order -> SimStatistics -> SimStatistics
+updateShopFloorOrder blTimes up order simStatistics = simStatistics {simStatsShopFloor = updateSimStatsOrder False blTimes up order (simStatsShopFloor simStatistics)}
 
 
-updateBlockOrder :: Bool -> Update -> Order -> SimStatistics -> SimStatistics
-updateBlockOrder isPartial up@(UpBlock bl) order simStatistics =
-  simStatistics { simStatsBlock = M.insert bl (updateSimStatsOrder isPartial up order stats) (simStatsBlock simStatistics)
-                , simStatsBlockTimes = M.insert bl (updateStatsBlockTime up order blTimes) (simStatsBlockTimes simStatistics)
-                }
+updateBlockOrder :: Bool -> BlockTimes -> Update -> Order -> SimStatistics -> SimStatistics
+updateBlockOrder isPartial blTimes up@(UpBlock bl) order = updateBlockOrderBlockOnly isPartial blTimes up order . updateBlockOrderTimesOnly blTimes up order
+updateBlockOrder _ _ bl _ = error ("called updateBlockOrder on a non block: " ++ show bl)
+
+
+updateBlockOrderBlockOnly :: Bool -> BlockTimes -> Update -> Order -> SimStatistics -> SimStatistics
+updateBlockOrderBlockOnly isPartial blTimes up@(UpBlock bl) order simStatistics =
+  simStatistics {simStatsBlock = M.insert bl (updateSimStatsOrder isPartial blTimes up order stats) (simStatsBlock simStatistics)}
   where
     stats = fromMaybe emptyStats (M.lookup bl $ simStatsBlock simStatistics)
-    blTimes = fromMaybe emptyStatsBlockTime (M.lookup bl $ simStatsBlockTimes simStatistics)
-
-updateBlockOrder _ bl _ _ = error ("called updateBlockOrder on a non block: " ++ show bl)
+updateBlockOrderBlockOnly _ _ bl _ _ = error ("called updateBlockOrderBlockOnly on a non block: " ++ show bl)
 
 
-updateBlockOrderBlockOnly :: Bool -> Update -> Order -> SimStatistics -> SimStatistics
-updateBlockOrderBlockOnly isPartial up@(UpBlock bl) order simStatistics =
-  simStatistics {simStatsBlock = M.insert bl (updateSimStatsOrder isPartial up order stats) (simStatsBlock simStatistics)}
+updateBlockOrderTimesOnly :: BlockTimes -> Update -> Order -> SimStatistics -> SimStatistics
+updateBlockOrderTimesOnly blTimes up@(UpBlock bl) order simStatistics =
+  simStatistics {simStatsBlockTimes = M.insert bl (updateStatsBlockTime blTimes up order statsBlTimes) (simStatsBlockTimes simStatistics)}
   where
-    stats = fromMaybe emptyStats (M.lookup bl $ simStatsBlock simStatistics)
-updateBlockOrderBlockOnly _ bl _ _ = error ("called updateBlockOrderBlockOnly on a non block: " ++ show bl)
-
-
-updateBlockOrderTimesOnly :: Bool -> Update -> Order -> SimStatistics -> SimStatistics
-updateBlockOrderTimesOnly isPartial up@(UpBlock bl) order simStatistics =
-  simStatistics {simStatsBlockTimes = M.insert bl (updateStatsBlockTime up order blTimes) (simStatsBlockTimes simStatistics)}
-  where
-    blTimes = fromMaybe emptyStatsBlockTime (M.lookup bl $ simStatsBlockTimes simStatistics)
+    statsBlTimes = fromMaybe emptyStatsBlockTime (M.lookup bl $ simStatsBlockTimes simStatistics)
 updateBlockOrderTimesOnly _ bl _ _ = error ("called updateBlockOrderTimesOnly on a non block: " ++ show bl)
 
 
-updateStatsBlockTime :: Update -> Order -> StatsBlockTime -> StatsBlockTime
-updateStatsBlockTime up order (StatsBlockTime pT) = StatsBlockTime (pT + getBlockFlowTime up order)
+updateStatsBlockTime :: BlockTimes -> Update -> Order -> StatsBlockTime -> StatsBlockTime
+updateStatsBlockTime blTimes up@(UpBlock (Machine {})) order (StatsBlockTime pT) = StatsBlockTime (pT + getBlockFlowTime blTimes up order)
+updateStatsBlockTime blTimes up@(UpBlock bl) order (StatsBlockTime pT) = StatsBlockTime (pT + fromTime (max 0 $ blockStartTime order - M.findWithDefault 0 bl blTimes))
 
 -- | This function updates the ``SimStats`` according to the given order and for the given block. The Boolean, decides
 -- whether the order is counted (False) or if this is a partial update (True) and the actual one will follow.
-updateSimStatsOrder :: Bool -> Update -> Order  -> SimStats -> SimStats
-updateSimStatsOrder isPartial up order (SimStats nr ft mTard) = case up of
-  UpBlock{} -> SimStats nr' (updateOrderTime isPartial up order ft) Nothing
-  _         ->  SimStats nr' (updateOrderTime isPartial up order ft) (Just $ updateTardiness up order (fromMaybe emptyStatsOrderTard mTard))
+updateSimStatsOrder :: Bool -> BlockTimes -> Update -> Order  -> SimStats -> SimStats
+updateSimStatsOrder isPartial blTimes up order (SimStats nr ft mTard) = case up of
+  UpBlock{} -> SimStats nr' (updateOrderTime isPartial blTimes up order ft) Nothing
+  _         -> SimStats nr' (updateOrderTime isPartial blTimes up order ft) (Just $ updateTardiness up order (fromMaybe emptyStatsOrderTard mTard))
   where nr' | isPartial = nr
             | otherwise = nr+1
 
 
-updateOrderTime :: Bool -> Update -> Order -> StatsOrderTime -> StatsOrderTime
-updateOrderTime isPartial up order st@(StatsOrderTime tSum stdDev _) =
+updateOrderTime :: Bool -> BlockTimes -> Update -> Order -> StatsOrderTime -> StatsOrderTime
+updateOrderTime isPartial blTimes up order st@(StatsOrderTime tSum stdDev _) =
   StatsOrderTime
-    (tSum + getBlockFlowTime up order)
+    (tSum + getBlockFlowTime blTimes up order)
     (stdDev)
     (if isPartial
        then Just $ st {statsLastUpdatePartial = Nothing}

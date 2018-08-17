@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 181
+--     Update #: 201
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -47,6 +47,7 @@ import           Control.Monad.IO.Class
 import           Control.Monad.Logger
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
+import qualified Data.List                  as L
 import qualified Data.Map.Strict            as M
 import           Data.Monoid                ((<>))
 import           Data.Sequence              (replicate)
@@ -73,6 +74,7 @@ import           SimSim.Statistics.Ops
 import           SimSim.Time
 
 
+import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Fgi
 import           SimSim.Runner.Machine
 import           SimSim.Runner.Queue
@@ -95,8 +97,12 @@ simulation sim simEnd incomingOrders = do
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
-    finalize simEnd = statsEndPeriodAddCosts . mapBlockTimes (max simEnd) . setSimCurrentTime simEnd
-
+    finalize simEnd = statsEndPeriodAddCosts . mapBlockTimes (max simEnd) . fixIdleTimeQueues . setSimCurrentTime simEnd
+    fixIdleTimeQueues sim = foldl' (\s bl -> statsAddBlockTimesOnly bl dummyOrder s) sim blsQueues
+      where
+        blsMachines = filter (\bl -> isMachine bl) (toList $ simBlocks $ simInternal sim) -- queue is idle
+        blsQueues = L.nub $ concatMap (dispatchReverse (simRouting sim)) $ filter (\mBl -> maybe True null (M.lookup mBl (simOrdersQueue sim))) blsMachines
+        dummyOrder = (newOrder (Product 1) simEnd simEnd) {orderCurrentTime = simEnd}
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts after one period.
@@ -118,8 +124,7 @@ simulateLogging loggingFun sim incomingOrders = do
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts after one period.
 simulateLoggingEnd :: (LoggingT IO SimSim -> IO SimSim) -> Time -> SimSim -> [Order] -> IO SimSim
-simulateLoggingEnd loggingFun simEnd sim incomingOrders = do
-  loggingFun $ runEffect $ simulation sim simEnd incomingOrders
+simulateLoggingEnd loggingFun simEnd sim incomingOrders = loggingFun $ runEffect $ simulation sim simEnd incomingOrders
 
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
@@ -157,7 +162,6 @@ mkPipeProdSys sim ordersToRelease =
     maxMs = simMaxMachines $ simInternal sim
     lastOccur = Prelude.maximum $ M.elems (simBlockLastOccur $ simInternal sim)
     routes = simRouting sim
-    nxtOrderId = simNextOrderId sim
 
 --
 -- Runner.hs ends here

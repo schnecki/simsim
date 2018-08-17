@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 295
+--     Update #: 314
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,6 +50,7 @@ import           Control.Monad.Trans.Class
 import qualified Data.Map.Strict            as M
 import           Data.Text                  (Text)
 import           Data.Void
+import qualified Data.List as L
 import           Debug.Trace
 import           Pipes
 import Control.Monad.Logger
@@ -95,35 +96,50 @@ queue name routes (Right order) = do
     _ -> void $ respond (pure order) -- just push through
   request q >>= queue name routes    -- request new order and process
 
+
 -- | Process blocks, by responding one order for each block and then process the new requests.
 processBlocks :: (MonadLogger m, MonadState SimSim m) => Text -> Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
 processBlocks _ _ [] = return []
 processBlocks name loop (nxtBl:bs) = do
   oldQueues <- gets simOrdersQueue
+  allOrders <- M.findWithDefault [] nxtBl <$> gets simOrdersQueue
+  -- update stats
+  let minOrders = map (L.minimumBy (compare `on` blockStartTime)) $ groupBy ((==) `on` lastBlock) $ sortBy (compare `on` lastBlock) allOrders
+  blTimes <- gets (simBlockTimes . simInternal)
+  unless (null allOrders) $
+    modify (\sim -> foldl' (\s minOrder -> let lastBl = lastBlock minOrder
+                                               blTime = max (blockStartTime minOrder) (M.findWithDefault 0 lastBl blTimes)
+                                           in setBlockTime lastBl blTime $ statsAddBlockTimesOnly lastBl minOrder s) sim minOrders)
+  -- dispatch order
   mOrder <- state (getAndRemoveOrderFromQueue nxtBl)
   case mOrder of
-    Nothing -> processBlocks name loop bs
+    Nothing -> do
+      logger Nothing $ "No more orders in queue " ++ tshow nxtBl
+      processBlocks name loop bs
     Just o -> do
+      let thisBl = lastBlock o
       endTime <- getSimEndTime
       startTime <-
         if isMachine nxtBl
           then (\x -> max (orderCurrentTime o) x) <$> getBlockTime nxtBl
           else return $ orderCurrentTime o
       isFree <- isNothing . M.lookup nxtBl <$> gets simOrdersMachine
-      if startTime > endTime || not isFree
-        then reset oldQueues    -- reset queue state to prevent re-ordering of queues
+      if not isFree || startTime > endTime
+        then do
+          reset oldQueues -- reset queue state to prevent re-ordering of queues
+          logger Nothing $ "Reset old queues for " ++ tshow thisBl ++ " and order " ++ tshow (orderId o)
+          processBlocks name True bs
         else do
           let o' = setOrderCurrentTime startTime o
-          let thisBl = lastBlock o'
           logger (Just startTime) $ "Order " ++ tshow (orderId o') ++ " just left " ++ tshow thisBl ++ ". Order: " ++ tshow o'
-          modify (statsAddBlockBlockOnly False thisBl o' . setBlockTime thisBl startTime)
+          modify (setBlockTime thisBl startTime . statsAddBlockBlockOnly False thisBl o')
           r <- respond $ pure o'
           rs <- processBlocks name False bs
           if loop
             then processBlocks name True (r : rs)
             else return (r : rs)
   where
-    reset oldQueues = modify (setOrderQueue oldQueues) >> return []
+    reset oldQueues = modify (setOrderQueue oldQueues)
 
 
 processOrder :: Routing -> Block -> Order -> Order

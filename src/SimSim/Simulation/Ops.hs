@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 28
+--     Update #: 37
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -79,7 +79,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
                mempty
                mempty
                emptyStatistics
-               (SimInternal uniqueBlocks mTimes 1 maxMachines (fromProcTimes procTimes) randomNs (M.fromList topSorts) (M.fromList lastOccur))
+               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) randomNs (M.fromList topSorts) (M.fromList lastOccur))
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps))
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
@@ -88,7 +88,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
             routeGroups = NL.groupBy ((==) `on` fst . fst) $ NL.sortBy (compare `on` fst . fst) routes
             routeGroupsWoFgi = map (NL.filter (not . isFgi . snd)) routeGroups
             lengths = max (fmap (length . filter (not . isMachine . snd)) routeGroupsWoFgi) (fmap (length . filter (not . isQueue . snd)) routeGroupsWoFgi) -- every route is one step
-            mTimes = M.fromList $ zip (filter isMachine $ toList allBlocks) (repeat 0)
+            blTimes = M.fromList $ zip (filter (\x -> isQueue x || isMachine x) $ toList allBlocks) (repeat 0)
             hasSource = OrderPool `elem` uniqueBlocks
             randomNs = NL.fromList $ randomRs (0, 1) g
             lastOccur = map (Prelude.maximum . concat . occurances) (toList allBlocks)
@@ -141,14 +141,9 @@ setOrderQueue queues sim = sim {simOrdersQueue = queues }
 
 
 addOrderToQueue :: Block -> Order -> SimSim -> SimSim
-addOrderToQueue bl o sim = updateBlockTime $ sim {simOrdersQueue = M.insertWith (flip (<>)) (nextBlock o) [o] (simOrdersQueue sim)}
+addOrderToQueue bl o sim = sim {simOrdersQueue = M.insertWith (flip (<>)) (nextBlock o) [o] (simOrdersQueue sim)}
   where
     internal = simInternal sim
-    queueStateBefore = M.lookup (nextBlock o) (simOrdersQueue sim)
-    wasEmpty = maybe True null queueStateBefore
-    updateBlockTime sim
-      | wasEmpty = statsAddBlockTimesOnly False bl o $ setBlockTime bl (orderCurrentTime o) sim
-      | otherwise = id sim
 
 
 getAndRemoveOrderFromQueue :: Block -> SimSim -> (Maybe Order, SimSim)

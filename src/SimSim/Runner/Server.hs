@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 22
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -55,12 +55,12 @@ import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
 import           System.Random
 
-
 import           SimSim.Block
 import           SimSim.Order
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
+import           SimSim.Runner.Util
 import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Time
@@ -69,6 +69,7 @@ import           SimSim.Time
 server :: (MonadLogger m, MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
 server _ nr [] = modify (addNextOrderId (nr-1)) -- set new order id for upcoming orders
 server sim nr (o:os) = do
+  logger Nothing $ "Server orders: " ++ tshow (map orderId (o:os))
   let t = simCurrentTime sim
   respond $ setOrderId nr $ setOrderBlockStartTime t $ setOrderCurrentTime t o
   server sim (nr+1) os

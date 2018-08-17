@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 393
+--     Update #: 394
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -95,9 +95,11 @@ instance Eq SimSim where
       ]
 
 
+type BlockTimes = M.Map Block Time
+
 data SimInternal = SimInternal
   { simBlocks          :: !(NL.NonEmpty Block)
-  , simBlockTimes      :: !(M.Map Block Time)
+  , simBlockTimes      :: !BlockTimes
   , simEndTime         :: !Time
   , simMaxMachines     :: !Int
   , simProcessingTimes :: !ProcessingTimes
