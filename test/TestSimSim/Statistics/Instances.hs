@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 9
+--     Update #: 10
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,9 +74,9 @@ instance CoArbitrary StatsOrderCost where
   coarbitrary (StatsOrderCost ear wip bo fgi) = variant 0 . coarbitrary (ear, wip, bo, fgi)
 
 instance Arbitrary StatsOrderTime where
-  arbitrary = StatsOrderTime <$> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal))
+  arbitrary = StatsOrderTime <$> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal)) <*> arbitrary
 instance CoArbitrary StatsOrderTime where
-  coarbitrary (StatsOrderTime sumT stdDevT) = variant 0 . coarbitrary (sumT, stdDevT)
+  coarbitrary (StatsOrderTime sumT stdDevT partial) = variant 0 . coarbitrary (sumT, stdDevT, partial)
 
 instance Arbitrary StatsOrderTard where
   arbitrary = StatsOrderTard <$> choose (0, maxVal) <*> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal))

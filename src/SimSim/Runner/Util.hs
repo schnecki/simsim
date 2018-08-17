@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 68
+--     Update #: 71
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -77,6 +77,11 @@ instance (MonadLogger m) => MonadLogger (Proxy a b c d m) where
 getSimEndTime :: (MonadState SimSim m) => m Time
 getSimEndTime = gets (simEndTime . simInternal)
 
+updateTailRandNrs :: SimSim -> SimSim
+updateTailRandNrs sim = sim {simInternal = (simInternal sim) {simRandomNumbers = newRands}}
+  where
+    newRands = NL.fromList $ NL.tail $ simRandomNumbers $ simInternal sim
+
 
 getNextRand :: (MonadState SimSim m) => m Double
 getNextRand = do
@@ -89,16 +94,6 @@ getBlockTime Sink = error "called block time for a sink"
 getBlockTime block = do
   m <- gets (simBlockTimes . simInternal)
   return $ fromMaybe (error $ "no block time for block: " ++ show block) (M.lookup block m)
-
-addToBlockTime :: (MonadState SimSim m) => Block -> Time -> m ()
-addToBlockTime block t = onBlockTime block (t+)
-
-setBlockTime :: (MonadState SimSim m) => Block -> Time -> m ()
-setBlockTime block t = onBlockTime block (const t)
-
-
-onBlockTime :: (MonadState SimSim m) => Block -> (Time -> Time) -> m () 
-onBlockTime block f = modify (\s -> s {simInternal = (simInternal s) {simBlockTimes = M.update (return . f) block (simBlockTimes $ simInternal s)}})
 
 mapBlockTimes :: (Time -> Time) -> SimSim -> SimSim
 mapBlockTimes f s = s {simInternal = (simInternal s) {simBlockTimes = M.map f (simBlockTimes $ simInternal s)}}

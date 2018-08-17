@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 56
+--     Update #: 66
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,8 +42,8 @@ import qualified Data.Map.Strict as M
 import           SimSim.Block
 
 data SimStatistics = SimStatistics
-  { simStatsBlock           :: M.Map Block SimStats       -- ^ Statistics for blocks, like nr of orders.
-  , simStatsBlockTimes      :: M.Map Block StatsBlockTime -- ^ Lists the (processing) times for the machines (only for machines).
+  { simStatsBlock           :: M.Map Block SimStats       -- ^ Statistics for blocks, like nr of orders, flow time.
+  , simStatsBlockTimes      :: M.Map Block StatsBlockTime -- ^ Lists the (processing) times only for the machines and queues.
   , simStatsShopFloor       :: SimStats       -- ^ Shop floor (from release until entry of finished goods inventory)
   , simStatsShopFloorAndFgi :: SimStats       -- ^ Shop floor (from release until shipping)
   , simStatsOrderCosts      :: StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
@@ -57,8 +57,10 @@ data SimStats = SimStats
   } deriving (Eq, Show)
 
 data StatsOrderTime = StatsOrderTime
-  { statsSumTime    :: Rational
-  , statsStdDevTime :: Rational
+  { statsSumTime           :: Rational
+  , statsStdDevTime        :: Rational
+  , statsLastUpdatePartial :: Maybe StatsOrderTime -- ^ Only used if last update was partial. Holds the previous
+                                                   -- ``StatsOrderTime``.
   } deriving (Eq, Show)
 
 data StatsOrderTard = StatsOrderTard
@@ -75,7 +77,7 @@ data StatsOrderCost = StatsOrderCost
   } deriving (Eq, Show)
 
 data StatsBlockTime = StatsBlockTime
-  { statsProcessing :: Rational
+  { statsBlockTime :: Rational  -- ^ Processing time for machines, idle time for queues.
   -- , statsBroken
   } deriving (Eq, Show)
 
@@ -87,7 +89,7 @@ emptyStats :: SimStats
 emptyStats = SimStats 0 emptyStatsOrderTime Nothing
 
 emptyStatsOrderTime :: StatsOrderTime
-emptyStatsOrderTime = StatsOrderTime 0 0
+emptyStatsOrderTime = StatsOrderTime 0 0 Nothing
 
 emptyStatsOrderTard :: StatsOrderTard
 emptyStatsOrderTard = StatsOrderTard 0 0 0

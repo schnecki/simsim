@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 55
+--     Update #: 62
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,17 +50,17 @@ import           SimSim.Statistics.Pretty
 import           SimSim.Time
 
 instance Pretty SimSim where
-  pretty = prettySimulation prettyOrderDue
+  pretty = prettySimulation False prettyOrderDue
 
 
 prettySimSim :: SimSim -> Text
-prettySimSim sim = pack $ displayS (renderSmart 1.0 97 $ prettySimulation prettyOrderDue sim) ""
+prettySimSim sim = pack $ displayS (renderSmart 1.0 97 $ prettySimulation False prettyOrderDue sim) ""
 
-prettySimulation :: (Order -> Doc) -> SimSim -> Doc
-prettySimulation prettyOrder sim =
+prettySimulation :: Bool -> (Order -> Doc) -> SimSim -> Doc
+prettySimulation updateStats prettyOrder sim =
   nest 2 $
   text "Simulation:" <$$>
-  -- text "Routing:" <+>
+  text "Next OrderId:" <+> integer (simNextOrderId sim) <$$>
   text "Current Simulation Time:" <+> prettyTime (simCurrentTime sim) <$$>
   text "Period Length:" <+> prettyTime (simPeriodLength sim) <+> "steps" <$$>
   nest 2 (prettyOrderPool prettyOrder (simOrdersOrderPool sim)) <$$>
@@ -68,7 +68,7 @@ prettySimulation prettyOrder sim =
   nest 2 (prettyOrderMachine prettyOrder (simOrdersMachine sim)) <$$>
   nest 2 (prettyOrderFgi prettyOrder (simOrdersFgi sim)) <$$>
   nest 2 (prettyOrderFinishedOrders prettyOrder (simOrdersShipped sim)) <$$>
-  nest 2 (prettySimStatistics (simCurrentTime sim) (simStatistics sim)) <$$> empty
+  nest 2 (prettySimStatistics updateStats sim) <$$> empty
 
 
 prettyOrderPool :: (Order -> Doc) -> [Order] -> Doc

@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 257
+--     Update #: 276
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -60,12 +60,14 @@ import qualified Prelude                    as Prelude
 import           System.Random
 
 import           SimSim.Block
+import SimSim.Statistics
 import           SimSim.Order.Type
 import           SimSim.ProcessingTime.Ops
 import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Util
+import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 
 type QueueResponse = Maybe Order
@@ -97,28 +99,34 @@ queue name routes (Right order)      -- received an order, store and continue
 -- | Process blocks, by responding one order for each block and then process the new requests.
 processBlocks :: (MonadLogger m, MonadState SimSim m) => Text -> Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
 processBlocks _ _ [] = return []
-processBlocks name loop (bl:bs) = do
-  mOrder <- state (getAndRemoveOrderFromQueue bl)
+processBlocks name loop (nxtBl:bs) = do
+  oldQueues <- gets simOrdersQueue
+  mOrder <- state (getAndRemoveOrderFromQueue nxtBl)
   case mOrder of
     Nothing -> processBlocks name loop bs
     Just o -> do
-      let nxtBl = nextBlock o
       endTime <- getSimEndTime
       mStartTime <-
-        if isMachine bl
-          then (\x -> Just (max (orderCurrentTime o)) <*> Just x) <$> getBlockTime nxtBl
-          else return Nothing
-      if maybe False (>= endTime) mStartTime
-        then do
-        modify (addOrderToQueue bl o)
-        mQueues <- gets simOrdersQueue
-        return []
-        else do
-          r <- respond $ pure o
-          rs <- processBlocks name False bs
-          if loop
-            then processBlocks name True (r : rs)
-            else return (r : rs)
+        if isMachine nxtBl
+          then (\x -> Just $ max (orderCurrentTime o) x) <$> getBlockTime nxtBl
+          else return $ Just $ orderCurrentTime o
+      case mStartTime of
+        Nothing -> reset oldQueues -- reset queue state to prevent re-ordering of queues
+        Just startTime ->
+          if startTime >= endTime
+            then reset oldQueues   -- reset queue state to prevent re-ordering of queues
+            else do
+              let o' = setOrderCurrentTime startTime o
+              let thisBl = lastBlock o
+              logger (Just startTime) $ "Order " ++ tshow (orderId o) ++ " just left " ++ tshow thisBl
+              modify (setBlockTime thisBl startTime)
+              r <- respond $ pure o'
+              rs <- processBlocks name False bs
+              if loop
+                then processBlocks name True (r : rs)
+                else return (r : rs)
+  where
+    reset oldQueues = modify (setOrderQueue oldQueues) >> return []
 
 
 processOrder :: Routing -> Block -> Order -> Order

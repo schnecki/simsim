@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 68
+--     Update #: 71
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -57,7 +57,7 @@ data Order = Order
   , prodEnd          :: !(Maybe Time)
   , shipped          :: !(Maybe Time)
   , lastBlock        :: !Block
-  , lastBlockStart   :: !Time
+  , blockStartTime   :: !Time
   , nextBlock        :: !Block
   , orderCurrentTime :: Time
   } deriving (Show)
@@ -98,8 +98,8 @@ setOrderId nr o = o {orderId = nr}
 setOrderCurrentTime :: Time -> Order -> Order
 setOrderCurrentTime t o = o {orderCurrentTime = t}
 
-setOrderLastBlockStart :: Time -> Order -> Order
-setOrderLastBlockStart t o = o { lastBlockStart = t}
+setOrderBlockStartTime :: Time -> Order -> Order
+setOrderBlockStartTime t o = o { blockStartTime = t}
 
 
 addToOrderCurrentTime :: Time -> Order -> Order

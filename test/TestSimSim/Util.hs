@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 27
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,30 +36,42 @@
 
 module TestSimSim.Util
     ( (===)
+    , (====)
+    , eqPretty
     ) where
 
 import           ClassyPrelude                as P
 import           Data.Algorithm.Diff
 import           Data.Algorithm.DiffOutput
 import           Test.QuickCheck              hiding ((===))
+import qualified Test.QuickCheck              as QC
 import           Text.PrettyPrint.ANSI.Leijen
 
-(====) :: (Pretty a, Eq a) => a -> a -> Property
-l ==== r = whenFail (print err) (l P.== r)
-  where err = pretty l ++ "\n\n/=\n\n" ++ pretty r
+
+-- | Like '==', but prints a counterexample when it fails.
+infix 4 ====
+(====) :: (Show a, Eq a) => a -> a -> Property
+(====) = (QC.===)
 
 
 -- | Like '==', but prints a counterexample when it fails.
 infix 4 ===
 (===) :: (Pretty a, Eq a) => a -> a -> Property
-x === y =
-  counterexample (show' x ++ interpret res ++ show' y ++ "\n\tDiff: " ++ ppDiff diffs) res
+x === y = eqPretty x pretty y pretty
+
+
+-- | Like '==', but prints a counterexample when it fails.
+eqPretty :: (Pretty a, Eq a) => a -> (a -> Doc) -> a -> (a -> Doc) -> Property
+eqPretty x xDocF y yDocF =
+  counterexample (show xDoc ++ interpret res ++ show yDoc ++ "\n\tDiff: " ++ ppDiff diffs) res
   where
     res = x P.== y
-    diffs = getGroupedDiffBy (P.==) (lines $ show' x) (lines $ show' y)
+    xDoc = xDocF x
+    yDoc = yDocF y
+    diffs = getGroupedDiffBy (P.==) (lines $ show xDoc) (lines $ show yDoc)
     interpret True  = " == "
     interpret False = " /= "
-    show' = show . pretty
+
 
 --
 -- Util.hs ends here

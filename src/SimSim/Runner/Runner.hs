@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 179
+--     Update #: 180
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -67,7 +67,7 @@ import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
-import           SimSim.Simulation
+import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Statistics.Ops
 import           SimSim.Time

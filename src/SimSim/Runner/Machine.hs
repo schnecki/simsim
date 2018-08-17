@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 167
+--     Update #: 174
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -64,6 +64,7 @@ import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Util
+import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Statistics
 import           SimSim.Time
@@ -102,16 +103,17 @@ processOrder routes bl order pT = do
     else if startTime + pT > endTime -- check if can be processed fully
            then do
              logger (Just startTime) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until SIMULATION END " ++ tshow endTime
-             addToBlockTime bl (endTime - startTime)
-             let order' = dispatch routes bl $ setOrderLastBlockStart startTime $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
+             modify (addToBlockTime bl (endTime - startTime))
+             let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
              modify (addOrderToMachine order' (pT + startTime - endTime))
-             modify (statsAddBlock bl order')
+             -- do not update statistics. Current load will be added in prettyStatistics
+             modify (statsAddBlockPartialUpdate bl order')
            else do
              logger (Just startTime) $ tshow bl ++ " processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow (startTime + pT)
-             addToBlockTime bl pT
-             let order' = dispatch routes bl $ setOrderLastBlockStart startTime $ setOrderCurrentTime (startTime + pT) $ setProdStartTime startTime order
+             modify (addToBlockTime bl pT)
+             let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime (startTime + pT) $ setProdStartTime startTime order
              modify (statsAddBlock bl order')
-             let order'' = setOrderLastBlockStart endTime order'
+             let order'' = setOrderBlockStartTime endTime order'
              void $ respond $ pure order'' -- for us, process
 
 

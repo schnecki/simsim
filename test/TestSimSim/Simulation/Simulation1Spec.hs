@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 42
+--     Update #: 64
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,7 +49,7 @@ import           Test.QuickCheck                     hiding ((===))
 import           Text.PrettyPrint.ANSI.Leijen
 
 import           SimSim
-import           SimSim.Order.Type
+import           SimSim.Order
 import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Pretty
 import           SimSim.Simulation.Type
@@ -114,7 +114,7 @@ prop_simulation1AtTime t f =
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
     sim' <- simulateUntil t sim orders
-    return $ f sim === sim'
+    return $ eqPretty (f sim) (prettySimulation False prettyOrderDue) sim' pretty
 
 simAtTime1 :: SimSim -> SimSim
 simAtTime1 sim =
@@ -126,64 +126,40 @@ simAtTime1 sim =
   , simOrdersMachine = M.fromList [(Machine 1, (orders !! 0, 2)), (Machine 2, (orders !! 1, 3))]
   , simOrdersFgi = []
   , simOrdersShipped = []
-  , simStatistics = statsAtTime10
+  , simStatistics = statsAtTime1
   }
   where
-    statsAtTime10 :: SimStatistics
-    statsAtTime10 =
-      SimStatistics
-      { simStatsBlock = M.fromList []
-      , simStatsBlockTimes = M.fromList []
-      , simStatsShopFloor = statsShopFloor
-      , simStatsShopFloorAndFgi = statsShopFloorAndFgi
-      , simStatsOrderCosts = statsOrderCost
-      }
-      where
-        statsShopFloor = SimStats {statsNrOrders = 0, statsOrderFlowTime = StatsOrderTime 0 0, statsOrderTardiness = Just $ StatsOrderTard 0 0 0}
-        statsShopFloorAndFgi = SimStats {statsNrOrders = 0, statsOrderFlowTime = StatsOrderTime 0 0, statsOrderTardiness = Just $ StatsOrderTard 0 0 0}
-        statsOrderCost = StatsOrderCost 0 0 0 0
-
-
-simAtTime10 :: SimSim -> SimSim
-simAtTime10 sim =
-  sim
-  { simCurrentTime = 10
-  , simNextOrderId = 5
-  , simOrdersOrderPool = []
-  , simOrdersQueue = M.fromList []
-  , simOrdersMachine = M.fromList []
-  , simOrdersFgi = []
-  , simOrdersShipped = []
-  , simStatistics = statsAtTime10
-  }
-  where
-    statsAtTime10 :: SimStatistics
-    statsAtTime10 =
+    statsAtTime1 :: SimStatistics
+    statsAtTime1 =
       SimStatistics
       { simStatsBlock =
           M.fromList
-            [ (OrderPool, SimStats 4 (StatsOrderTime 0 0) Nothing)
-            , (Queue 1,   SimStats 3 (StatsOrderTime 2 0) Nothing)
-            , (Queue 2,   SimStats 1 (StatsOrderTime 0 0) Nothing)
-            , (Machine 1, SimStats 1 (StatsOrderTime 1 0) Nothing)
-            , (Machine 2, SimStats 1 (StatsOrderTime 1 0) Nothing)
+            [ (OrderPool, SimStats 4 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Queue 1, SimStats 1 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Queue 2, SimStats 1 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Machine 1, SimStats 0 (StatsOrderTime 1 0 (Just $ StatsOrderTime 0 0 Nothing)) Nothing)
+            , (Machine 2, SimStats 0 (StatsOrderTime 1 0 (Just $ StatsOrderTime 0 0 Nothing)) Nothing)
             ]
-      , simStatsBlockTimes =
-          M.fromList
-            [ (OrderPool, StatsBlockTime 0)
-            , (Queue 1,   StatsBlockTime 1)
-            , (Queue 2,   StatsBlockTime 0)
-            , (Machine 1, StatsBlockTime 1)
-            , (Machine 2, StatsBlockTime 1)
-            ]
+      ,  simStatsBlockTimes =
+          M.fromList [(OrderPool, StatsBlockTime 0), (Queue 1, StatsBlockTime 0), (Queue 2, StatsBlockTime 0), (Machine 1, StatsBlockTime 1), (Machine 2, StatsBlockTime 1)]
       , simStatsShopFloor = statsShopFloor
       , simStatsShopFloorAndFgi = statsShopFloorAndFgi
       , simStatsOrderCosts = statsOrderCost
       }
       where
-        statsShopFloor = SimStats {statsNrOrders = 0, statsOrderFlowTime = StatsOrderTime 0 0, statsOrderTardiness = Just $ StatsOrderTard 0 0 0}
-        statsShopFloorAndFgi = SimStats {statsNrOrders = 0, statsOrderFlowTime = StatsOrderTime 0 0, statsOrderTardiness = Just $ StatsOrderTard 0 0 0}
-        statsOrderCost = StatsOrderCost 0 0 0 0
+        statsShopFloor =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsShopFloorAndFgi =
+          SimStats
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing
+          , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsOrderCost = StatsOrderCost 0 4 0 0
+
 
 --
 -- Simulation1Spec.hs ends here

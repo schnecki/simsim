@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 60
+--     Update #: 62
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,6 +63,7 @@ import           SimSim.Routing
 import           SimSim.Runner.Dispatch
 import           SimSim.Runner.Util
 import           SimSim.Shipment
+import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Statistics
 
@@ -73,7 +74,7 @@ fgi (Left nr) = do              -- period done, ship orders
   shipper <- shipment <$> gets simShipment
   os <- gets simOrdersFgi
   t <- gets (simEndTime . simInternal)
-  setBlockTime FGI t
+  modify (setBlockTime FGI t)
   let ships = map (setShippedTime t) $ filter (shipper t) os
   modify (removeOrdersFromFgi ships . setFinishedOrders ships)
   mapM_ (modify . statsAddShipped) ships
@@ -82,7 +83,7 @@ fgi (Left nr) = do              -- period done, ship orders
 fgi (Right order) = do          -- new order arrived at fgi
   case nextBlock order of
     FGI -> do
-      let order' = setOrderLastBlockStart (orderCurrentTime order) order
+      let order' = setOrderBlockStartTime (orderCurrentTime order) order
       modify (statsAddEndProduction order' . addOrderToFgi order')
       logger Nothing $ "Added order " <> tshow (orderId order') <> " to FGI at time " <> tshow (orderCurrentTime order)
     _ -> void $ respond (pure order)

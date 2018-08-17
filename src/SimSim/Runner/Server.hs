@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 17
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -61,16 +61,16 @@ import           SimSim.Order
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Routing
-import           SimSim.Simulation
+import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Time
 
 
 server :: (MonadLogger m, MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
-server _ nr [] = modify (addNextOrderId nr) -- set new order id for upcoming orders
+server _ nr [] = modify (addNextOrderId (nr-1)) -- set new order id for upcoming orders
 server sim nr (o:os) = do
   let t = simCurrentTime sim
-  respond $ setOrderId nr $ setOrderLastBlockStart t $ setOrderCurrentTime t o
+  respond $ setOrderId nr $ setOrderBlockStartTime t $ setOrderCurrentTime t o
   server sim (nr+1) os
 
 
