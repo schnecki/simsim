@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 83
+--     Update #: 85
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,33 +50,33 @@ import           SimSim.Statistics.Pretty
 import           SimSim.Time
 
 instance Pretty SimSim where
-  pretty = prettySimulation True False prettyOrderDue
+  pretty = prettySimulation True prettyOrderDue
 
 
 prettySimSim :: SimSim -> Text
 prettySimSim sim = pack $ displayS (renderSmart 1.0 97 $ pretty sim) ""
 
-prettySimulation :: Bool -> Bool -> (Order -> Doc) -> SimSim -> Doc
-prettySimulation isTest updateStats prettyOrder sim =
+prettySimulation :: Bool -> (Order -> Doc) -> SimSim -> Doc
+prettySimulation isTest prettyOrder sim =
   nest 2 $
   text "Simulation:" <$$>
   text "Next OrderId:" <+> integer (simNextOrderId sim) <$$>
   text "Current Simulation Time:" <+> prettyTime (simCurrentTime sim) <$$>
   text "Period Length:" <+> prettyTime (simPeriodLength sim) <+> "steps" <$$>
   nest 2 (prettyOrderPool prettyOrder (simOrdersOrderPool sim)) <$$>
-  nest 2 (prettyOrderQueue isTest updateStats prettyOrder (simOrdersQueue sim)) <$$>
+  nest 2 (prettyOrderQueue isTest prettyOrder (simOrdersQueue sim)) <$$>
   nest 2 (prettyOrderMachine prettyOrder (simOrdersMachine sim)) <$$>
   nest 2 (prettyOrderFgi prettyOrder (simOrdersFgi sim)) <$$>
   nest 2 (prettyOrderFinishedOrders prettyOrder (simOrdersShipped sim)) <$$>
-  nest 2 (prettySimStatistics isTest updateStats sim) <$$> empty
+  nest 2 (prettySimStatistics isTest sim) <$$> empty
 
 
 prettyOrderPool :: (Order -> Doc) -> [Order] -> Doc
 prettyOrderPool prettyOrder xs =
   text "Order Pool:" <$$> prettyOrderList prettyOrder xs
 
-prettyOrderQueue :: Bool -> Bool -> (Order -> Doc) -> M.Map Block [Order] -> Doc
-prettyOrderQueue isTest updateStats prettyOrder m =
+prettyOrderQueue :: Bool -> (Order -> Doc) -> M.Map Block [Order] -> Doc
+prettyOrderQueue isTest prettyOrder m =
   text "Queues for:" <$$> prettyMap (text . show) (prettyOrderList prettyOrder) m
 
 

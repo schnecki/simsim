@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 23
+--     Update #: 40
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -53,10 +53,17 @@ data Update
   | Shipped                     -- ^ For flow time through whole system.
   deriving (Show)
 
-data UpdateType = Both | ProcTime | FlowTime
-  deriving (Show)
+-- | Updates ``StatsOrderTime`` as part of ``StatsFlowTime``.
+updateStatsOrderTime :: Bool -> Update -> Order -> StatsOrderTime -> StatsOrderTime
+updateStatsOrderTime isPartial up order st@(StatsOrderTime tSum stdDev _) =
+  StatsOrderTime
+    (tSum + getBlockFlowTime up order)
+    (stdDev)
+    (if isPartial
+       then Just $ st {statsLastUpdatePartial = Nothing}
+       else Nothing)
 
-
+-- | Updates ``StatsOrderTard`` as part of ``StatsFlowTime``.
 updateTardiness :: Update -> Order -> StatsOrderTard -> StatsOrderTard
 updateTardiness up order st@(StatsOrderTard nr tardSum stdDev) =
   case up of
@@ -70,7 +77,7 @@ updateTardiness up order st@(StatsOrderTard nr tardSum stdDev) =
         Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (stdDev) -- TODO
     _ -> st
 
-
+-- | Updates the ``StatsOrderCost``.
 updateCosts :: Update -> Order -> StatsOrderCost -> StatsOrderCost
 updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
   case up of
@@ -78,18 +85,21 @@ updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
     _       -> st
 
 
-getBlockFlowTime :: BlockTimes -> Update -> Order -> Rational
-getBlockFlowTime blTimes bl order = case bl of
-  UpBlock bl -> case bl of
-    OrderPool -> fromTime $ fromMaybe err $ (-) <$> released order <*> pure (arrivalDate order) -- released
-    FGI       -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
-    Sink      -> error "Update of Sink not possible"
-    Machine{}   -> fromTime $ orderCurrentTime order - blockStartTime order
-    Queue{}    -> fromTime $ orderCurrentTime order - blockStartTime order -- M.findWithDefault 0 bl blTimes
-  EndProd    -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order             -- finished production
-  Shipped    -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order             -- shipped
-
-  where err = error "Nothing in getBlockFlowTime"
+-- | Returns the flow time of an order according to the given update block sequence.
+getBlockFlowTime :: Update -> Order -> Rational
+getBlockFlowTime bl order =
+  case bl of
+    UpBlock bl ->
+      case bl of
+        OrderPool  -> fromTime $ fromMaybe err $ (-) <$> released order <*> pure (arrivalDate order) -- released
+        FGI        -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> prodEnd order             -- released
+        Sink       -> error "Update of Sink not possible"
+        Machine {} -> fromTime $ orderCurrentTime order - blockStartTime order
+        Queue {}   -> fromTime $ orderCurrentTime order - blockStartTime order
+    EndProd -> fromTime $ fromMaybe err $ (-) <$> prodEnd order <*> released order -- finished production
+    Shipped -> fromTime $ fromMaybe err $ (-) <$> shipped order <*> released order -- shipped
+  where
+    err = error "Nothing in getBlockFlowTime"
 
 
 --

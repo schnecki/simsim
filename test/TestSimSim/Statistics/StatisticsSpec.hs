@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 91
+--     Update #: 97
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -78,14 +78,13 @@ spec = do
 instance Pretty Rational where
   pretty = text . show
 
-prop_blockFlowTime :: BlockTimes -> Update -> Order -> Property
-prop_blockFlowTime blTimes bl@Shipped o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (released o)) === getBlockFlowTime blTimes bl o
-prop_blockFlowTime blTimes bl@EndProd o = isJust (prodEnd o) ==> fromTime (fromJust (prodEnd o) - fromJust (released o)) === getBlockFlowTime blTimes bl o
-prop_blockFlowTime blTimes bl@(UpBlock OrderPool) o = isJust (released o) ==> fromTime (fromJust (released o) - arrivalDate o) === getBlockFlowTime blTimes bl o
-prop_blockFlowTime blTimes bl@(UpBlock FGI) o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) === getBlockFlowTime blTimes bl o
-prop_blockFlowTime blTimes bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime blTimes bl o > 0
-prop_blockFlowTime blTimes bl o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime blTimes bl o
--- prop_blockFlowTime blTimes bl@(UpBlock q@Queue{}) o = property $ fromTime (orderCurrentTime o - M.findWithDefault 0 q blTimes) === getBlockFlowTime blTimes bl o
+prop_blockFlowTime :: Update -> Order -> Property
+prop_blockFlowTime bl@Shipped o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (released o)) === getBlockFlowTime bl o
+prop_blockFlowTime bl@EndProd o = isJust (prodEnd o) ==> fromTime (fromJust (prodEnd o) - fromJust (released o)) === getBlockFlowTime bl o
+prop_blockFlowTime bl@(UpBlock OrderPool) o = isJust (released o) ==> fromTime (fromJust (released o) - arrivalDate o) === getBlockFlowTime bl o
+prop_blockFlowTime bl@(UpBlock FGI) o = isJust (shipped o) ==> fromTime (fromJust (shipped o) - fromJust (prodEnd o)) === getBlockFlowTime bl o
+prop_blockFlowTime bl@(UpBlock Sink) o = expectFailure $ property $ getBlockFlowTime bl o > 0
+prop_blockFlowTime bl o = property $ fromTime (orderCurrentTime o - blockStartTime o) === getBlockFlowTime bl o
 
 prop_updateCosts :: Update -> Order -> StatsOrderCost -> Property
 prop_updateCosts Shipped o st@(StatsOrderCost earn wip bo fgi) = property $ StatsOrderCost (earn+1) wip bo fgi === updateCosts Shipped o st
@@ -105,7 +104,7 @@ prop_updateTardiness o st = forAll sizedUpdate (\us -> conjoin $ map (\u -> prop
 
 
 prop_statsAddRelease :: Order -> SimSim -> Property
-prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> property $ eqPretty (sim {simStatistics = stats {simStatsBlockFlowTimes = block', simStatsBlockProcTimes = times'}}) (prettySimStatistics True True) (statsAddRelease o sim) (prettySimStatistics True False)
+prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> property $ eqPretty (sim {simStatistics = stats {simStatsBlockFlowTimes = block', simStatsBlockProcTimes = times'}}) (prettySimStatistics True) (statsAddRelease o sim) (prettySimStatistics True)
   where
     stats = simStatistics sim
     addStatsOrderTime (StatsOrderTime s1 stdDev1 partial1) (StatsOrderTime s2 stdDev2 partial2) = StatsOrderTime (s1 + s2) 0  Nothing -- TODO stdDev
@@ -117,7 +116,7 @@ prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> 
        , statsOrderTardiness = Nothing -- statsOrderTardiness vOld `addStatsOrderTard` statsOrderTardiness vNew
        })
     simStatsSingleton f o =
-      SimFlowTimeStats
+      StatsFlowTime
         1
         (StatsOrderTime (f o) 0 Nothing)
         Nothing
@@ -131,9 +130,12 @@ prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> 
 
 
 prop_statsAddEndProduction :: Order -> SimSim -> Property
-prop_statsAddEndProduction o sim =
-  isJust (prodEnd o) && isNothing (shipped o) ==> sim {simStatistics = stats {simStatsShopFloor = simStatsShopFloor'}} === statsAddEndProduction o sim
+prop_statsAddEndProduction o simIn =
+  isJust (prodEnd o) &&
+  isNothing (shipped o) ==>
+  eqPretty (sim {simStatistics = stats {simStatsShopFloor = simStatsShopFloor'}}) (prettySimStatistics True) (statsAddEndProduction o sim) (prettySimStatistics True)
   where
+    sim = simIn {simOrdersFgi = [o] }
     stats = simStatistics sim
     s = simStatsShopFloor stats
     simStatsShopFloor' =
@@ -160,17 +162,17 @@ prop_statsAddShipped o sim =
   where
     stats = simStatistics sim
     -- FGI
-    sing = SimFlowTimeStats 1 (addFT emptyStatsOrderTime o) Nothing
+    sing = StatsFlowTime 1 (addFT emptyStatsOrderTime o) Nothing
       where
         addFT (StatsOrderTime sumT stdDev partial) o = StatsOrderTime (sumT + t) 0 Nothing -- TODO
         t = fromTime $ fromJust (shipped o) - fromJust (prodEnd o)
     singTimes = StatsProcTime (fromTime $ fromJust (shipped o) - fromJust (prodEnd o))
-    addSimFlowTimeStats (SimFlowTimeStats nr1 ft1 tard1) (SimFlowTimeStats nr2 ft2 tard2) = SimFlowTimeStats (nr1 + nr2) (addFtStats ft1 ft2) Nothing
+    addStatsFlowTime (StatsFlowTime nr1 ft1 tard1) (StatsFlowTime nr2 ft2 tard2) = StatsFlowTime (nr1 + nr2) (addFtStats ft1 ft2) Nothing
     addFtStats (StatsOrderTime s1 stdDev1 partial1) (StatsOrderTime s2 stdDev2 partial2) = StatsOrderTime (s1 + s2) 0 Nothing -- TODO
     addTardStats (StatsOrderTard nr1 s1 stdDev1) (StatsOrderTard nr2 s2 stdDev2) = StatsOrderTard (nr1 + nr2) (s1 + s2) 0 -- TODO
-    blocks' = M.insertWith addSimFlowTimeStats FGI sing (simStatsBlockFlowTimes stats)
-    addSimFlowTimeStatsProcTimes (StatsProcTime t1) (StatsProcTime t2) = StatsProcTime (t1 + t2)
-    blockTimes' = M.insertWith addSimFlowTimeStatsProcTimes FGI singTimes (simStatsBlockProcTimes stats)
+    blocks' = M.insertWith addStatsFlowTime FGI sing (simStatsBlockFlowTimes stats)
+    addStatsFlowTimeProcTimes (StatsProcTime t1) (StatsProcTime t2) = StatsProcTime (t1 + t2)
+    blockTimes' = M.insertWith addStatsFlowTimeProcTimes FGI singTimes (simStatsBlockProcTimes stats)
     -- Costs
     costs = simStatsOrderCosts stats
     costs' = costs {statsEarnings = statsEarnings costs + 1}

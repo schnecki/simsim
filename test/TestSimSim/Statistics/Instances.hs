@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 11
+--     Update #: 12
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -83,10 +83,10 @@ instance Arbitrary StatsOrderTard where
 instance CoArbitrary StatsOrderTard where
   coarbitrary (StatsOrderTard nr s stdDev) = variant 0 . coarbitrary (nr, s, stdDev)
 
-instance Arbitrary SimFlowTimeStats where
-  arbitrary = SimFlowTimeStats <$> arbitrary <*> arbitrary <*> arbitrary
-instance CoArbitrary SimFlowTimeStats where
-  coarbitrary (SimFlowTimeStats nr ft tard) = variant 0 . coarbitrary (nr, ft, tard)
+instance Arbitrary StatsFlowTime where
+  arbitrary = StatsFlowTime <$> arbitrary <*> arbitrary <*> arbitrary
+instance CoArbitrary StatsFlowTime where
+  coarbitrary (StatsFlowTime nr ft tard) = variant 0 . coarbitrary (nr, ft, tard)
 
 instance Arbitrary SimStatistics where
   arbitrary =

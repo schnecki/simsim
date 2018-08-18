@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 71
+--     Update #: 72
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -89,11 +89,15 @@ getNextRand = do
   put $ updateTailRandNrs sim
   return $ NL.head $ simRandomNumbers $ simInternal sim
 
-getBlockTime :: (MonadState SimSim m) => Block -> m Time
-getBlockTime Sink = error "called block time for a sink"
-getBlockTime block = do
-  m <- gets (simBlockTimes . simInternal)
-  return $ fromMaybe (error $ "no block time for block: " ++ show block) (M.lookup block m)
+getBlockTimeM :: (MonadState SimSim m) => Block -> m Time
+getBlockTimeM = gets . getBlockTime
+
+getBlockTime :: Block -> SimSim -> Time
+getBlockTime Sink _ = error "called block time for a sink"
+getBlockTime block sim = fromMaybe (error $ "no block time for block: " ++ show block) (M.lookup block m)
+  where
+    m = simBlockTimes $ simInternal sim
+
 
 mapBlockTimes :: (Time -> Time) -> SimSim -> SimSim
 mapBlockTimes f s = s {simInternal = (simInternal s) {simBlockTimes = M.map f (simBlockTimes $ simInternal s)}}

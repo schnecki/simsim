@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 316
+--     Update #: 319
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -108,7 +108,9 @@ processBlocks name loop (nxtBl:bs) = do
   unless (null allOrders) $
     modify (\sim -> foldl' (\s minOrder -> let lastBl = lastBlock minOrder
                                                blTime = max (blockStartTime minOrder) (M.findWithDefault 0 lastBl blTimes)
-                                           in setBlockTime lastBl blTime $ statsAddBlockTimesOnly lastBl minOrder s) sim minOrders)
+                                           in setBlockTime lastBl blTime $ statsAddBlock ProcTime lastBl minOrder s) sim minOrders)
+
+
   -- dispatch order
   mOrder <- state (getAndRemoveOrderFromQueue nxtBl)
   case mOrder of
@@ -120,7 +122,7 @@ processBlocks name loop (nxtBl:bs) = do
       endTime <- getSimEndTime
       startTime <-
         if isMachine nxtBl
-          then (\x -> max (orderCurrentTime o) x) <$> getBlockTime nxtBl
+          then (\x -> max (orderCurrentTime o) x) <$> getBlockTimeM nxtBl
           else return $ orderCurrentTime o
       isFree <- isNothing . M.lookup nxtBl <$> gets simOrdersMachine
       if not isFree || startTime > endTime
@@ -131,7 +133,7 @@ processBlocks name loop (nxtBl:bs) = do
         else do
           let o' = setOrderCurrentTime startTime o
           logger (Just startTime) $ "Order " ++ tshow (orderId o') ++ " just left " ++ tshow thisBl ++ ". Order: " ++ tshow o'
-          modify (setBlockTime thisBl startTime . statsAddBlockBlockOnly False thisBl o')
+          modify (setBlockTime thisBl startTime . statsAddBlock FlowTime thisBl o')
           r <- respond $ pure o'
           rs <- processBlocks name False bs
           if loop

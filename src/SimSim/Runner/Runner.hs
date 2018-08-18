@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 204
+--     Update #: 212
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -71,6 +71,7 @@ import           SimSim.Routing
 import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
 import           SimSim.Statistics.Ops
+import           SimSim.Statistics.Pretty
 import           SimSim.Time
 
 
@@ -97,12 +98,17 @@ simulation sim simEnd incomingOrders = do
   let simRel = removeOrdersFromOrderPool relOrds simOp
   finalize simEnd <$> execStateP simRel (mkPipeProdSys simRel relOrds)
   where
-    finalize simEnd = statsEndPeriodAddCosts . mapBlockTimes (max simEnd) . fixIdleTimeQueues . setSimCurrentTime simEnd
-    fixIdleTimeQueues sim = foldl' (\s bl -> statsAddBlockTimesOnly bl dummyOrder s) sim blsQueues
+    finalize simEnd = statsEndPeriodAddCosts . mapBlockTimes (max simEnd) . fixIdleTimeQueues . fixIdleTimeFgi . setSimCurrentTime simEnd
+    dummyOrder = (newOrder (Product 1) simEnd simEnd) {orderCurrentTime = simEnd, blockStartTime = simEnd}
+    fixIdleTimeQueues sim = foldl' (\s bl -> statsAddBlockPartialUpdate ProcTime bl dummyOrder s) sim blsQueues
       where
         blsMachines = filter (\bl -> isMachine bl) (toList $ simBlocks $ simInternal sim) -- queue is idle
         blsQueues = L.nub $ concatMap (dispatchReverse (simRouting sim)) $ filter (\mBl -> maybe True null (M.lookup mBl (simOrdersQueue sim))) blsMachines
-        dummyOrder = (newOrder (Product 1) simEnd simEnd) {orderCurrentTime = simEnd}
+    fixIdleTimeFgi sim | null (simOrdersFgi sim) =
+                           -- trace ("Adding dummy order. Before: " ++ show (prettySimStatistics True sim))
+                           -- trace ("Afterwards: " ++ show (prettySimStatistics True $ statsAddBlock ProcTime FGI dummyOrder sim))
+                           statsAddBlockPartialUpdate ProcTime FGI dummyOrder sim
+                       | otherwise = sim
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts after one period.

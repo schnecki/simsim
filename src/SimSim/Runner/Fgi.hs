@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 63
+--     Update #: 68
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -46,6 +46,7 @@ import           Control.Monad.IO.Class
 import           Control.Monad.Logger
 import           Control.Monad.State.Strict hiding (mapM_)
 import           Control.Monad.Trans.Class
+import qualified Data.List                  as L
 import           Data.Text                  (Text)
 import           Data.Void
 import           Debug.Trace
@@ -74,10 +75,10 @@ fgi (Left nr) = do              -- period done, ship orders
   shipper <- shipment <$> gets simShipment
   os <- gets simOrdersFgi
   t <- gets (simEndTime . simInternal)
-  modify (setBlockTime FGI t)
   let ships = map (setShippedTime t) $ filter (shipper t) os
   modify (removeOrdersFromFgi ships . setFinishedOrders ships)
   mapM_ (modify . statsAddShipped) ships
+  unless (null ships) $ modify (setBlockTime FGI t)
   logger Nothing $ "Left " <> tshow nr <> " in FGI. Shipped orders: " <> tshow (fmap orderId ships)
   void $ respond $ Left (nr + 1)
 fgi (Right order) = do          -- new order arrived at fgi

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 79
+--     Update #: 80
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,10 +42,10 @@ import qualified Data.Map.Strict as M
 import           SimSim.Block
 
 data SimStatistics = SimStatistics
-  { simStatsBlockFlowTimes  :: M.Map Block SimFlowTimeStats -- ^ Statistics for blocks, like nr of orders, flow time.
+  { simStatsBlockFlowTimes  :: M.Map Block StatsFlowTime -- ^ Statistics for blocks, like nr of orders, flow time.
   , simStatsBlockProcTimes  :: M.Map Block StatsProcTime    -- ^ Lists the (processing) times only for the machines and queues.
-  , simStatsShopFloor       :: SimFlowTimeStats       -- ^ Shop floor (from release until entry of finished goods inventory)
-  , simStatsShopFloorAndFgi :: SimFlowTimeStats       -- ^ Shop floor (from release until shipping)
+  , simStatsShopFloor       :: StatsFlowTime       -- ^ Shop floor (from release until entry of finished goods inventory)
+  , simStatsShopFloorAndFgi :: StatsFlowTime       -- ^ Shop floor (from release until shipping)
   , simStatsOrderCosts      :: StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
                                               -- holding.
   } deriving (Show)
@@ -60,7 +60,7 @@ instance Eq SimStatistics where
       , simStatsOrderCosts stats1 == simStatsOrderCosts stats2
       ]
 
-data SimFlowTimeStats = SimFlowTimeStats
+data StatsFlowTime = StatsFlowTime
   { statsNrOrders       :: Integer              -- ^ Nr of orders.
   , statsOrderFlowTime  :: StatsOrderTime       -- ^ Flow time statistics.
   , statsOrderTardiness :: Maybe StatsOrderTard -- ^ Only tardy orders for shop floor and shop floor plus FGI.
@@ -99,8 +99,8 @@ data StatsProcTime = StatsProcTime
 emptyStatistics :: SimStatistics
 emptyStatistics = SimStatistics mempty mempty emptyStats emptyStats emptyStatsOrderCost
 
-emptyStats :: SimFlowTimeStats
-emptyStats = SimFlowTimeStats 0 emptyStatsOrderTime Nothing
+emptyStats :: StatsFlowTime
+emptyStats = StatsFlowTime 0 emptyStatsOrderTime Nothing
 
 emptyStatsOrderTime :: StatsOrderTime
 emptyStatsOrderTime = StatsOrderTime 0 0 Nothing

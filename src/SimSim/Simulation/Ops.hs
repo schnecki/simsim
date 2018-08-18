@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 42
+--     Update #: 44
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -88,7 +88,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
             routeGroups = NL.groupBy ((==) `on` fst . fst) $ NL.sortBy (compare `on` fst . fst) routes
             routeGroupsWoFgi = map (NL.filter (not . isFgi . snd)) routeGroups
             lengths = max (fmap (length . filter (not . isMachine . snd)) routeGroupsWoFgi) (fmap (length . filter (not . isQueue . snd)) routeGroupsWoFgi) -- every route is one step
-            blTimes = M.fromList $ zip (filter (\x -> isQueue x || isMachine x) $ toList allBlocks) (repeat 0)
+            blTimes = M.fromList $ zip (filter (not . isSink) (toList allBlocks)) (repeat 0)
             hasSource = OrderPool `elem` uniqueBlocks
             randomNs = NL.fromList $ randomRs (0, 1) g
             lastOccur = map (Prelude.maximum . concat . occurances) (toList allBlocks)

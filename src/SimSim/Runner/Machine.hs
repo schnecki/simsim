@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 210
+--     Update #: 213
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -79,7 +79,6 @@ machine name routes (Left nr) = do
   machineOrds <- gets simOrdersMachine
   let machines = map fst $ filter ((== nr) . snd) (M.toList blLastOccur)
   let filledMachines = filter (isJust . flip M.lookup machineOrds) machines
-  logger Nothing $ "Machin"
   unless (null filledMachines) $ mapM_ (processCurrentMachineWip name routes) filledMachines
   void $ respond $ Left (nr + 1)
 machine name routes (Right order) = do
@@ -98,7 +97,7 @@ machine name routes (Right order) = do
 processCurrentMachineWip :: (MonadLogger m, MonadIO m) => Text -> Routing -> Block -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 processCurrentMachineWip name routes bl = do
   endTime <- getSimEndTime
-  blockTime <- getBlockTime bl
+  blockTime <- getBlockTimeM bl
   unless (blockTime >= endTime) $ do
     mOrderTime <- state (getAndRemoveOrderFromMachine bl)
     maybe (return ()) (uncurry $ processOrder name routes bl) mOrderTime
@@ -107,7 +106,7 @@ processCurrentMachineWip name routes bl = do
 processOrder :: (MonadLogger m, MonadIO m) => Text -> Routing -> Block -> Order -> Time -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 processOrder name routes bl order pT = do
   endTime <- getSimEndTime
-  blockTime <- getBlockTime bl
+  blockTime <- getBlockTimeM bl
   let startTime = max blockTime (orderCurrentTime order)
   when (startTime > endTime) $ error $ "Machine " ++ show bl ++ " (" ++ unpack name ++ ") falsely received following order (startTime was greater than the endTime) " ++ show order
   if startTime + pT > endTime   -- check if can be processed fully or only partially
@@ -117,7 +116,7 @@ processOrder name routes bl order pT = do
         ". Full Processing time: " ++ tshow pT ++ " (until " ++ tshow (startTime + pT) ++ ")."
       modify (addToBlockTime bl (endTime - startTime))
       let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime endTime $ setProdStartTime blockTime order
-      modify (statsAddBlockPartialUpdate bl order')
+      modify (statsAddBlockPartialUpdate FlowAndProcTime bl order')
       modify (addOrderToMachine order' (startTime + pT - endTime))
     else do
       let procEndTime = startTime + pT
@@ -125,7 +124,7 @@ processOrder name routes bl order pT = do
         tshow bl ++ " (" ++ name ++ ") processing order " ++ tshow (orderId order) ++ " from " ++ tshow startTime ++ " until ORDER FINISHED at " ++ tshow procEndTime
       modify (addToBlockTime bl pT)
       let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime procEndTime $ setProdStartTime startTime order
-      modify (statsAddBlock bl order')
+      modify (statsAddBlock FlowAndProcTime bl order')
       let order'' = setOrderBlockStartTime procEndTime order' -- start time for next block queue
       void $ respond $ pure order'' -- for us, process
 

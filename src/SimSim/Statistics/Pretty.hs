@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 103
+--     Update #: 106
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -51,14 +51,10 @@ import           SimSim.Time
 time :: Rational -> Doc
 time = double . fromRational
 
-prettySimStatistics :: Bool -> Bool -> SimSim -> Doc
-prettySimStatistics isTest updateStats sim = prettySimStatisticsInternal isTest curTime (simStatistics sim)
+prettySimStatistics :: Bool -> SimSim -> Doc
+prettySimStatistics isTest sim = prettySimStatisticsInternal isTest curTime (simStatistics sim)
   where
     curTime = simCurrentTime sim
-    -- blockOrderList =
-    --   concatMap ((\os -> map (\o -> (lastBlock o, o)) os) . snd) (M.toList (simOrdersQueue sim)) ++
-    --   map (second fst) (M.toList (simOrdersMachine sim)) ++ map (\x -> (FGI, x)) (simOrdersFgi sim)
-    -- simStatsUpdate = foldl' (\s (b, o) -> statsAddBlock b (o {orderCurrentTime = curTime}) s) sim blockOrderList
 
 
 prettySimStatisticsInternal :: Bool -> Time -> SimStatistics -> Doc
@@ -71,8 +67,8 @@ prettySimStatisticsInternal isTest curTime (SimStatistics bls blTimes sf sfFgi c
   nest 2 (text "Shop Floor and FGI" <$$> prettyStats isTest sfFgi) <$$>
   nest 2 (text "Costs" <$$> prettyOrderCosts costs)
 
-prettyStats :: Bool -> SimFlowTimeStats -> Doc
-prettyStats isTest (SimFlowTimeStats nr time mTard) =
+prettyStats :: Bool -> StatsFlowTime -> Doc
+prettyStats isTest (StatsFlowTime nr time mTard) =
   (\x -> maybe x (\tard -> x <$$> nest 2 (text "tardiness:" <$$> prettyOrderTardiness isTest nr tard)) mTard) $
   text "orders seen:" <+> integer nr <$$> nest 2 (text "flow time:" <$$> prettyOrderTime isTest nr time)
 
@@ -120,7 +116,7 @@ prettyBlockTime isTest bl curTime (StatsProcTime pTime) =
     then parens (time pTime)
     else empty
   where
-    isIdleTime = isQueue bl
+    isIdleTime = not $ isMachine bl
     procTime :: Rational
     procTime
       | isIdleTime = fromTime curTime - pTime
