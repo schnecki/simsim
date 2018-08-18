@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 37
+--     Update #: 42
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -126,6 +126,11 @@ setSimBlockTime block t sim = sim {simInternal = (simInternal sim) {simBlockTime
 setNextOrderId :: OrderId -> SimSim -> SimSim
 setNextOrderId nextOrderId sim = sim { simNextOrderId = nextOrderId }
 
+getNextOrderId :: SimSim -> (OrderId, SimSim)
+getNextOrderId sim = (oId, sim { simNextOrderId = oId+1 })
+  where oId = simNextOrderId sim
+
+
 addNextOrderId :: OrderId -> SimSim -> SimSim
 addNextOrderId add sim = sim { simNextOrderId = simNextOrderId sim + add }
 
@@ -169,6 +174,7 @@ emptyOrdersMachine bl sim = sim { simOrdersMachine = M.delete bl (simOrdersMachi
 
 addOrderToFgi :: Order -> SimSim -> SimSim
 addOrderToFgi o sim = sim {simOrdersFgi = simOrdersFgi sim <> [o] }
+
 
 removeOrdersFromFgi :: [Order] -> SimSim -> SimSim
 removeOrdersFromFgi os sim = sim {simOrdersFgi = filter (`notElem` os) (simOrdersFgi sim)}

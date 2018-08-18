@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 73
+--     Update #: 79
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,10 +42,10 @@ import qualified Data.Map.Strict as M
 import           SimSim.Block
 
 data SimStatistics = SimStatistics
-  { simStatsBlock           :: M.Map Block SimStats       -- ^ Statistics for blocks, like nr of orders, flow time.
-  , simStatsBlockTimes      :: M.Map Block StatsBlockTime -- ^ Lists the (processing) times only for the machines and queues.
-  , simStatsShopFloor       :: SimStats       -- ^ Shop floor (from release until entry of finished goods inventory)
-  , simStatsShopFloorAndFgi :: SimStats       -- ^ Shop floor (from release until shipping)
+  { simStatsBlockFlowTimes  :: M.Map Block SimFlowTimeStats -- ^ Statistics for blocks, like nr of orders, flow time.
+  , simStatsBlockProcTimes  :: M.Map Block StatsProcTime    -- ^ Lists the (processing) times only for the machines and queues.
+  , simStatsShopFloor       :: SimFlowTimeStats       -- ^ Shop floor (from release until entry of finished goods inventory)
+  , simStatsShopFloorAndFgi :: SimFlowTimeStats       -- ^ Shop floor (from release until shipping)
   , simStatsOrderCosts      :: StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
                                               -- holding.
   } deriving (Show)
@@ -53,14 +53,14 @@ data SimStatistics = SimStatistics
 instance Eq SimStatistics where
   stats1 == stats2 =
     and
-      [ simStatsBlock stats1 == simStatsBlock stats2
-      , simStatsBlockTimes stats1 == simStatsBlockTimes stats2
+      [ simStatsBlockFlowTimes stats1 == simStatsBlockFlowTimes stats2
+      , simStatsBlockProcTimes stats1 == simStatsBlockProcTimes stats2
       , simStatsShopFloor stats1 == simStatsShopFloor stats2
       , simStatsShopFloorAndFgi stats1 == simStatsShopFloorAndFgi stats2
       , simStatsOrderCosts stats1 == simStatsOrderCosts stats2
       ]
 
-data SimStats = SimStats
+data SimFlowTimeStats = SimFlowTimeStats
   { statsNrOrders       :: Integer              -- ^ Nr of orders.
   , statsOrderFlowTime  :: StatsOrderTime       -- ^ Flow time statistics.
   , statsOrderTardiness :: Maybe StatsOrderTard -- ^ Only tardy orders for shop floor and shop floor plus FGI.
@@ -90,8 +90,8 @@ data StatsOrderCost = StatsOrderCost
   , statsFgiCosts :: Integer    -- ^ Nr of holding costs (sum of orders in inventory at end of period).
   } deriving (Eq, Show)
 
-data StatsBlockTime = StatsBlockTime
-  { statsBlockTime :: Rational  -- ^ Processing time for machines, idle time for queues.
+data StatsProcTime = StatsProcTime
+  { statsBlockTime :: Rational  -- ^ Processing time for Machine, idle time for OrderPool, Queue and FGI.
   -- , statsBroken
   } deriving (Eq, Show)
 
@@ -99,8 +99,8 @@ data StatsBlockTime = StatsBlockTime
 emptyStatistics :: SimStatistics
 emptyStatistics = SimStatistics mempty mempty emptyStats emptyStats emptyStatsOrderCost
 
-emptyStats :: SimStats
-emptyStats = SimStats 0 emptyStatsOrderTime Nothing
+emptyStats :: SimFlowTimeStats
+emptyStats = SimFlowTimeStats 0 emptyStatsOrderTime Nothing
 
 emptyStatsOrderTime :: StatsOrderTime
 emptyStatsOrderTime = StatsOrderTime 0 0 Nothing
@@ -111,8 +111,8 @@ emptyStatsOrderTard = StatsOrderTard 0 0 0
 emptyStatsOrderCost :: StatsOrderCost
 emptyStatsOrderCost = StatsOrderCost 0 0 0 0
 
-emptyStatsBlockTime :: StatsBlockTime
-emptyStatsBlockTime = StatsBlockTime 0
+emptyStatsProcTime :: StatsProcTime
+emptyStatsProcTime = StatsProcTime 0
 
 --
 -- Type.hs ends here

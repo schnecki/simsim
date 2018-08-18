@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 40
+--     Update #: 41
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -68,7 +68,7 @@ import           SimSim.Time
 
 
 sink :: (MonadLogger m, MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
-sink (Left nr) = logger Nothing "No more orders"
+sink (Left nr) = logger Nothing "No more orders: END OF SIMULATION"
 sink (Right order) = do
   case nextBlock order of
     Sink -> return ()           -- everything worked out

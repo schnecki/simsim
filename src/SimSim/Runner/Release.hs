@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 71
+--     Update #: 72
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -72,7 +72,9 @@ import           SimSim.Runner.Dispatch
 
 -- | Takes as input the routes and a list of order to be released into the production system.
 release :: (MonadLogger m, MonadIO m) => SimSim -> Routing -> [Order] -> Server Block Downstream (StateT SimSim m) ()
-release sim routes [] = void $ respond (Left 1)
+release sim routes [] = do
+  logger Nothing "Released all orders. Sending `Left 1`."
+  void $ respond (Left 1)
 release sim routes (o:os) = do
   let t = simCurrentTime sim
   let o' = process routes t o

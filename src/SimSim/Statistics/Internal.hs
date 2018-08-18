@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 23
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -51,6 +51,9 @@ data Update
   = UpBlock Block               -- ^ For flow time through given block.
   | EndProd                     -- ^ For flow time through production.
   | Shipped                     -- ^ For flow time through whole system.
+  deriving (Show)
+
+data UpdateType = Both | ProcTime | FlowTime
   deriving (Show)
 
 

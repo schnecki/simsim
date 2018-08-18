@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 201
+--     Update #: 204
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -145,7 +145,7 @@ simulateUntilLogging loggingFun simEnd sim incomingOrders = simulateLoggingEnd l
 
 -- | This function creates the pipe which serves the orders into the order pool.
 mkPipeOrderPool :: (MonadLogger m, MonadIO m) => SimSim -> [Order] -> Proxy X () () X (StateT SimSim m) ()
-mkPipeOrderPool sim incomingOrders = server sim (simNextOrderId sim) incomingOrders >>~ orderPoolSink
+mkPipeOrderPool sim incomingOrders = server sim incomingOrders >>~ orderPoolSink
 
 
 -- | This function creates the pipe which simulates the production system.

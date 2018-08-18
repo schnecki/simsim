@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 205
+--     Update #: 210
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,11 +41,12 @@ module SimSim.Runner.Machine
 
 import           ClassyPrelude
 
-import           Control.Monad
+import           Control.Monad              hiding (mapM_)
 import           Control.Monad.IO.Class
 import           Control.Monad.Logger
-import           Control.Monad.State.Strict
+import           Control.Monad.State.Strict hiding (mapM_)
 import           Control.Monad.Trans.Class
+import qualified Data.Map.Strict            as M
 import           Data.Monoid                ((<>))
 import           Data.Text                  (Text)
 import           Data.Void
@@ -72,9 +73,15 @@ import           SimSim.Time
 
 -- | Machines push the finished orders to the dispatcher and pull order from the queue.
 machine :: (MonadLogger m, MonadIO m) => Text -> Routing -> Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
-machine name _ (Left nr) = do
-  logger Nothing $ "Empty machine pipe " ++ name
-  void $ respond $ Left (nr+1)
+machine name routes (Left nr) = do
+  logger Nothing $ "Machine " ++ name ++ " input Left " ++ tshow nr ++ ". Start Processing current WIP."
+  blLastOccur <- gets (simBlockLastOccur . simInternal)
+  machineOrds <- gets simOrdersMachine
+  let machines = map fst $ filter ((== nr) . snd) (M.toList blLastOccur)
+  let filledMachines = filter (isJust . flip M.lookup machineOrds) machines
+  logger Nothing $ "Machin"
+  unless (null filledMachines) $ mapM_ (processCurrentMachineWip name routes) filledMachines
+  void $ respond $ Left (nr + 1)
 machine name routes (Right order) = do
   let bl = nextBlock order
   case bl of
@@ -90,8 +97,11 @@ machine name routes (Right order) = do
 -- | Load order from machine and process.
 processCurrentMachineWip :: (MonadLogger m, MonadIO m) => Text -> Routing -> Block -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
 processCurrentMachineWip name routes bl = do
-  mOrderTime <- state (getAndRemoveOrderFromMachine bl)
-  maybe (return ()) (uncurry $ processOrder name routes bl) mOrderTime
+  endTime <- getSimEndTime
+  blockTime <- getBlockTime bl
+  unless (blockTime >= endTime) $ do
+    mOrderTime <- state (getAndRemoveOrderFromMachine bl)
+    maybe (return ()) (uncurry $ processOrder name routes bl) mOrderTime
 
 
 processOrder :: (MonadLogger m, MonadIO m) => Text -> Routing -> Block -> Order -> Time -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 11
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,10 +63,10 @@ maxVal = 5000
 toR :: Double -> Rational
 toR = toRational
 
-instance Arbitrary StatsBlockTime where
-  arbitrary = StatsBlockTime . toR <$> choose (0, maxVal)
-instance CoArbitrary StatsBlockTime where
-  coarbitrary (StatsBlockTime pr) = variant 0 . coarbitrary pr
+instance Arbitrary StatsProcTime where
+  arbitrary = StatsProcTime . toR <$> choose (0, maxVal)
+instance CoArbitrary StatsProcTime where
+  coarbitrary (StatsProcTime pr) = variant 0 . coarbitrary pr
 
 instance Arbitrary StatsOrderCost where
   arbitrary = StatsOrderCost <$> choose (0, maxVal) <*> choose (0, maxVal) <*> choose (0, maxVal) <*> choose (0, maxVal)
@@ -83,10 +83,10 @@ instance Arbitrary StatsOrderTard where
 instance CoArbitrary StatsOrderTard where
   coarbitrary (StatsOrderTard nr s stdDev) = variant 0 . coarbitrary (nr, s, stdDev)
 
-instance Arbitrary SimStats where
-  arbitrary = SimStats <$> arbitrary <*> arbitrary <*> arbitrary
-instance CoArbitrary SimStats where
-  coarbitrary (SimStats nr ft tard) = variant 0 . coarbitrary (nr, ft, tard)
+instance Arbitrary SimFlowTimeStats where
+  arbitrary = SimFlowTimeStats <$> arbitrary <*> arbitrary <*> arbitrary
+instance CoArbitrary SimFlowTimeStats where
+  coarbitrary (SimFlowTimeStats nr ft tard) = variant 0 . coarbitrary (nr, ft, tard)
 
 instance Arbitrary SimStatistics where
   arbitrary =

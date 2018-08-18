@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 25
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -66,13 +66,14 @@ import           SimSim.Simulation.Type
 import           SimSim.Time
 
 
-server :: (MonadLogger m, MonadIO m) => SimSim -> OrderId -> [Order] -> Server Block Order (StateT SimSim m) ()
-server _ nr [] = modify (addNextOrderId (nr-1)) -- set new order id for upcoming orders
-server sim nr (o:os) = do
+server :: (MonadLogger m, MonadIO m) => SimSim -> [Order] -> Server Block Order (StateT SimSim m) ()
+server _ [] = return ()  -- set new order id for upcoming orders
+server sim (o:os) = do
   logger Nothing $ "Server orders: " ++ tshow (map orderId (o:os))
   let t = simCurrentTime sim
+  nr <- state getNextOrderId
   respond $ setOrderId nr $ setOrderBlockStartTime t $ setOrderCurrentTime t o
-  server sim (nr+1) os
+  server sim os
 
 
 orderPoolSink :: (MonadIO m) => Order -> Client Block Order (StateT SimSim m) ()

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 102
+--     Update #: 103
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -71,8 +71,8 @@ prettySimStatisticsInternal isTest curTime (SimStatistics bls blTimes sf sfFgi c
   nest 2 (text "Shop Floor and FGI" <$$> prettyStats isTest sfFgi) <$$>
   nest 2 (text "Costs" <$$> prettyOrderCosts costs)
 
-prettyStats :: Bool -> SimStats -> Doc
-prettyStats isTest (SimStats nr time mTard) =
+prettyStats :: Bool -> SimFlowTimeStats -> Doc
+prettyStats isTest (SimFlowTimeStats nr time mTard) =
   (\x -> maybe x (\tard -> x <$$> nest 2 (text "tardiness:" <$$> prettyOrderTardiness isTest nr tard)) mTard) $
   text "orders seen:" <+> integer nr <$$> nest 2 (text "flow time:" <$$> prettyOrderTime isTest nr time)
 
@@ -111,8 +111,8 @@ prettyOrderTardiness isTest nr stats@(StatsOrderTard nrTard sumTime stdDev) =
     else empty
 
 
-prettyBlockTime :: Bool -> Block -> Time -> StatsBlockTime -> Doc
-prettyBlockTime isTest bl curTime (StatsBlockTime pTime) =
+prettyBlockTime :: Bool -> Block -> Time -> StatsProcTime -> Doc
+prettyBlockTime isTest bl curTime (StatsProcTime pTime) =
   text "Processing in %:" <+>
   time (100 * procTime / t) <$$> text "Idle in %:" <+>
   time (100 * (t - procTime) / t) <+>

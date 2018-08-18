@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 314
+--     Update #: 316
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -82,9 +82,8 @@ queue name routes (Left nr) -- no more orders from upstream, process queued orde
   blLastOccur <- gets (simBlockLastOccur . simInternal)
   let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
-  if null orders
-    then void (respond $ Left (nr + 1))
-    else processBlocks name True blocks >> void (respond $ Left (nr + 1))
+  unless (null orders) $ void $ processBlocks name True blocks
+  void $ respond $ Left (nr + 1)
 -- received an order, store and continue
 queue name routes (Right order) = do
   let q = nextBlock order

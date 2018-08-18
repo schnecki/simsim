@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 62
+--     Update #: 63
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -84,7 +84,7 @@ fgi (Right order) = do          -- new order arrived at fgi
   case nextBlock order of
     FGI -> do
       let order' = setOrderBlockStartTime (orderCurrentTime order) order
-      modify (statsAddEndProduction order' . addOrderToFgi order')
+      modify (addOrderToFgi order' . statsAddEndProduction order')
       logger Nothing $ "Added order " <> tshow (orderId order') <> " to FGI at time " <> tshow (orderCurrentTime order)
     _ -> void $ respond (pure order)
   nxtOrder <- request Sink

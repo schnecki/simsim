@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 86
+--     Update #: 91
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -105,7 +105,7 @@ prop_updateTardiness o st = forAll sizedUpdate (\us -> conjoin $ map (\u -> prop
 
 
 prop_statsAddRelease :: Order -> SimSim -> Property
-prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> property $ eqPretty (sim {simStatistics = stats {simStatsBlock = block', simStatsBlockTimes = times'}}) (prettySimStatistics True True) (statsAddRelease o sim) (prettySimStatistics True False)
+prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> property $ eqPretty (sim {simStatistics = stats {simStatsBlockFlowTimes = block', simStatsBlockProcTimes = times'}}) (prettySimStatistics True True) (statsAddRelease o sim) (prettySimStatistics True False)
   where
     stats = simStatistics sim
     addStatsOrderTime (StatsOrderTime s1 stdDev1 partial1) (StatsOrderTime s2 stdDev2 partial2) = StatsOrderTime (s1 + s2) 0  Nothing -- TODO stdDev
@@ -117,17 +117,17 @@ prop_statsAddRelease o sim = isJust (released o) && isNothing (prodStart o) ==> 
        , statsOrderTardiness = Nothing -- statsOrderTardiness vOld `addStatsOrderTard` statsOrderTardiness vNew
        })
     simStatsSingleton f o =
-      SimStats
+      SimFlowTimeStats
         1
         (StatsOrderTime (f o) 0 Nothing)
         Nothing
       where
         tard = maybe 0 (fromTime . max 0 . subtract (dueDate o)) (shipped o)
     singRel = simStatsSingleton (\o -> fromTime (fromJust (released o)) - fromTime (arrivalDate o)) o
-    block' = M.insertWith updateFunBlock OrderPool singRel (simStatsBlock stats)
+    block' = M.insertWith updateFunBlock OrderPool singRel (simStatsBlockFlowTimes stats)
     addStatsOrderTimeRelease (StatsOrderTime sm stdDev partial) o = StatsOrderTime (sm + fromTime (fromJust (released o) - arrivalDate o)) stdDev -- TODO
     updateFunBlockTime vOld vNew = vOld {statsBlockTime = statsBlockTime vOld + statsBlockTime vNew}
-    times' = M.insertWith updateFunBlockTime OrderPool (StatsBlockTime (fromTime (fromJust (released o) - arrivalDate o))) (simStatsBlockTimes stats)
+    times' = M.insertWith updateFunBlockTime OrderPool (StatsProcTime (fromTime (fromJust (released o) - arrivalDate o))) (simStatsBlockProcTimes stats)
 
 
 prop_statsAddEndProduction :: Order -> SimSim -> Property
@@ -154,22 +154,23 @@ prop_statsAddEndProduction o sim =
 prop_statsAddShipped :: Order -> SimSim -> Property
 prop_statsAddShipped o sim =
   isJust (shipped o) ==>
-  sim {simStatistics = stats {simStatsBlock = blocks', simStatsBlockTimes = blockTimes', simStatsShopFloorAndFgi = simStatsShopFloorAndFgi', simStatsOrderCosts = costs'}} ===
+  sim
+  {simStatistics = stats {simStatsBlockFlowTimes = blocks', simStatsBlockProcTimes = blockTimes', simStatsShopFloorAndFgi = simStatsShopFloorAndFgi', simStatsOrderCosts = costs'}} ===
   statsAddShipped o sim
   where
     stats = simStatistics sim
     -- FGI
-    sing = SimStats 1 (addFT emptyStatsOrderTime o) Nothing
+    sing = SimFlowTimeStats 1 (addFT emptyStatsOrderTime o) Nothing
       where
         addFT (StatsOrderTime sumT stdDev partial) o = StatsOrderTime (sumT + t) 0 Nothing -- TODO
         t = fromTime $ fromJust (shipped o) - fromJust (prodEnd o)
-    singTimes = StatsBlockTime (fromTime $ fromJust (shipped o) - fromJust (prodEnd o))
-    addSimStats (SimStats nr1 ft1 tard1) (SimStats nr2 ft2 tard2) = SimStats (nr1 + nr2) (addFtStats ft1 ft2) Nothing
+    singTimes = StatsProcTime (fromTime $ fromJust (shipped o) - fromJust (prodEnd o))
+    addSimFlowTimeStats (SimFlowTimeStats nr1 ft1 tard1) (SimFlowTimeStats nr2 ft2 tard2) = SimFlowTimeStats (nr1 + nr2) (addFtStats ft1 ft2) Nothing
     addFtStats (StatsOrderTime s1 stdDev1 partial1) (StatsOrderTime s2 stdDev2 partial2) = StatsOrderTime (s1 + s2) 0 Nothing -- TODO
     addTardStats (StatsOrderTard nr1 s1 stdDev1) (StatsOrderTard nr2 s2 stdDev2) = StatsOrderTard (nr1 + nr2) (s1 + s2) 0 -- TODO
-    blocks' = M.insertWith addSimStats FGI sing (simStatsBlock stats)
-    addSimStatsBlockTimes (StatsBlockTime t1) (StatsBlockTime t2) = StatsBlockTime (t1 + t2)
-    blockTimes' = M.insertWith addSimStatsBlockTimes FGI singTimes (simStatsBlockTimes stats)
+    blocks' = M.insertWith addSimFlowTimeStats FGI sing (simStatsBlockFlowTimes stats)
+    addSimFlowTimeStatsProcTimes (StatsProcTime t1) (StatsProcTime t2) = StatsProcTime (t1 + t2)
+    blockTimes' = M.insertWith addSimFlowTimeStatsProcTimes FGI singTimes (simStatsBlockProcTimes stats)
     -- Costs
     costs = simStatsOrderCosts stats
     costs' = costs {statsEarnings = statsEarnings costs + 1}
