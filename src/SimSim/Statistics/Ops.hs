@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 237
+--     Update #: 244
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -45,11 +45,13 @@ module SimSim.Statistics.Ops
     ) where
 
 import           ClassyPrelude
+import qualified Data.List                  as L
 import qualified Data.Map.Strict            as M
 import           Data.Ratio                 (denominator)
 
 import           SimSim.Block
 import           SimSim.Order.Type
+import           SimSim.ProductType
 import           SimSim.Simulation.Type
 import           SimSim.Statistics.Internal
 import           SimSim.Statistics.Type
@@ -69,18 +71,27 @@ statsAddRelease order sim = sim {simStatistics = updateBlockOrder False blTimes 
 -- | This function reports an order as finished with production (now entering the FGI). It updates the statistics
 -- according to the given order.
 statsAddEndProduction :: Order -> SimSim -> SimSim
-statsAddEndProduction order sim
-  | wasEmpty = sim {simStatistics = updateBlockOrder False blTimes ProcTime (UpBlock FGI) order $ updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
-  | otherwise = sim {simStatistics = updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
+statsAddEndProduction order sim = sim {simStatistics = updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
+  -- | wasEmpty = sim {simStatistics = updateBlockOrder False blTimes ProcTime (UpBlock FGI) order  }
+  -- | otherwise = sim {simStatistics = updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
   where
     blTimes = simBlockTimes $ simInternal sim
     wasEmpty = null $ simOrdersFgi sim
 
--- | This function reports an order as shipped (leaving the FGI). The corresponding statistical information is updated.
-statsAddShipped :: Order -> SimSim -> SimSim
-statsAddShipped order sim = sim {simStatistics = updateBlockOrder False blTimes FlowTime (UpBlock FGI) order $ updateShopFloorAndFgiOrder blTimes Shipped order (simStatistics sim)}
+-- | This function reports a set of orders as shipped (leaving the FGI). And updates the processing time of the FGI
+-- accordingly. The corresponding statistical information is updated.
+statsAddShipped :: [Order] -> [Order] -> SimSim -> SimSim
+statsAddShipped fgiOrds shippedOrders sim
+  | wasEmpty = foldl' upOrder (sim {simStatistics = updateBlockOrder False blTimes ProcTime (UpBlock FGI) dummyOrder (simStatistics sim)}) shippedOrders
+  | otherwise = foldl' upOrder sim shippedOrders
   where
     blTimes = simBlockTimes $ simInternal sim
+    upOrder s order = s {simStatistics = updateBlockOrder False blTimes FlowTime (UpBlock FGI) order $ updateShopFloorAndFgiOrder blTimes Shipped order (simStatistics s)}
+    earliestEntry = minimum $ simEndTime (simInternal sim) `ncons` map blockStartTime fgiOrds
+    dummyOrder = (newOrder (Product 1) 0 0) {blockStartTime = earliestEntry}
+    wasEmpty
+      | earliestEntry > simCurrentTime sim = True
+      | otherwise = False
 
 statsAddBlock :: UpdateType -> Block -> Order -> SimSim -> SimSim
 statsAddBlock upType bl o sim = statsAddBlockInternal False upType bl o sim

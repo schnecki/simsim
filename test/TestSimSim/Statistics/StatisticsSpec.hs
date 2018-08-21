@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 97
+--     Update #: 99
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -158,7 +158,7 @@ prop_statsAddShipped o sim =
   isJust (shipped o) ==>
   sim
   {simStatistics = stats {simStatsBlockFlowTimes = blocks', simStatsBlockProcTimes = blockTimes', simStatsShopFloorAndFgi = simStatsShopFloorAndFgi', simStatsOrderCosts = costs'}} ===
-  statsAddShipped o sim
+  statsAddShipped [o] [o] sim
   where
     stats = simStatistics sim
     -- FGI
