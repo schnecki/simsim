@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 11
+--     Update #: 19
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,11 +41,12 @@ module SimSim.Shipment.OnDueDate
 import           ClassyPrelude
 
 import           SimSim.Order.Type
+import           SimSim.Shipment.Regularity
 import           SimSim.Shipment.Type
 import           SimSim.Time
 
 shipOnDueDate :: Shipment
-shipOnDueDate = Shipment shipOnDueDate' name
+shipOnDueDate = Shipment ShipEndOfPeriod shipOnDueDate' name
 
 shipOnDueDate' :: Time -> Order -> Bool
 shipOnDueDate' t = (<= t) . dueDate

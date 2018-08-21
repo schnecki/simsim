@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 7
+--     Update #: 8
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,11 +48,17 @@ import           TestSimSim.Time.Instances
 
 
 instance Arbitrary Shipment where
-  arbitrary = Shipment <$> arbitrary <*> (pack <$> arbitrary)
+  arbitrary = Shipment <$> arbitrary <*> arbitrary <*> (pack <$> arbitrary)
 
 instance CoArbitrary Shipment where
-  coarbitrary (Shipment a b) = variant 0 . coarbitrary (a, unpack b)
+  coarbitrary (Shipment s a b) = variant 0 . coarbitrary (s, a, unpack b)
 
+instance Arbitrary ShipmentRegularity where
+  arbitrary = oneof $ map return [ShipEndOfPeriod, ShipWhenStoppedAndEndOfPeriod]
+
+instance CoArbitrary ShipmentRegularity where
+  coarbitrary ShipEndOfPeriod               = variant 0
+  coarbitrary ShipWhenStoppedAndEndOfPeriod = variant 1
 
 --
 -- Instances.hs ends here
