@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 394
+--     Update #: 395
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -89,7 +89,7 @@ instance Eq SimSim where
       , simOrdersOrderPool sim1 == simOrdersOrderPool sim2
       , simOrdersFgi sim1 == simOrdersFgi sim2
       , simOrdersMachine sim1 == simOrdersMachine sim2
-      , simOrdersQueue sim1 == simOrdersQueue sim2
+      , M.filter (not.null) (simOrdersQueue sim1) == M.filter (not.null) (simOrdersQueue sim2)
       , simOrdersShipped sim1 == simOrdersShipped sim2
       , simStatistics sim1 == simStatistics sim2
       ]
