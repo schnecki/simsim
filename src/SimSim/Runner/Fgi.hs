@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 68
+--     Update #: 76
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -71,15 +71,17 @@ import           SimSim.Statistics
 
 -- | A FGI queues orders until shipped.
 fgi :: (MonadLogger m, MonadIO m) => Downstream -> Proxy Block Downstream Block Downstream (StateT SimSim m) ()
-fgi (Left nr) = do              -- period done, ship orders
-  shipper <- shipment <$> gets simShipment
-  os <- gets simOrdersFgi
+fgi (Left nr) = do
+  shipper <- shipment <$> gets simShipment -- (partial) period done, ship orders
+  fgiOrds <- gets simOrdersFgi
   t <- gets (simEndTime . simInternal)
-  let ships = map (setShippedTime t) $ filter (shipper t) os
+  let ships = map (setShippedTime t) $ filter (shipper t) fgiOrds
   modify (removeOrdersFromFgi ships . setFinishedOrders ships)
-  mapM_ (modify . statsAddShipped) ships
-  unless (null ships) $ modify (setBlockTime FGI t)
-  logger Nothing $ "Left " <> tshow nr <> " in FGI. Shipped orders: " <> tshow (fmap orderId ships)
+  modify (statsAddShipped fgiOrds ships)
+
+  let allShipped = length ships == length fgiOrds
+  when allShipped $ modify (setBlockTime FGI t)
+  logger Nothing $ "Left " <> tshow nr <> " in FGI. Shipped orders: " <> tshow (fmap orderId ships) <> " from FGI orders: " <> tshow (fmap orderId fgiOrds)
   void $ respond $ Left (nr + 1)
 fgi (Right order) = do          -- new order arrived at fgi
   case nextBlock order of

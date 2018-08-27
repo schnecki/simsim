@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 132
+--     Update #: 139
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -112,6 +112,7 @@ spec = do
     it "prop_simulation1 Time=5" $ prop_simulation1AtTime 5 simAtTime5
     it "prop_simulation1 Time=6" $ prop_simulation1AtTime 6 simAtTime6
     it "prop_simulation1 Time=7" $ prop_simulation1AtTime 7 simAtTime7
+    it "prop_simulation1 Time=8" $ prop_simulation1AtTime 8 simAtTime8
   describe "Simulation combinations" $ do
     it "prop_simulation1 1plus1Eq2" $ prop_simulation1plus1Eq2
 
@@ -492,6 +493,55 @@ simAtTime7 sim =
       }
       where
         statsShopFloor = StatsFlowTime {statsNrOrders = 1, statsOrderFlowTime = StatsOrderTime 6 0 Nothing, statsOrderTardiness = Just $ StatsOrderTard 0 0 0}
+        statsShopFloorAndFgi =
+          StatsFlowTime
+          { statsNrOrders = 0
+          , statsOrderFlowTime = StatsOrderTime 0 0 Nothing
+          , statsOrderTardiness = Nothing -- Just $ StatsOrderTard 0 0 0
+          }
+        statsOrderCost = StatsOrderCost 0 0 0 0
+
+
+simAtTime8 :: SimSim -> SimSim
+simAtTime8 sim =
+  sim
+  { simCurrentTime = 8
+  , simNextOrderId = 5
+  , simOrdersOrderPool = []
+  , simOrdersQueue = M.fromList [(Machine 1, [orders !! 1]), (Machine 2, [])]
+  , simOrdersMachine = M.fromList [(Machine 1, (orders !! 3, 1))]
+  , simOrdersFgi = [orders !! 0, orders !! 2]
+  , simOrdersShipped = []
+  , simStatistics = statsAtTime8
+  }
+  where
+    statsAtTime8 :: SimStatistics
+    statsAtTime8 =
+      SimStatistics
+      { simStatsBlockFlowTimes =
+          M.fromList            -- flow time of fully finished queue orders only, but full machine processing times
+            [ (OrderPool, StatsFlowTime 4 (StatsOrderTime 0 0 Nothing) Nothing)
+            , (Queue 1, StatsFlowTime 3 (StatsOrderTime 9 0 Nothing) Nothing)
+            , (Queue 2, StatsFlowTime 3 (StatsOrderTime 1 0 Nothing) Nothing)
+            , (Machine 1, StatsFlowTime 2 (StatsOrderTime 8 0 Nothing) Nothing)
+            , (Machine 2, StatsFlowTime 3 (StatsOrderTime 8 0 Nothing) Nothing)
+            ]
+      , simStatsBlockProcTimes -- idle times for queues, processing times for machines and orderpool
+         =
+          M.fromList
+            [ (OrderPool, StatsProcTime 0)
+            , (Queue 1, StatsProcTime 0)
+            , (Queue 2, StatsProcTime 7)
+            , (FGI, StatsProcTime 6)
+            , (Machine 1, StatsProcTime 8)
+            , (Machine 2, StatsProcTime 8)
+            ]
+      , simStatsShopFloor = statsShopFloor
+      , simStatsShopFloorAndFgi = statsShopFloorAndFgi
+      , simStatsOrderCosts = statsOrderCost
+      }
+      where
+        statsShopFloor = StatsFlowTime {statsNrOrders = 2, statsOrderFlowTime = StatsOrderTime 14 0 Nothing, statsOrderTardiness = Just $ StatsOrderTard 0 0 0}
         statsShopFloorAndFgi =
           StatsFlowTime
           { statsNrOrders = 0
