@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 320
+--     Update #: 328
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -78,9 +78,11 @@ queue :: (MonadLogger m, MonadIO m) => Text -> Routing -> Downstream -> Proxy Up
 queue name routes (Left nr) -- no more orders from upstream, process queued orders
  = do
   mQueues <- gets simOrdersQueue --  load any order
-  logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ "\tcurrent queues:" <> (tshow $ map orderId <$> mQueues)
+  logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ ". current queues:" <> tshow (map orderId <$> mQueues)
   blLastOccur <- gets (simBlockLastOccur . simInternal)
   let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
+  logger Nothing $ "Last occur: " <> tshow blLastOccur
+  logger Nothing $ "Queue " ++ name ++ " checking blocks: " <> tshow blocks
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
   unless (null orders) $ void $ processBlocks name True blocks
   void $ respond $ Left (nr + 1)
@@ -100,6 +102,7 @@ queue name routes (Right order) = do
 processBlocks :: (MonadLogger m, MonadState SimSim m) => Text -> Bool -> [Block] -> Proxy x' x Block Downstream m [Block]
 processBlocks _ _ [] = return []
 processBlocks name loop (nxtBl:bs) = do
+  logger Nothing $ "Processing Queue for Block " <> tshow nxtBl
   oldQueues <- gets simOrdersQueue
   allOrders <- M.findWithDefault [] nxtBl <$> gets simOrdersQueue
   -- update stats
@@ -136,6 +139,7 @@ processBlocks name loop (nxtBl:bs) = do
           modify (setBlockTime thisBl startTime . statsAddBlock FlowTime thisBl o')
           r <- respond $ pure o'
           rs <- processBlocks name False bs
+          logger (Just startTime) $ "Responses: " <> tshow (r : rs)
           if loop
             then processBlocks name True (r : rs)
             else return (r : rs)

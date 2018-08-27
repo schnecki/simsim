@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 243
+--     Update #: 249
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -113,7 +113,8 @@ main =
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
     -- sim'' <- foldM (simulateLogging runStderrLoggingT) sim ([incomingOrders] ++ replicate 1 [])
-    sim'' <- simulateUntilLogging runStderrLoggingT 11 sim incomingOrders
+    sim' <- simulateUntilLogging runStderrLoggingT 1 sim incomingOrders
+    sim'' <- simulateUntilLogging runStderrLoggingT 3 sim' []
     -- sim'' <- simulateUntilLogging runStderrLoggingT 3 sim' [] -- incomingOrders
     -- putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
     -- putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
@@ -126,7 +127,7 @@ main =
 
     -- putDoc $ prettySimStatistics (simStatistics sim')
 
-    -- putStrLn $ prettySimSim sim'
+    putStrLn $ prettySimSim sim'
     putStrLn $ prettySimSim sim''
 
 --

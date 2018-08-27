@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 220
+--     Update #: 222
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -173,7 +173,7 @@ mkPipeProdSys sim ordersToRelease =
   fgi >~>
   sink
   where
-    maxMs = simMaxMachines $ simInternal sim
+    maxMs = simMaxMachines (simInternal sim)
     lastOccur = Prelude.maximum $ M.elems (simBlockLastOccur $ simInternal sim)
     routes = simRouting sim
 

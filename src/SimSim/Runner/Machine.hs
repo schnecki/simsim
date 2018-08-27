@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 213
+--     Update #: 221
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -126,7 +126,8 @@ processOrder name routes bl order pT = do
       let order' = dispatch routes bl $ setOrderBlockStartTime startTime $ setOrderCurrentTime procEndTime $ setProdStartTime startTime order
       modify (statsAddBlock FlowAndProcTime bl order')
       let order'' = setOrderBlockStartTime procEndTime order' -- start time for next block queue
-      void $ respond $ pure order'' -- for us, process
+      void $ respond $ pure order''
+      -- when (procEndTime <= endTime) $ request bl >>= machine name routes -- process next order
 
 
 --

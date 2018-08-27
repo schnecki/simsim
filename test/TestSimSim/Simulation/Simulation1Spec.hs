@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 172
+--     Update #: 191
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module TestSimSim.Simulation.Simulation1Spec
   ( spec
   ) where
 
+import           Control.Monad                       (guard, liftM)
 import qualified Data.List                           as L
 import qualified Data.Map.Strict                     as M
 import           Debug.Trace
@@ -123,6 +124,8 @@ spec = do
     it "prop_simulation1 Time=30" $ prop_simulation1AtTime 30 simAtTime30
   describe "Simulation combinations" $ do
     it "prop_simulation1 1plus1Eq2" $ prop_simulation1plus1Eq2
+    it "prop_simulation1plus2Eq3" $ prop_simulation1plus2Eq3
+    -- it "prop_simulation1AddTwo" $ prop_simulation1AddTwo
 
 
 prop_simulation1AtTime :: Time -> (SimSim -> SimSim) -> Property
@@ -156,10 +159,20 @@ propList =
   ]
 
 
-prop_simulation1Plus2 :: Property
-prop_simulation1Plus2 = ioProperty $ do
-  (aProp,aPer,aFun) <- oneof $ map return propList
-  undefined
+prop_simulation1AddTwo :: Double -> Double -> Property
+prop_simulation1AddTwo stop end =
+  stop < end ==> ioProperty $ do
+    g <- newStdGen
+    let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
+    sim1 <- simulateUntil (Time $ toRational stop) sim orders
+    sim2 <- simulateUntil (Time $ toRational end) sim1 []
+    sim' <- simulateUntil (Time $ toRational end) sim orders
+    return $
+      eqPretty
+        sim2
+        (prettySimulation True prettyOrderDue)
+        sim'
+        (\x -> prettySimulation True prettyOrderDue x <$$> text "Numbers: " <> double stop <+> text "-->" <+> double end <+> text " == " <+> double end)
 
 
 prop_simulation1plus1Eq2 :: Property
@@ -169,6 +182,16 @@ prop_simulation1plus1Eq2 = ioProperty $ do
     sim1 <- simulateUntil 1 sim orders
     sim2 <- simulateUntil 2 sim1 []
     sim' <- simulateUntil 2 sim orders
+    return $ eqPretty sim2 (prettySimulation True prettyOrderDue) sim' (prettySimulation True prettyOrderDue)
+
+
+prop_simulation1plus2Eq3 :: Property
+prop_simulation1plus2Eq3 = ioProperty $ do
+    g <- newStdGen
+    let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
+    sim1 <- simulateUntil 1 sim orders
+    sim2 <- simulateUntil 3 sim1 []
+    sim' <- simulateUntil 3 sim orders
     return $ eqPretty sim2 (prettySimulation True prettyOrderDue) sim' (prettySimulation True prettyOrderDue)
 
 
