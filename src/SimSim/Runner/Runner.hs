@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 218
+--     Update #: 220
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -89,8 +89,8 @@ import           SimSim.Runner.Util
 -- the production system.
 simulation :: (MonadLogger m, MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimSim
 simulation sim simEnd incomingOrders = do
-  let timeNextPeriod = simCurrentTime sim + simPeriodLength sim
-  let stSim = setSimEndTime (min timeNextPeriod simEnd) sim
+  let timeNextPeriodEnd = simCurrentTime sim + simPeriodLength sim
+  let stSim = setSimEndTime (min timeNextPeriodEnd simEnd) sim
   simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
   let opOrders = simOrdersOrderPool simOp
       time = simCurrentTime simOp
@@ -103,18 +103,20 @@ simulation sim simEnd incomingOrders = do
     else return sim'
   where
     finalize sim = statsEndPeriodAddCosts $ mapBlockTimes (max endT) $ fixIdleTimeQueues $ fixIdleTimeFgi $ setSimCurrentTime endT sim
-      where endT = simEndTime $ simInternal sim
-    dummyOrder = (newOrder (Product 1) simEnd simEnd) {orderCurrentTime = simEnd, blockStartTime = simEnd}
+      where
+        endT = simEndTime $ simInternal sim
     fixIdleTimeQueues sim = foldl' (\s bl -> statsAddBlockPartialUpdate ProcTime bl dummyOrder s) sim blsQueues
       where
-        blsMachines = filter (\bl -> isMachine bl) (toList $ simBlocks $ simInternal sim) -- queue is idle
+        blsMachines = filter isMachine (toList $ simBlocks $ simInternal sim) -- queue is idle
         blsQueues = L.nub $ concatMap (dispatchReverse (simRouting sim)) $ filter (\mBl -> maybe True null (M.lookup mBl (simOrdersQueue sim))) blsMachines
+        dummyOrder = (newOrder (Product 1) simTimeStopped simTimeStopped) {orderCurrentTime = simTimeStopped, blockStartTime = simTimeStopped}
+        simTimeStopped = simEndTime $ simInternal sim
     fixIdleTimeFgi sim
-      | null (simOrdersFgi sim)
-                           -- trace ("Adding dummy order. Before: " ++ show (prettySimStatistics True sim))
-                           -- trace ("Afterwards: " ++ show (prettySimStatistics True $ statsAddBlock ProcTime FGI dummyOrder sim))
-       = statsAddBlockPartialUpdate ProcTime FGI dummyOrder sim
+      | null (simOrdersFgi sim) = statsAddBlockPartialUpdate ProcTime FGI dummyOrder sim
       | otherwise = sim
+      where
+        dummyOrder = (newOrder (Product 1) simTimeStopped simTimeStopped) {orderCurrentTime = simTimeStopped, blockStartTime = simTimeStopped}
+        simTimeStopped = simEndTime $ simInternal sim
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts after one period.

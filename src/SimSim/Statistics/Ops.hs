@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 244
+--     Update #: 247
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -94,10 +94,10 @@ statsAddShipped fgiOrds shippedOrders sim
       | otherwise = False
 
 statsAddBlock :: UpdateType -> Block -> Order -> SimSim -> SimSim
-statsAddBlock upType bl o sim = statsAddBlockInternal False upType bl o sim
+statsAddBlock = statsAddBlockInternal False
 
 statsAddBlockPartialUpdate :: UpdateType -> Block -> Order -> SimSim -> SimSim
-statsAddBlockPartialUpdate upType bl o sim = statsAddBlockInternal True upType bl o sim
+statsAddBlockPartialUpdate = statsAddBlockInternal True
 
 statsAddBlockInternal :: Bool -> UpdateType -> Block -> Order -> SimSim -> SimSim
 statsAddBlockInternal isPartial upType bl o sim = sim {simStatistics = updateBlockOrder isPartial blTimes upType (UpBlock bl) o (simStatistics sim)}
@@ -108,7 +108,7 @@ statsAddBlockInternal isPartial upType bl o sim = sim {simStatistics = updateBlo
 -- | This function accumulates the costs at the end of the period. If it is not the end of the period, then nothing is done.
 statsEndPeriodAddCosts :: SimSim -> SimSim
 statsEndPeriodAddCosts sim
-  | denominator (fromTime (simCurrentTime sim) / fromTime (simPeriodLength sim)) == 0 =
+  | denominator (fromTime (simCurrentTime sim) / fromTime (simPeriodLength sim)) == 1 =
     sim {simStatistics = updateCostsEndPeriod (simCurrentTime sim) (simOrdersOrderPool sim) (simOrdersQueue sim) (simOrdersMachine sim) (simOrdersFgi sim) (simStatistics sim)}
   | otherwise = sim
 
@@ -152,9 +152,10 @@ updateBlockOrder _ _ _ bl _ _ = error ("called updateBlockOrder on a non block: 
 
 -- | This function updates the ``StatsProcTime
 updateStatsProcTime :: BlockTimes -> Update -> Order -> StatsProcTime -> StatsProcTime
-updateStatsProcTime _ up@(UpBlock (Machine {})) order (StatsProcTime pT) = StatsProcTime (pT + getBlockFlowTime up order)
-updateStatsProcTime blTimes up@(UpBlock bl) order (StatsProcTime pT) = StatsProcTime (pT + fromTime (max 0 $ blockStartTime order - blTime ))
-  where blTime = fromMaybe (error $ "empty block time for " ++ show bl ++ " in updateStatsProcTime") (M.lookup bl blTimes)
+updateStatsProcTime _ up@(UpBlock Machine {}) order (StatsProcTime pT) = StatsProcTime (pT + getBlockFlowTime up order)
+updateStatsProcTime blTimes up@(UpBlock bl) order (StatsProcTime pT) = StatsProcTime (pT + fromTime (max 0 $ blockStartTime order - blTime))
+  where
+    blTime = fromMaybe (error $ "empty block time for " ++ show bl ++ " in updateStatsProcTime") (M.lookup bl blTimes)
 
 
 -- | This function updates the ``StatsFlowTime`` according to the given order and for the given block. The Boolean, decides

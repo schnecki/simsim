@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 8
+--     Update #: 19
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,17 +37,21 @@
 module SimSim.Shipment.Type
     ( Shipment (..)
     , ShipmentFun (..)
+    , ShipmentRegularity (..)
     ) where
 
 import           ClassyPrelude
 
 import           SimSim.Order
+import           SimSim.Shipment.Regularity
 import           SimSim.Time
+
 
 type ShipmentFun = Time -> Order -> Bool
 
 data Shipment = Shipment
-  { shipment           :: ShipmentFun
+  { shipmentRegularity :: ShipmentRegularity
+  , shipment           :: ShipmentFun
   , uniqueShipmentName :: Text
   }
 

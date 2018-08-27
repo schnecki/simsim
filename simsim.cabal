@@ -56,8 +56,9 @@ library
                      , SimSim.Statistics.Pretty
                      , SimSim.Statistics.Type
                      , SimSim.Shipment
-                     , SimSim.Shipment.Type
                      , SimSim.Shipment.OnDueDate
+                     , SimSim.Shipment.Type
+                     , SimSim.Shipment.Regularity
   other-modules:
   build-depends:       base >= 4.7 && < 5
                      , transformers
