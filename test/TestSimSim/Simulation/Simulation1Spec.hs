@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 202
+--     Update #: 209
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,12 +42,14 @@ module TestSimSim.Simulation.Simulation1Spec
 import           Control.Monad                       (guard, liftM)
 import qualified Data.List                           as L
 import qualified Data.Map.Strict                     as M
+import qualified Data.Maybe
 import           Debug.Trace
 import           Prelude
 import           System.Random
 import           Test.Hspec
 import           Test.QuickCheck                     hiding ((===))
-import           Text.PrettyPrint.ANSI.Leijen
+import           Text.PrettyPrint.ANSI.Leijen        hiding ((<$>))
+
 
 import           SimSim
 import           SimSim.Order
@@ -125,7 +127,8 @@ spec = do
   describe "Simulation combinations" $ do
     it "prop_simulation1 1plus1Eq2" $ prop_simulation1plus1Eq2
     it "prop_simulation1 plus2Eq3" $ prop_simulation1plus2Eq3
-    it "prop_simulation1 AddTwo" $ property prop_simulation1AddTwo
+    it "prop_simulation1 With one stop vs. direct simulation" $ property prop_simulation1AddTwo
+    it "prop_simulation1 With one stop vs. predifined one" $ property prop_simulation1AddTwo2
 
 
 prop_simulation1AtTime :: Time -> (SimSim -> SimSim) -> Property
@@ -173,6 +176,27 @@ prop_simulation1AddTwo stop end =
         (prettySimulation True prettyOrderDue)
         sim2
         (\x -> prettySimulation True prettyOrderDue x <$$> text "Numbers: " <> double stop <+> text "-->" <+> double end <+> text " == " <+> double end)
+
+
+prop_simulation1AddTwo2 :: Time -> Property
+prop_simulation1AddTwo2 endD = ioProperty $ do
+  end <- generate $ oneof (map (return.snd3) propList)
+  stop <- generate $ (Time . toRational) <$> choose (0 :: Double, fromRational $ fromTime end)
+  g <- newStdGen
+  let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
+  sim1 <- simulateUntil stop sim orders
+  sim2 <- simulateUntil end sim1 []
+    -- sim' <- simulateUntil (Time $ toRational end) sim orders
+  let sim' = thd3 (Data.Maybe.fromJust $ L.find ((== end) . snd3) propList) sim
+  return $
+    eqPretty
+      sim'
+      (prettySimulation True prettyOrderDue)
+      sim2
+      (\x -> prettySimulation True prettyOrderDue x <$$> text "Numbers: " <> prettyTime stop <+> text "-->" <+> prettyTime end <+> text " == " <+> prettyTime end)
+  where
+    snd3 (_, x, _) = x
+    thd3 (_, _, x) = x
 
 
 prop_simulation1plus1Eq2 :: Property

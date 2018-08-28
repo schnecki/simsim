@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 343
+--     Update #: 345
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -81,12 +81,10 @@ queue name routes (Left nr) -- no more orders from upstream, process queued orde
   mQueues <- gets simOrdersQueue --  load any order
   logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ ". current queues:" <> tshow (map orderId <$> mQueues)
   blLastOccur <- gets (simBlockLastOccur . simInternal)
-  -- fill next block and possibly move orders into machine from last block
-  let blocks = map fst $ filter ((\x -> x == nr + 1 || x == nr - 1) . snd) (M.toList blLastOccur)
-  -- logger Nothing $ "Last occur: " <> tshow blLastOccur
+  let blocks = map fst $ filter ((\x -> x == nr + 1 || x == nr - 1) . snd) (M.toList blLastOccur) -- fill next block and possibly move orders into machine from last block
   logger Nothing $ "Queue " ++ name ++ " checking blocks: " <> tshow blocks
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
-  mapM_ (void . processCurrentMachineWip name routes) blocks
+  mapM_ (void . processCurrentMachineWip name routes) blocks -- ensure blocks have finished processing
   unless (null orders) $ void $ processBlocks name True blocks
   respond (Left (nr + 1)) >>= processBlocks name True . return
   return ()
