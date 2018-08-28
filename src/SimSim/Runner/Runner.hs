@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 222
+--     Update #: 226
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,6 +50,7 @@ import           Control.Monad.Trans.Class
 import qualified Data.List                  as L
 import qualified Data.Map.Strict            as M
 import           Data.Monoid                ((<>))
+import           Data.Ratio                 (denominator)
 import           Data.Sequence              (replicate)
 import           Data.Text                  (Text)
 import           Data.Void
@@ -58,7 +59,7 @@ import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
-import qualified Prelude                    as Prelude
+import qualified Prelude
 import           System.Random
 
 
@@ -102,9 +103,12 @@ simulation sim simEnd incomingOrders = do
     then simulation sim' simEnd []
     else return sim'
   where
-    finalize sim = statsEndPeriodAddCosts $ mapBlockTimes (max endT) $ fixIdleTimeQueues $ fixIdleTimeFgi $ setSimCurrentTime endT sim
+    finalize sim = addStatsCosts $ mapBlockTimes (max endT) $ fixIdleTimeQueues $ fixIdleTimeFgi $ setSimCurrentTime endT sim
       where
         endT = simEndTime $ simInternal sim
+    addStatsCosts sim | isPeriodEnd sim = statsEndPeriodAddCosts sim
+                      | otherwise = sim
+
     fixIdleTimeQueues sim = foldl' (\s bl -> statsAddBlockPartialUpdate ProcTime bl dummyOrder s) sim blsQueues
       where
         blsMachines = filter isMachine (toList $ simBlocks $ simInternal sim) -- queue is idle

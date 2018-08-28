@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 191
+--     Update #: 196
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -125,7 +125,7 @@ spec = do
   describe "Simulation combinations" $ do
     it "prop_simulation1 1plus1Eq2" $ prop_simulation1plus1Eq2
     it "prop_simulation1plus2Eq3" $ prop_simulation1plus2Eq3
-    -- it "prop_simulation1AddTwo" $ prop_simulation1AddTwo
+    it "prop_simulation1AddTwo" $ property prop_simulation1AddTwo
 
 
 prop_simulation1AtTime :: Time -> (SimSim -> SimSim) -> Property
@@ -161,7 +161,7 @@ propList =
 
 prop_simulation1AddTwo :: Double -> Double -> Property
 prop_simulation1AddTwo stop end =
-  stop < end ==> ioProperty $ do
+  stop >= 0 && stop < end ==> ioProperty $ do
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
     sim1 <- simulateUntil (Time $ toRational stop) sim orders

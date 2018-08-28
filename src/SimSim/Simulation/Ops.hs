@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 46
+--     Update #: 49
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,6 +41,7 @@ import           ClassyPrelude
 import           Data.Graph
 import qualified Data.List.NonEmpty         as NL
 import qualified Data.Map.Strict            as M
+import           Data.Ratio                 (denominator)
 import qualified Prelude                    as Prelude
 import           System.Random
 

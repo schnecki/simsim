@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 247
+--     Update #: 248
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -52,6 +52,7 @@ import           Data.Ratio                 (denominator)
 import           SimSim.Block
 import           SimSim.Order.Type
 import           SimSim.ProductType
+import           SimSim.Runner.Util
 import           SimSim.Simulation.Type
 import           SimSim.Statistics.Internal
 import           SimSim.Statistics.Type
@@ -108,7 +109,7 @@ statsAddBlockInternal isPartial upType bl o sim = sim {simStatistics = updateBlo
 -- | This function accumulates the costs at the end of the period. If it is not the end of the period, then nothing is done.
 statsEndPeriodAddCosts :: SimSim -> SimSim
 statsEndPeriodAddCosts sim
-  | denominator (fromTime (simCurrentTime sim) / fromTime (simPeriodLength sim)) == 1 =
+  | isPeriodEnd sim =
     sim {simStatistics = updateCostsEndPeriod (simCurrentTime sim) (simOrdersOrderPool sim) (simOrdersQueue sim) (simOrdersMachine sim) (simOrdersFgi sim) (simStatistics sim)}
   | otherwise = sim
 

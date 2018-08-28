@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 72
+--     Update #: 73
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,6 +49,7 @@ import qualified Data.Map.Strict            as M
 import           Data.Monoid                ((<>))
 import           Data.Text                  (Text)
 import           Data.Void
+import Data.Ratio (denominator)
 import           Debug.Trace
 import qualified Prelude
 import           Pipes
@@ -109,6 +110,12 @@ logger Nothing txt = do
   let t = Prelude.maximum (M.elems m)
   logger (Just t) txt
 logger (Just t) txt = $(logDebug) $ "t=" ++ tshow (pretty t) ++ ": " ++ txt
+
+
+isPeriodEnd :: SimSim -> Bool
+isPeriodEnd sim
+  | simCurrentTime sim /= 0 && denominator (fromTime (simCurrentTime sim) / fromTime (simPeriodLength sim)) == 1 = True
+  | otherwise = False
 
 
 --

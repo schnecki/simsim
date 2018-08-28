@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 328
+--     Update #: 343
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,9 +43,9 @@ module SimSim.Runner.Queue
 
 import           ClassyPrelude
 
-import           Control.Monad hiding (forM_)
+import           Control.Monad hiding (forM_, mapM_)
 import           Control.Monad.IO.Class
-import           Control.Monad.State.Strict hiding (foldM_,forM_)
+import           Control.Monad.State.Strict hiding (foldM_,forM_, mapM_)
 import           Control.Monad.Trans.Class
 import qualified Data.Map.Strict            as M
 import           Data.Text                  (Text)
@@ -67,6 +67,7 @@ import           SimSim.ProcessingTime.Ops
 import           SimSim.ProductType
 import           SimSim.Routing
 import           SimSim.Runner.Dispatch
+import           SimSim.Runner.Machine
 import           SimSim.Runner.Util
 import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
@@ -80,12 +81,15 @@ queue name routes (Left nr) -- no more orders from upstream, process queued orde
   mQueues <- gets simOrdersQueue --  load any order
   logger Nothing $ "Queue " ++ name ++ " input Left " ++ tshow nr ++ ". current queues:" <> tshow (map orderId <$> mQueues)
   blLastOccur <- gets (simBlockLastOccur . simInternal)
-  let blocks = map fst $ filter ((== nr + 1) . snd) (M.toList blLastOccur)
-  logger Nothing $ "Last occur: " <> tshow blLastOccur
+  -- fill next block and possibly move orders into machine from last block
+  let blocks = map fst $ filter ((\x -> x == nr + 1 || x == nr - 1) . snd) (M.toList blLastOccur)
+  -- logger Nothing $ "Last occur: " <> tshow blLastOccur
   logger Nothing $ "Queue " ++ name ++ " checking blocks: " <> tshow blocks
   let orders = mconcat $ mapMaybe (`M.lookup` mQueues) blocks
+  mapM_ (void . processCurrentMachineWip name routes) blocks
   unless (null orders) $ void $ processBlocks name True blocks
-  void $ respond $ Left (nr + 1)
+  respond (Left (nr + 1)) >>= processBlocks name True . return
+  return ()
 -- received an order, store and continue
 queue name routes (Right order) = do
   let q = nextBlock order
@@ -125,7 +129,7 @@ processBlocks name loop (nxtBl:bs) = do
       endTime <- getSimEndTime
       startTime <-
         if isMachine nxtBl
-          then (\x -> max (orderCurrentTime o) x) <$> getBlockTimeM nxtBl
+          then max (orderCurrentTime o) <$> getBlockTimeM nxtBl
           else return $ orderCurrentTime o
       isFree <- isNothing . M.lookup nxtBl <$> gets simOrdersMachine
       if not isFree || startTime > endTime
@@ -135,7 +139,7 @@ processBlocks name loop (nxtBl:bs) = do
           processBlocks name True bs
         else do
           let o' = setOrderCurrentTime startTime o
-          logger (Just startTime) $ "Order " ++ tshow (orderId o') ++ " just left " ++ tshow thisBl ++ ". Order: " ++ tshow o'
+          logger (Just startTime) $ "Order " ++ tshow (orderId o') ++ " just left " ++ tshow thisBl ++ " (" ++ name ++ "). Order: " ++ tshow o'
           modify (setBlockTime thisBl startTime . statsAddBlock FlowTime thisBl o')
           r <- respond $ pure o'
           rs <- processBlocks name False bs
