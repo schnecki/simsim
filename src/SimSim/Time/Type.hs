@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 8
+--     Update #: 10
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -64,6 +64,13 @@ instance Num Time where
 instance Fractional Time where
   fromRational x = Time $ toRational x
   (Time x) / (Time y) = Time (x/y)
+
+instance Real Time where
+  toRational (Time x) = x
+
+instance RealFrac Time where
+  properFraction (Time x) = (a, Time b)
+    where (a,b) = properFraction x
 
 
 --

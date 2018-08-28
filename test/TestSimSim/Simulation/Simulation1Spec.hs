@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 196
+--     Update #: 202
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -124,8 +124,8 @@ spec = do
     it "prop_simulation1 Time=30" $ prop_simulation1AtTime 30 simAtTime30
   describe "Simulation combinations" $ do
     it "prop_simulation1 1plus1Eq2" $ prop_simulation1plus1Eq2
-    it "prop_simulation1plus2Eq3" $ prop_simulation1plus2Eq3
-    it "prop_simulation1AddTwo" $ property prop_simulation1AddTwo
+    it "prop_simulation1 plus2Eq3" $ prop_simulation1plus2Eq3
+    it "prop_simulation1 AddTwo" $ property prop_simulation1AddTwo
 
 
 prop_simulation1AtTime :: Time -> (SimSim -> SimSim) -> Property
@@ -169,9 +169,9 @@ prop_simulation1AddTwo stop end =
     sim' <- simulateUntil (Time $ toRational end) sim orders
     return $
       eqPretty
-        sim2
-        (prettySimulation True prettyOrderDue)
         sim'
+        (prettySimulation True prettyOrderDue)
+        sim2
         (\x -> prettySimulation True prettyOrderDue x <$$> text "Numbers: " <> double stop <+> text "-->" <+> double end <+> text " == " <+> double end)
 
 
@@ -179,10 +179,10 @@ prop_simulation1plus1Eq2 :: Property
 prop_simulation1plus1Eq2 = ioProperty $ do
     g <- newStdGen
     let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
-    sim1 <- simulateUntil 1 sim orders
-    sim2 <- simulateUntil 2 sim1 []
-    sim' <- simulateUntil 2 sim orders
-    return $ eqPretty sim2 (prettySimulation True prettyOrderDue) sim' (prettySimulation True prettyOrderDue)
+    sim1 <- simulateUntil 0.833 sim orders
+    sim2 <- simulateUntil 11.0 sim1 []
+    sim' <- simulateUntil 11.0 sim orders
+    return $ eqPretty sim' (prettySimulation True prettyOrderDue) sim2 (prettySimulation True prettyOrderDue)
 
 
 prop_simulation1plus2Eq3 :: Property
@@ -192,7 +192,7 @@ prop_simulation1plus2Eq3 = ioProperty $ do
     sim1 <- simulateUntil 1 sim orders
     sim2 <- simulateUntil 3 sim1 []
     sim' <- simulateUntil 3 sim orders
-    return $ eqPretty sim2 (prettySimulation True prettyOrderDue) sim' (prettySimulation True prettyOrderDue)
+    return $ eqPretty sim' (prettySimulation True prettyOrderDue) sim2 (prettySimulation True prettyOrderDue)
 
 
 simAtTime1 :: SimSim -> SimSim

@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 226
+--     Update #: 228
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -90,7 +90,8 @@ import           SimSim.Runner.Util
 -- the production system.
 simulation :: (MonadLogger m, MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimSim
 simulation sim simEnd incomingOrders = do
-  let timeNextPeriodEnd = simCurrentTime sim + simPeriodLength sim
+
+  let timeNextPeriodEnd = (Time $ toRational $ floor ((simCurrentTime sim + simPeriodLength sim) / simPeriodLength sim)) * simPeriodLength sim
   let stSim = setSimEndTime (min timeNextPeriodEnd simEnd) sim
   simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
   let opOrders = simOrdersOrderPool simOp
