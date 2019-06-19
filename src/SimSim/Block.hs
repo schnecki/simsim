@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 -- Block.hs ---
 --
 -- Filename: Block.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 24
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +41,8 @@ module SimSim.Block where
 import           ClassyPrelude
 import qualified Data.List.NonEmpty as NL
 import qualified Data.Map.Strict    as M
+import           Data.Serialize
+import           GHC.Generics
 import           System.Random
 
 -- Idea: recursive Block datatype? to model full work centers etc.
@@ -48,7 +52,7 @@ data Block
   | Machine Int                 -- ^. This block is a machine.
   | FGI                         -- ^. This block is a finished goods inventory.
   | Sink                        -- ^. This block removes the orders from the system.
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic, Serialize)
 
 isMachine :: Block -> Bool
 isMachine Machine{} = True

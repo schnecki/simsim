@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 42
+--     Update #: 49
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,7 +37,8 @@
 module SimSim.Routing where
 
 import           ClassyPrelude
-import qualified Data.List.NonEmpty as NL
+import qualified Data.List.NonEmpty       as NL
+import           Data.Serialize.Instances
 
 import           SimSim.Block
 import           SimSim.Order
@@ -48,6 +49,7 @@ infixl 2 -->
 
 type Routing = NL.NonEmpty ((ProductType,Block), Block)
 type Routes = [((ProductType,Block), Block)]
+
 
 --
 -- Routing.hs ends here

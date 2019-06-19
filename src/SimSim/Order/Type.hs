@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 71
+--     Update #: 78
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,6 +39,8 @@
 module SimSim.Order.Type where
 
 import           ClassyPrelude
+import           Data.Serialize
+import           GHC.Generics
 
 import           SimSim.Block
 import           SimSim.ProductType
@@ -60,7 +64,7 @@ data Order = Order
   , blockStartTime   :: !Time
   , nextBlock        :: !Block
   , orderCurrentTime :: Time
-  } deriving (Show)
+  } deriving (Show, Generic, Serialize)
 
 instance Eq Order where
   x == y = orderId x == orderId y

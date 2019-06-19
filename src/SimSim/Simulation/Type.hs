@@ -1,4 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DeriveAnyClass      #-}
+{-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE RankNTypes          #-}
 -- Type.hs ---
 --
@@ -11,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 395
+--     Update #: 406
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,9 +42,11 @@ module SimSim.Simulation.Type where
 
 import           ClassyPrelude
 import           Data.Graph
-import qualified Data.List.NonEmpty         as NL
-import qualified Data.Map.Strict            as M
-import qualified Prelude                    as Prelude
+import qualified Data.List.NonEmpty             as NL
+import qualified Data.Map.Strict                as M
+import           Data.Serialize
+import           GHC.Generics
+import qualified Prelude                        as Prelude
 import           System.Random
 
 import           SimSim.Block
@@ -54,6 +58,7 @@ import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
 import           SimSim.Shipment
+import           SimSim.Simulation.Serialisable
 import           SimSim.Statistics.Type
 import           SimSim.Time
 
@@ -73,6 +78,11 @@ data SimSim = SimSim
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
   }
+
+toSerialisable :: SimSim -> SimSimSerialisable
+toSerialisable (SimSim ro t p nId _ _ _ op q m f sh stats int) =
+  SimSimSerialisable ro t p nId op q m f sh stats (toSerialisableInternal int)
+
 
 instance Show SimSim where
   show sim =
@@ -95,7 +105,7 @@ instance Eq SimSim where
       ]
 
 
-type BlockTimes = M.Map Block Time
+-- type BlockTimes = M.Map Block Time
 
 data SimInternal = SimInternal
   { simBlocks          :: !(NL.NonEmpty Block)
@@ -107,6 +117,10 @@ data SimInternal = SimInternal
   , simProductRoutes   :: !(M.Map ProductType [Block])
   , simBlockLastOccur  :: !(M.Map Block Int)
   }
+
+toSerialisableInternal :: SimInternal -> SimInternalSerialisable
+toSerialisableInternal (SimInternal bl t e m _ ran rout last) =
+  SimInternalSerialisable bl t e m ran rout last
 
 
 --

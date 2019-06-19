@@ -71,6 +71,8 @@ library
                      , mtl
                      , monad-logger >= 0.2.2
                      , ansi-wl-pprint
+                     , cereal
+                     , serialize-instances
 
   default-extensions: NoImplicitPrelude
                      , OverloadedStrings

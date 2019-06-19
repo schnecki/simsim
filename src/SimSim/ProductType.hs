@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- ProductType.hs ---
 --
 -- Filename: ProductType.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 4
+--     Update #: 6
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,8 +39,11 @@
 module SimSim.ProductType where
 
 import           ClassyPrelude
+import           Data.Serialize
+import           GHC.Generics
 
-newtype ProductType = Product Int deriving (Show, Eq, Ord)
+
+newtype ProductType = Product Int deriving (Show, Eq, Ord, Generic, Serialize)
 
 
 --

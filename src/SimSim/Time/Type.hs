@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 12
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,7 +41,10 @@ module SimSim.Time.Type where
 
 import           ClassyPrelude
 import           Data.Ratio
+import           Data.Serialize
+import           GHC.Generics
 import           Text.Printf
+
 
 -- Synonyms
 type CurrentTime = Time
@@ -48,7 +53,7 @@ type DueDate = Time
 
 
 newtype Time = Time Rational
-  deriving (Ord, Eq, Show, Read)
+  deriving (Ord, Eq, Show, Read, Generic, Serialize)
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t
