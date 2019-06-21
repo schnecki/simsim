@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 19
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -54,6 +54,13 @@ data Shipment = Shipment
   , shipment           :: ShipmentFun
   , uniqueShipmentName :: Text
   }
+
+instance Eq Shipment where
+  (Shipment r1 _ n1) == (Shipment r2 _ n2) = r1 == r2 && n1 == n2
+
+instance Ord Shipment where
+  compare (Shipment r1 _ n1) (Shipment r2 _ n2) = compare (r1,n1) (r2,n2)
+
 
 instance Show Shipment where
   show = unpack . uniqueShipmentName

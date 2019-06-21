@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 406
+--     Update #: 417
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,6 +50,7 @@ import qualified Prelude                        as Prelude
 import           System.Random
 
 import           SimSim.Block
+import           SimSim.BlockTimes
 import           SimSim.Dispatch
 import           SimSim.Order.Type
 import           SimSim.Period
@@ -77,11 +78,15 @@ data SimSim = SimSim
   , simOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
-  }
+  } deriving (Ord)
 
 toSerialisable :: SimSim -> SimSimSerialisable
 toSerialisable (SimSim ro t p nId _ _ _ op q m f sh stats int) =
   SimSimSerialisable ro t p nId op q m f sh stats (toSerialisableInternal int)
+
+fromSerialisable :: Release -> Dispatch -> Shipment -> ProcessingTimes -> SimSimSerialisable -> SimSim
+fromSerialisable rel disp ship procTimes (SimSimSerialisable ro t p nId op q m f sh stats int)
+  = SimSim ro t p nId rel disp ship op q m f sh stats (fromSerialisableInternal procTimes int)
 
 
 instance Show SimSim where
@@ -105,8 +110,6 @@ instance Eq SimSim where
       ]
 
 
--- type BlockTimes = M.Map Block Time
-
 data SimInternal = SimInternal
   { simBlocks          :: !(NL.NonEmpty Block)
   , simBlockTimes      :: !BlockTimes
@@ -118,9 +121,21 @@ data SimInternal = SimInternal
   , simBlockLastOccur  :: !(M.Map Block Int)
   }
 
+instance Eq SimInternal where
+  (SimInternal bl1 tim1 end1 maxM1 procT1 rands1 routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 procT2 rands2 routes2 lastOcc2) =
+    bl1 == bl2 && tim1 == tim2 && end1 == end2 && maxM1 == maxM2 && procT1 == procT2 && rands1 == rands2 && routes1 == routes2 && lastOcc1 == lastOcc2
+
+instance Ord SimInternal where
+  compare (SimInternal bl1 tim1 end1 maxM1 procT1 rands1 routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 procT2 rands2 routes2 lastOcc2) =
+    compare (bl1,tim1,end1,maxM1,rands1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,rands2,routes2,lastOcc2)
+
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
 toSerialisableInternal (SimInternal bl t e m _ ran rout last) =
   SimInternalSerialisable bl t e m ran rout last
+
+fromSerialisableInternal :: ProcessingTimes -> SimInternalSerialisable -> SimInternal
+fromSerialisableInternal procTimes (SimInternalSerialisable bl t e m ran rout last) =
+  SimInternal bl t e m procTimes ran rout last
 
 
 --

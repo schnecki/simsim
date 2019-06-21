@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 47
+--     Update #: 49
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -56,6 +56,10 @@ type RandomUniform = Double     -- ^ Random number between 0 and 1.
 
 -- TODO decide on how to use random numbers
 type ProcessingTime = RandomUniform -> Time
+
+instance Eq ProcessingTime where
+  _ == _ = True
+
 
 type ProcessingTimes = M.Map Block (M.Map ProductType ProcessingTime)
 

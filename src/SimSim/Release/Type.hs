@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 6
+--     Update #: 8
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -52,6 +52,12 @@ data Release = Release
   { releaser          :: ReleaseFun
   , uniqueReleaseName :: Text
   }
+
+instance Eq Release where
+  (Release _ n1) == (Release _ n2) = n1 == n2
+
+instance Ord Release where
+  compare (Release _ n1) (Release _ n2) = compare n1 n2
 
 instance Show Release where
   show = unpack . uniqueReleaseName

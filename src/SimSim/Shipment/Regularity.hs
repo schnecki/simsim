@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 2
+--     Update #: 5
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,12 +38,14 @@ module SimSim.Shipment.Regularity
     ( ShipmentRegularity (..)
     ) where
 
+import           ClassyPrelude
 
 -- | Decides on how often finished orders are shipped.
 data ShipmentRegularity
   = ShipEndOfPeriod
   | ShipWhenStoppedAndEndOfPeriod
   --  | ShipEvery Rational -- need to add the step size in Runner.simulation
+  deriving (Eq, Ord)
 
 
 --

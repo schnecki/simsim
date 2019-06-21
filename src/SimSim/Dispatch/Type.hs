@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 147
+--     Update #: 148
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -55,6 +55,13 @@ data Dispatch = Dispatch
   { dispatcher         :: DispatchFunction
   , uniqueDispatchName :: Text
   }
+
+instance Eq Dispatch where
+  (Dispatch _ n1) == (Dispatch _ n2) = n1 == n2
+
+instance Ord Dispatch where
+  compare (Dispatch _ n1) (Dispatch _ n2) = compare n1 n2
+
 
 instance Show Dispatch where
   show = unpack . uniqueDispatchName

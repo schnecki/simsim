@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 249
+--     Update #: 251
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,6 +50,7 @@ import qualified Data.Map.Strict            as M
 import           Data.Ratio                 (denominator)
 
 import           SimSim.Block
+import           SimSim.BlockTimes
 import           SimSim.Order.Type
 import           SimSim.ProductType
 import           SimSim.Runner.Util

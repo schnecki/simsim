@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 6
+--     Update #: 10
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -51,6 +51,7 @@ import qualified Prelude                    as Prelude
 import           System.Random
 
 import           SimSim.Block
+import           SimSim.BlockTimes
 import           SimSim.Dispatch
 import           SimSim.Order.Type
 import           SimSim.Period
@@ -77,10 +78,8 @@ data SimSimSerialisable = SimSimSerialisable
   , serSimOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
   , serSimStatistics      :: SimStatistics
   , serSimInternal        :: !SimInternalSerialisable
-  } deriving (Generic, Serialize)
+  } deriving (Eq, Ord, Generic, Serialize)
 
-
-type BlockTimes = M.Map Block Time
 
 data SimInternalSerialisable = SimInternalSerialisable
   { serSimBlocks         :: !(NL.NonEmpty Block)
@@ -91,7 +90,7 @@ data SimInternalSerialisable = SimInternalSerialisable
   , serSimRandomNumbers  :: !(NL.NonEmpty Double)
   , serSimProductRoutes  :: !(M.Map ProductType [Block])
   , serSimBlockLastOccur :: !(M.Map Block Int)
-  } deriving (Generic, Serialize)
+  } deriving (Eq, Ord, Generic, Serialize)
 
 
 --

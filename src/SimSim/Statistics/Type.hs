@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 83
+--     Update #: 84
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -53,7 +53,7 @@ data SimStatistics = SimStatistics
   , simStatsShopFloorAndFgi :: StatsFlowTime       -- ^ Shop floor (from release until shipping)
   , simStatsOrderCosts      :: StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
                                               -- holding.
-  } deriving (Show, Generic, Serialize)
+  } deriving (Show, Ord, Generic, Serialize)
 
 instance Eq SimStatistics where
   stats1 == stats2 =
@@ -69,14 +69,14 @@ data StatsFlowTime = StatsFlowTime
   { statsNrOrders       :: Integer              -- ^ Nr of orders.
   , statsOrderFlowTime  :: StatsOrderTime       -- ^ Flow time statistics.
   , statsOrderTardiness :: Maybe StatsOrderTard -- ^ Only tardy orders for shop floor and shop floor plus FGI.
-  } deriving (Eq, Show, Generic, Serialize)
+  } deriving (Eq, Show, Ord, Generic, Serialize)
 
 data StatsOrderTime = StatsOrderTime
   { statsSumTime           :: Rational
   , statsStdDevTime        :: Rational
   , statsLastUpdatePartial :: Maybe StatsOrderTime -- ^ Only used if last update was partial. Holds the previous
                                                    -- ``StatsOrderTime``.
-  } deriving (Show, Generic, Serialize)
+  } deriving (Show, Ord, Generic, Serialize)
 
 instance Eq StatsOrderTime where
   (StatsOrderTime sum1 stdDev1 _) == (StatsOrderTime sum2 stdDev2 _) = sum1 == sum2 && stdDev1 == stdDev2
@@ -86,19 +86,19 @@ data StatsOrderTard = StatsOrderTard
   { statsNrTardOrders   :: Integer
   , statsSumTardiness   :: Rational
   , statsStdDevTardTime :: Rational
-  } deriving (Eq, Show, Generic, Serialize)
+  } deriving (Eq, Show, Ord, Generic, Serialize)
 
 data StatsOrderCost = StatsOrderCost
   { statsEarnings :: Integer    -- ^ Nr of earnings (sum of finished orders).
   , statsWipCosts :: Integer    -- ^ Nr of WIP costs (sum of orders in WIP at end of period).
   , statsBoCosts  :: Integer    -- ^ Nr of back order costs (sum of orders overdue at end of period per period).
   , statsFgiCosts :: Integer    -- ^ Nr of holding costs (sum of orders in inventory at end of period).
-  } deriving (Eq, Show, Generic, Serialize)
+  } deriving (Eq, Show, Ord, Generic, Serialize)
 
 data StatsProcTime = StatsProcTime
   { statsBlockTime :: Rational  -- ^ Processing time for Machine, idle time for OrderPool, Queue and FGI.
   -- , statsBroken
-  } deriving (Eq, Show, Generic, Serialize)
+  } deriving (Eq, Show, Ord, Generic, Serialize)
 
 
 emptyStatistics :: SimStatistics

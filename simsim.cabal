@@ -20,6 +20,7 @@ library
                      , SimSim.Order.Type
                      , SimSim.Order.Pretty
                      , SimSim.Block
+                     , SimSim.BlockTimes
                      , SimSim.Dispatch
                      , SimSim.Dispatch.Type
                      , SimSim.Dispatch.FirstComeFirstServe
@@ -30,6 +31,7 @@ library
                      , SimSim.Simulation.Pretty
                      , SimSim.Simulation.Type
                      , SimSim.Simulation.Ops
+                     , SimSim.Simulation.Serialisable
                      , SimSim.Time
                      , SimSim.Time.Type
                      , SimSim.Time.Pretty
@@ -72,7 +74,6 @@ library
                      , monad-logger >= 0.2.2
                      , ansi-wl-pprint
                      , cereal
-                     , serialize-instances
 
   default-extensions: NoImplicitPrelude
                      , OverloadedStrings

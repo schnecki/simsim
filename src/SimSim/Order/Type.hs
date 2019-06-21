@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 78
+--     Update #: 79
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -64,7 +64,7 @@ data Order = Order
   , blockStartTime   :: !Time
   , nextBlock        :: !Block
   , orderCurrentTime :: Time
-  } deriving (Show, Generic, Serialize)
+  } deriving (Ord, Show, Generic, Serialize)
 
 instance Eq Order where
   x == y = orderId x == orderId y
