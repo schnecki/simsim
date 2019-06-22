@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 21
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -47,7 +47,7 @@ import           SimSim.Simulation.Ops          (newSimSim, newSimSimIO, resetSt
 import           SimSim.Simulation.Pretty
 import           SimSim.Simulation.Serialisable
 import           SimSim.Simulation.Type         (SimSim (..), fromSerialisable,
-                                                 toSerialisable)
+                                                 productTypes, toSerialisable)
 
 --
 -- Simulation.hs ends here

@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 59
+--     Update #: 60
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -85,7 +85,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
                mempty
                mempty
                emptyStatistics
-               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) g (M.fromList topSorts) (M.fromList lastOccur))
+               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) g (-periodLen) (M.fromList topSorts) (M.fromList lastOccur))
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps)) &&
                     (productTypes == map Product [1..length productTypes] || error "Product types must read Product 1, Product 2, Product 3, ...")

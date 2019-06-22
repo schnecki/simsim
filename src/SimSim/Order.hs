@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 28
+--     Update #: 31
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,9 +42,11 @@ module SimSim.Order
 
 import           SimSim.Order.Ops    (generateOrdersContDueDateDistr,
                                       generateOrdersDiscDueDateDistr,
-                                      generateOrdersFixedDueDateSlack)
+                                      generateOrdersFixedDueDateSlack,
+                                      generateOrdersUniform)
 import           SimSim.Order.Pretty
-import           SimSim.Order.Type   (Order (..), OrderId, newOrder)
+import           SimSim.Order.Type   (Order (..), OrderId, newOrder, orderBoTime,
+                                      orderFgiTime, orderSlackTime, orderWipTime)
 
 --
 -- Order.hs ends here

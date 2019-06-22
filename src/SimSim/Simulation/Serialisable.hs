@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 16
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -86,15 +86,16 @@ data SimSimSerialisable = SimSimSerialisable
 
 
 data SimInternalSerialisable = SimInternalSerialisable
-  { serSimBlocks         :: !(NL.NonEmpty Block)
-  , serSimBlockTimes     :: !BlockTimes
-  , serSimEndTime        :: !Time
-  , serSimMaxMachines    :: !Int
+  { serSimBlocks              :: !(NL.NonEmpty Block)
+  , serSimBlockTimes          :: !BlockTimes
+  , serSimEndTime             :: !Time
+  , serSimMaxMachines         :: !Int
   -- , simProcessingTimes :: !ProcessingTimes
   -- , serSimRandomNumbers  :: !(NL.NonEmpty Double)
-  , serSimRandGen        :: !(V.Vector Word32)
-  , serSimProductRoutes  :: !(M.Map ProductType [Block])
-  , serSimBlockLastOccur :: !(M.Map Block Int)
+  , serSimRandGen             :: !(V.Vector Word32)
+  , serSimOrderGenerationTime :: Time
+  , serSimProductRoutes       :: !(M.Map ProductType [Block])
+  , serSimBlockLastOccur      :: !(M.Map Block Int)
   } deriving (Eq, Ord, Generic, Serialize)
 
 

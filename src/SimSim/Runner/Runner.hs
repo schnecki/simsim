@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 229
+--     Update #: 230
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -122,6 +122,10 @@ simulation sim simEnd incomingOrders = do
       where
         dummyOrder = (newOrder (Product 1) simTimeStopped simTimeStopped) {orderCurrentTime = simTimeStopped, blockStartTime = simTimeStopped}
         simTimeStopped = simEndTime $ simInternal sim
+
+-- TODO: need to generate orders during simulation
+-- generateOrders :: TODO
+
 
 -- | This function simulates the system. For this the incoming orders are first put into the order pool and once
 -- released they are fed into the production system. The simulation halts after one period.

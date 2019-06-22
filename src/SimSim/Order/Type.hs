@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 82
+--     Update #: 86
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -77,6 +77,18 @@ instance Eq Order where
 newOrder :: ProductType -> ArrivalDate -> DueDate -> Order
 newOrder productType arrDate dueDate =
   Order (-1) productType arrDate dueDate Nothing Nothing Nothing Nothing OrderPool arrDate OrderPool 0
+
+orderSlackTime :: Order -> Time
+orderSlackTime order = dueDate order - arrivalDate order
+
+orderFgiTime :: Order -> Maybe Time
+orderFgiTime order = (-) <$> shipped order <*> prodEnd order
+
+orderBoTime :: Order -> Maybe Time
+orderBoTime order = max 0 <$> ((-) <$> shipped order <*> Just (dueDate order))
+
+orderWipTime :: Order -> Maybe Time
+orderWipTime order = (-) <$> prodEnd order <*> prodStart order
 
 orderFinishedProduction :: Order -> Bool
 orderFinishedProduction order = isJust (prodEnd order)

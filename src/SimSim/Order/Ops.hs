@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 110
+--     Update #: 137
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,6 +42,7 @@ module SimSim.Order.Ops
   ( generateOrdersContDueDateDistr
   , generateOrdersDiscDueDateDistr
   , generateOrdersFixedDueDateSlack
+  , generateOrdersUniform
   ) where
 
 import           ClassyPrelude
@@ -49,6 +50,7 @@ import           Control.DeepSeq
 import           Data.Serialize
 import           GHC.Generics
 import           Statistics.Distribution
+import           Statistics.Distribution.Uniform
 import           System.Random.MWC
 
 import           SimSim.Order.Type
@@ -101,15 +103,31 @@ generateOrdersFixedDueDateSlack sim dInterarrival dProductType dueDateSlack = do
         if acc + interArr < periodLen
           then ((acc + interArr) :) <$> repeatUntilTime (acc + interArr)
           else return []
-  arrivals <- map ((+currentTime) . timeFromDouble) <$> repeatUntilTime 0
+  arrivals <- map ((+currentTimeMinusPeriod) . timeFromDouble) <$> repeatUntilTime 0
+  print currentTimeMinusPeriod
+  print $ map timeToDouble arrivals
   -- productTypes <- map (Product . (+ 1) . (`mod` length pts)) <$> mapM (\_ -> genDiscreteVar dProductType gen) arrivals
   productTypes <- map (Product . (+ 1) . (`mod` length pts) . round) <$> mapM (\_ -> genContVar dProductType gen) arrivals
   let dueDates = replicate (length arrivals) (currentTime + dueDateSlack)
   return $ zipWith3 newOrder productTypes arrivals dueDates
   where
+    currentTimeMinusPeriod = currentTime - timeFromDouble periodLen
     currentTime = simCurrentTime sim
     gen = simRandGen $ simInternal sim
     periodLen = timeToDouble $ simPeriodLength sim
+    pts = productTypes sim
+
+generateOrdersUniform :: SimSim -> Int -> Int -> Time -> IO [Order]
+generateOrdersUniform sim minOrders maxOrders dueDateSlack = do
+  nrOrders <- round <$> genContVar (uniformDistr (fromIntegral minOrders-0.4999) (fromIntegral maxOrders+0.4999)) gen
+  let arrivals = replicate nrOrders currentTime
+  -- productTypes <- map (Product . (+ 1) . (`mod` length pts)) <$> mapM (\_ -> genDiscreteVar dProductType gen) arrivals
+  productTypes <- map (Product . round) <$> mapM (\_ -> genContVar (uniformDistr 0.5001 (fromIntegral (length pts)+0.4999)) gen) arrivals
+  let dueDates = replicate (length arrivals) (currentTime + dueDateSlack)
+  return $ zipWith3 newOrder productTypes arrivals dueDates
+  where
+    currentTime = simCurrentTime sim
+    gen = simRandGen $ simInternal sim
     pts = productTypes sim
 
 

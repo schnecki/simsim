@@ -14,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 433
+--     Update #: 437
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -109,38 +109,39 @@ instance Eq SimSim where
 
 
 data SimInternal = SimInternal
-  { simBlocks          :: !(NL.NonEmpty Block)
-  , simBlockTimes      :: !BlockTimes
-  , simEndTime         :: !Time
-  , simMaxMachines     :: !Int
-  , simProcessingTimes :: !ProcessingTimes
-  , simRandGen         :: !GenIO
-  , simProductRoutes   :: !(M.Map ProductType [Block])
-  , simBlockLastOccur  :: !(M.Map Block Int)
+  { simBlocks              :: !(NL.NonEmpty Block)
+  , simBlockTimes          :: !BlockTimes
+  , simEndTime             :: !Time
+  , simMaxMachines         :: !Int
+  , simProcessingTimes     :: !ProcessingTimes
+  , simRandGen             :: !GenIO
+  , simOrderGenerationTime :: !Time
+  , simProductRoutes       :: !(M.Map ProductType [Block])
+  , simBlockLastOccur      :: !(M.Map Block Int)
   } deriving (Generic)
 
 instance NFData SimInternal where
-  rnf (SimInternal bl tim end max pct !_ route lastBl) = rnf bl `seq` rnf tim `seq` rnf end `seq` rnf max `seq` rnf pct `seq` rnf route `seq` rnf lastBl
+  rnf (SimInternal bl tim end max pct !_ !ordGen route lastBl) = rnf bl `seq` rnf tim `seq` rnf end `seq` rnf max `seq` rnf pct `seq` rnf ordGen `seq` rnf route `seq` rnf lastBl
 
 instance Eq SimInternal where
-  (SimInternal bl1 tim1 end1 maxM1 _ _ routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 _ _ routes2 lastOcc2) =
-    bl1 == bl2 && tim1 == tim2 && end1 == end2 && maxM1 == maxM2 && routes1 == routes2 && lastOcc1 == lastOcc2
+  (SimInternal bl1 tim1 end1 maxM1 _ _ ordGen1 routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 _ _ ordGen2 routes2 lastOcc2) =
+    bl1 == bl2 && tim1 == tim2 && end1 == end2 && maxM1 == maxM2 && routes1 == routes2 && lastOcc1 == lastOcc2 && ordGen1 == ordGen2
 
 instance Ord SimInternal where
-  compare (SimInternal bl1 tim1 end1 maxM1 _ _ routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 _ _ routes2 lastOcc2) =
-    compare (bl1,tim1,end1,maxM1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,routes2,lastOcc2)
+  compare (SimInternal bl1 tim1 end1 maxM1 _ _ ordGen1 routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 _ _ ordGen2 routes2 lastOcc2) =
+    compare (bl1,tim1,end1,maxM1,ordGen1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,ordGen2,routes2,lastOcc2)
 
 
 productTypes :: SimSim -> [ProductType]
 productTypes  = M.keys . simProductRoutes . simInternal
 
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
-toSerialisableInternal (SimInternal bl t e m _ ran rout last) =
-  SimInternalSerialisable bl t e m (unsafePerformIO (fromSeed <$> save ran)) rout last
+toSerialisableInternal (SimInternal bl t e m _ ran ordGen rout last) =
+  SimInternalSerialisable bl t e m (unsafePerformIO (fromSeed <$> save ran)) ordGen rout last
 
 fromSerialisableInternal :: ProcessingTimes -> SimInternalSerialisable -> SimInternal
-fromSerialisableInternal procTimes (SimInternalSerialisable bl t e m ran rout last) =
-  SimInternal bl t e m procTimes (unsafePerformIO $ restore $ toSeed ran) rout last
+fromSerialisableInternal procTimes (SimInternalSerialisable bl t e m ran ordGen rout last) =
+  SimInternal bl t e m procTimes (unsafePerformIO $ restore $ toSeed ran) ordGen rout last
 
 
 --
