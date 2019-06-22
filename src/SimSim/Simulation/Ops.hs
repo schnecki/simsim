@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 53
+--     Update #: 59
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +40,7 @@ module SimSim.Simulation.Ops where
 
 import           ClassyPrelude
 import           Data.Graph
+import           Data.List                  (nub)
 import qualified Data.List.NonEmpty         as NL
 import qualified Data.Map.Strict            as M
 import qualified Prelude                    as Prelude
@@ -50,6 +51,7 @@ import           SimSim.Dispatch
 import           SimSim.Order.Type
 import           SimSim.Period
 import           SimSim.ProcessingTime.Type
+import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
 import           SimSim.Shipment
@@ -85,7 +87,9 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
                emptyStatistics
                (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) g (M.fromList topSorts) (M.fromList lastOccur))
         else error "wrong setup"
-      where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps))
+      where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps)) &&
+                    (productTypes == map Product [1..length productTypes] || error "Product types must read Product 1, Product 2, Product 3, ...")
+            productTypes = sort $ nub $ map fst topSorts
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
             uniqueBlocks = NL.fromList $ ordNub $ NL.toList allBlocks
             maxMachines = maximum (impureNonNull $ 1 : lengths)
@@ -94,7 +98,6 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
             lengths = max (fmap (length . filter (not . isMachine . snd)) routeGroupsWoFgi) (fmap (length . filter (not . isQueue . snd)) routeGroupsWoFgi) -- every route is one step
             blTimes = M.fromList $ zip (filter (not . isSink) (toList allBlocks)) (repeat 0)
             hasSource = OrderPool `elem` uniqueBlocks
-            -- randomNs = NL.fromList $ randomRs (0, 1) g
             lastOccur = map (Prelude.maximum . concat . occurances) (toList allBlocks)
             occurances bl = map (maybe [] (\x -> [(bl, fst x)]) . find ((== bl) . snd) . zip [0 ..]) (map snd topSorts)
             -- graph representation of routes

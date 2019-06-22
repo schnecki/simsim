@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 13
+--     Update #: 15
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -58,6 +58,12 @@ newtype Time = Time Rational
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t
+
+timeFromDouble :: Double -> Time
+timeFromDouble = Time . toRational
+
+timeToDouble :: Time -> Double
+timeToDouble = fromRational . fromTime
 
 instance Num Time where
   fromInteger x = Time (x % 1)

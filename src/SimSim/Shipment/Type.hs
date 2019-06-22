@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 24
+--     Update #: 25
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -45,7 +45,7 @@ module SimSim.Shipment.Type
 import           ClassyPrelude
 import           Control.DeepSeq
 
-import           SimSim.Order
+import           SimSim.Order.Type
 import           SimSim.Shipment.Regularity
 import           SimSim.Time
 

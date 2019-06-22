@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 80
+--     Update #: 82
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,6 +42,8 @@ import           ClassyPrelude
 import           Control.DeepSeq
 import           Data.Serialize
 import           GHC.Generics
+import           Statistics.Distribution
+import           System.Random.MWC
 
 import           SimSim.Block
 import           SimSim.ProductType
@@ -75,7 +77,6 @@ instance Eq Order where
 newOrder :: ProductType -> ArrivalDate -> DueDate -> Order
 newOrder productType arrDate dueDate =
   Order (-1) productType arrDate dueDate Nothing Nothing Nothing Nothing OrderPool arrDate OrderPool 0
-
 
 orderFinishedProduction :: Order -> Bool
 orderFinishedProduction order = isJust (prodEnd order)

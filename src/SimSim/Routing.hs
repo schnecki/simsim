@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 51
+--     Update #: 52
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,7 +42,7 @@ import           Data.Serialize
 import           GHC.Generics
 
 import           SimSim.Block
-import           SimSim.Order
+import           SimSim.Order.Type
 import           SimSim.ProductType
 
 a --> b = (a,b)

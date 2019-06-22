@@ -14,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 431
+--     Update #: 433
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -114,7 +114,6 @@ data SimInternal = SimInternal
   , simEndTime         :: !Time
   , simMaxMachines     :: !Int
   , simProcessingTimes :: !ProcessingTimes
-  -- , simRandomNumbers   :: !(NL.NonEmpty Double)
   , simRandGen         :: !GenIO
   , simProductRoutes   :: !(M.Map ProductType [Block])
   , simBlockLastOccur  :: !(M.Map Block Int)
@@ -130,6 +129,10 @@ instance Eq SimInternal where
 instance Ord SimInternal where
   compare (SimInternal bl1 tim1 end1 maxM1 _ _ routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 _ _ routes2 lastOcc2) =
     compare (bl1,tim1,end1,maxM1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,routes2,lastOcc2)
+
+
+productTypes :: SimSim -> [ProductType]
+productTypes  = M.keys . simProductRoutes . simInternal
 
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
 toSerialisableInternal (SimInternal bl t e m _ ran rout last) =

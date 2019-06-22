@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 9
+--     Update #: 10
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,7 +44,7 @@ module SimSim.Release.Type
 import           ClassyPrelude
 import           Control.DeepSeq
 
-import           SimSim.Order
+import           SimSim.Order.Type
 import           SimSim.Time
 
 
