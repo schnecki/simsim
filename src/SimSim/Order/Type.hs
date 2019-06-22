@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 79
+--     Update #: 80
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@
 module SimSim.Order.Type where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 import           Data.Serialize
 import           GHC.Generics
 
@@ -64,7 +65,7 @@ data Order = Order
   , blockStartTime   :: !Time
   , nextBlock        :: !Block
   , orderCurrentTime :: Time
-  } deriving (Ord, Show, Generic, Serialize)
+  } deriving (Ord, Show, Generic, Serialize, NFData)
 
 instance Eq Order where
   x == y = orderId x == orderId y

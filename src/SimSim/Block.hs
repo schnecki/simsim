@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 24
+--     Update #: 26
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@
 module SimSim.Block where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 import qualified Data.List.NonEmpty as NL
 import qualified Data.Map.Strict    as M
 import           Data.Serialize
@@ -52,7 +53,7 @@ data Block
   | Machine Int                 -- ^. This block is a machine.
   | FGI                         -- ^. This block is a finished goods inventory.
   | Sink                        -- ^. This block removes the orders from the system.
-  deriving (Show, Eq, Ord, Generic, Serialize)
+  deriving (Show, Eq, Ord, Generic, Serialize, NFData)
 
 isMachine :: Block -> Bool
 isMachine Machine{} = True

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 24
+--     Update #: 25
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,7 +40,7 @@ module SimSim.Order
   ) where
 
 import           SimSim.Order.Pretty
-import           SimSim.Order.Type   (Order (..), newOrder)
+import           SimSim.Order.Type   (Order (..), OrderId, newOrder)
 
 --
 -- Order.hs ends here

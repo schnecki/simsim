@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 19
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,7 +42,8 @@ module SimSim.Simulation
   ) where
 
 
-import           SimSim.Simulation.Ops          (newSimSim, resetStatistics, setSimEndTime)
+import           SimSim.Simulation.Ops          (newSimSim, newSimSimIO, resetStatistics,
+                                                 setSimEndTime)
 import           SimSim.Simulation.Pretty
 import           SimSim.Simulation.Serialisable
 import           SimSim.Simulation.Type         (SimSim (..), fromSerialisable,

@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 6
+--     Update #: 7
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,11 +39,12 @@
 module SimSim.ProductType where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 import           Data.Serialize
 import           GHC.Generics
 
 
-newtype ProductType = Product Int deriving (Show, Eq, Ord, Generic, Serialize)
+newtype ProductType = Product Int deriving (Show, Eq, Ord, Generic, Serialize, NFData)
 
 
 --

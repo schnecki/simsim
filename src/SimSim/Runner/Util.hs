@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 73
+--     Update #: 75
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -78,17 +78,15 @@ instance (MonadLogger m) => MonadLogger (Proxy a b c d m) where
 getSimEndTime :: (MonadState SimSim m) => m Time
 getSimEndTime = gets (simEndTime . simInternal)
 
-updateTailRandNrs :: SimSim -> SimSim
-updateTailRandNrs sim = sim {simInternal = (simInternal sim) {simRandomNumbers = newRands}}
-  where
-    newRands = NL.fromList $ NL.tail $ simRandomNumbers $ simInternal sim
-
-
-getNextRand :: (MonadState SimSim m) => m Double
-getNextRand = do
-  sim <- get
-  put $ updateTailRandNrs sim
-  return $ NL.head $ simRandomNumbers $ simInternal sim
+-- updateTailRandNrs :: SimSim -> SimSim
+-- updateTailRandNrs sim = sim {simInternal = (simInternal sim) {simRandomNumbers = newRands}}
+--   where
+--     newRands = NL.fromList $ NL.tail $ simRandomNumbers $ simInternal sim
+-- getNextRand :: (MonadState SimSim m) => m Double
+-- getNextRand = do
+--   sim <- get
+--   put $ updateTailRandNrs sim
+--   return $ NL.head $ simRandomNumbers $ simInternal sim
 
 getBlockTimeM :: (MonadState SimSim m) => Block -> m Time
 getBlockTimeM = gets . getBlockTime

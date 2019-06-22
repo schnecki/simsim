@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 253
+--     Update #: 258
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -83,10 +83,10 @@ periodLen :: Time
 periodLen = 10
 
 procTimes :: ProcTimes
-procTimes = [(Machine 1,[(Product 1, const 3)
-                        ,(Product 2, const 2)])
-            ,(Machine 2,[(Product 1, const 2)
-                        ,(Product 2, const 4)])
+procTimes = [(Machine 1,[(Product 1, return . const 3)
+                        ,(Product 2, return . const 2)])
+            ,(Machine 2,[(Product 1, return . const 2)
+                        ,(Product 2, return . const 4)])
             ]
 
 
@@ -111,8 +111,7 @@ measure e = do
 main :: IO ()
 main =
   measure $ do
-    g <- newStdGen
-    let sim = newSimSim g routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
+    sim <- newSimSimIO routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
     -- sim'' <- foldM (simulateLogging runStderrLoggingT) sim ([incomingOrders] ++ replicate 1 [])
     sim' <- simulateUntilLogging runStderrLoggingT 0.833 sim incomingOrders
     sim'' <- simulateUntilLogging runStderrLoggingT 11 sim' []

@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 -- ProcessingTime.hs ---
@@ -11,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 49
+--     Update #: 69
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,27 +40,17 @@
 module SimSim.ProcessingTime.Type where
 
 import           ClassyPrelude
-import           Control.Monad.Trans.State
-import           Data.Dynamic
-import qualified Data.Map.Strict           as M
-import           GHC.Read
-import           Pipes
-import           System.Random
+import qualified Data.Map.Strict                     as M
+import           Statistics.Distribution
+import           Statistics.Distribution.Exponential
+import           System.Random.MWC
 
 import           SimSim.Block
-import           SimSim.Order
 import           SimSim.ProductType
 import           SimSim.Time
 
-
-type RandomUniform = Double     -- ^ Random number between 0 and 1.
-
--- TODO decide on how to use random numbers
-type ProcessingTime = RandomUniform -> Time
-
-instance Eq ProcessingTime where
-  _ == _ = True
-
+-- ^ Use for instance Statistics.Distribution.Exponential and Statistics.Distribution to generate random numbers.
+type ProcessingTime = GenIO -> IO Time
 
 type ProcessingTimes = M.Map Block (M.Map ProductType ProcessingTime)
 
@@ -68,6 +59,16 @@ type ProcTimes = [(Block, [(ProductType, ProcessingTime)])]
 
 fromProcTimes :: ProcTimes -> ProcessingTimes
 fromProcTimes xs = M.fromList $ fmap (second M.fromList) xs
+
+
+-- d :: ExponentialDistribution
+-- d = exponential (1/0.8)
+
+-- test :: IO [Double]
+-- test = do
+--   g <- createSystemRandom
+--   mapM (\_ -> genContVar d g) [1..7000]
+
 
 --
 -- ProcessingTime.hs ends here

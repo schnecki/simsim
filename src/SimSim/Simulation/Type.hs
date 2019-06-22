@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE DeriveAnyClass      #-}
 {-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE RankNTypes          #-}
@@ -13,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 417
+--     Update #: 431
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,13 +42,10 @@
 module SimSim.Simulation.Type where
 
 import           ClassyPrelude
-import           Data.Graph
 import qualified Data.List.NonEmpty             as NL
 import qualified Data.Map.Strict                as M
-import           Data.Serialize
-import           GHC.Generics
-import qualified Prelude                        as Prelude
-import           System.Random
+import           System.IO.Unsafe
+import           System.Random.MWC
 
 import           SimSim.Block
 import           SimSim.BlockTimes
@@ -78,7 +76,7 @@ data SimSim = SimSim
   , simOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
   , simStatistics      :: SimStatistics
   , simInternal        :: !SimInternal
-  } deriving (Ord)
+  } deriving (Ord, Generic, NFData)
 
 toSerialisable :: SimSim -> SimSimSerialisable
 toSerialisable (SimSim ro t p nId _ _ _ op q m f sh stats int) =
@@ -116,26 +114,30 @@ data SimInternal = SimInternal
   , simEndTime         :: !Time
   , simMaxMachines     :: !Int
   , simProcessingTimes :: !ProcessingTimes
-  , simRandomNumbers   :: !(NL.NonEmpty Double)
+  -- , simRandomNumbers   :: !(NL.NonEmpty Double)
+  , simRandGen         :: !GenIO
   , simProductRoutes   :: !(M.Map ProductType [Block])
   , simBlockLastOccur  :: !(M.Map Block Int)
-  }
+  } deriving (Generic)
+
+instance NFData SimInternal where
+  rnf (SimInternal bl tim end max pct !_ route lastBl) = rnf bl `seq` rnf tim `seq` rnf end `seq` rnf max `seq` rnf pct `seq` rnf route `seq` rnf lastBl
 
 instance Eq SimInternal where
-  (SimInternal bl1 tim1 end1 maxM1 procT1 rands1 routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 procT2 rands2 routes2 lastOcc2) =
-    bl1 == bl2 && tim1 == tim2 && end1 == end2 && maxM1 == maxM2 && procT1 == procT2 && rands1 == rands2 && routes1 == routes2 && lastOcc1 == lastOcc2
+  (SimInternal bl1 tim1 end1 maxM1 _ _ routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 _ _ routes2 lastOcc2) =
+    bl1 == bl2 && tim1 == tim2 && end1 == end2 && maxM1 == maxM2 && routes1 == routes2 && lastOcc1 == lastOcc2
 
 instance Ord SimInternal where
-  compare (SimInternal bl1 tim1 end1 maxM1 procT1 rands1 routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 procT2 rands2 routes2 lastOcc2) =
-    compare (bl1,tim1,end1,maxM1,rands1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,rands2,routes2,lastOcc2)
+  compare (SimInternal bl1 tim1 end1 maxM1 _ _ routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 _ _ routes2 lastOcc2) =
+    compare (bl1,tim1,end1,maxM1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,routes2,lastOcc2)
 
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
 toSerialisableInternal (SimInternal bl t e m _ ran rout last) =
-  SimInternalSerialisable bl t e m ran rout last
+  SimInternalSerialisable bl t e m (unsafePerformIO (fromSeed <$> save ran)) rout last
 
 fromSerialisableInternal :: ProcessingTimes -> SimInternalSerialisable -> SimInternal
 fromSerialisableInternal procTimes (SimInternalSerialisable bl t e m ran rout last) =
-  SimInternal bl t e m procTimes ran rout last
+  SimInternal bl t e m procTimes (unsafePerformIO $ restore $ toSeed ran) rout last
 
 
 --

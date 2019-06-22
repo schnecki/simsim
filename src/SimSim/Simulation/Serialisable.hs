@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 15
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -46,9 +46,13 @@ import           Data.Graph
 import qualified Data.List.NonEmpty         as NL
 import qualified Data.Map.Strict            as M
 import           Data.Serialize
+import           Data.Vector.Serialize      ()
+import qualified Data.Vector.Unboxed        as V
 import           GHC.Generics
 import qualified Prelude                    as Prelude
 import           System.Random
+import           System.Random.MWC
+
 
 import           SimSim.Block
 import           SimSim.BlockTimes
@@ -87,7 +91,8 @@ data SimInternalSerialisable = SimInternalSerialisable
   , serSimEndTime        :: !Time
   , serSimMaxMachines    :: !Int
   -- , simProcessingTimes :: !ProcessingTimes
-  , serSimRandomNumbers  :: !(NL.NonEmpty Double)
+  -- , serSimRandomNumbers  :: !(NL.NonEmpty Double)
+  , serSimRandGen        :: !(V.Vector Word32)
   , serSimProductRoutes  :: !(M.Map ProductType [Block])
   , serSimBlockLastOccur :: !(M.Map Block Int)
   } deriving (Eq, Ord, Generic, Serialize)

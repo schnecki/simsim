@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 -- Ops.hs ---
 --
 -- Filename: Ops.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 49
+--     Update #: 53
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,26 +42,28 @@ import           ClassyPrelude
 import           Data.Graph
 import qualified Data.List.NonEmpty         as NL
 import qualified Data.Map.Strict            as M
-import           Data.Ratio                 (denominator)
 import qualified Prelude                    as Prelude
-import           System.Random
+import           System.Random.MWC
 
 import           SimSim.Block
 import           SimSim.Dispatch
 import           SimSim.Order.Type
 import           SimSim.Period
 import           SimSim.ProcessingTime.Type
-import           SimSim.ProductType
 import           SimSim.Release
 import           SimSim.Routing
 import           SimSim.Shipment
 import           SimSim.Simulation.Type
-import           SimSim.Statistics.Ops
 import           SimSim.Statistics.Type
 import           SimSim.Time
 
+newSimSimIO :: Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> IO SimSim
+newSimSimIO routesE procTimes periodLen release dispatch shipment = do
+  g <- createSystemRandom
+  return $ newSimSim g routesE procTimes periodLen release dispatch shipment
 
-newSimSim :: (RandomGen g) => g -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> SimSim
+
+newSimSim :: GenIO -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> SimSim
 newSimSim g routesE procTimes periodLen release dispatch shipment =
   case NL.nonEmpty (filter ((/= Sink) . snd) routesE) of
     Nothing -> error "Routing cannot be empty, and must include an OrderPool! Connections to the Sink, e.g. ((Product 1, OrderPool) --> Sink), do not count."
@@ -80,7 +83,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
                mempty
                mempty
                emptyStatistics
-               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) randomNs (M.fromList topSorts) (M.fromList lastOccur))
+               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) g (M.fromList topSorts) (M.fromList lastOccur))
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps))
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
@@ -91,7 +94,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
             lengths = max (fmap (length . filter (not . isMachine . snd)) routeGroupsWoFgi) (fmap (length . filter (not . isQueue . snd)) routeGroupsWoFgi) -- every route is one step
             blTimes = M.fromList $ zip (filter (not . isSink) (toList allBlocks)) (repeat 0)
             hasSource = OrderPool `elem` uniqueBlocks
-            randomNs = NL.fromList $ randomRs (0, 1) g
+            -- randomNs = NL.fromList $ randomRs (0, 1) g
             lastOccur = map (Prelude.maximum . concat . occurances) (toList allBlocks)
             occurances bl = map (maybe [] (\x -> [(bl, fst x)]) . find ((== bl) . snd) . zip [0 ..]) (map snd topSorts)
             -- graph representation of routes

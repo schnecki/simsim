@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 8
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +42,7 @@ module SimSim.Release.Type
     ) where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 
 import           SimSim.Order
 import           SimSim.Time
@@ -51,7 +54,7 @@ type ReleaseFun = Time -> [Order] -> IO [Order]
 data Release = Release
   { releaser          :: ReleaseFun
   , uniqueReleaseName :: Text
-  }
+  } deriving (Generic, NFData)
 
 instance Eq Release where
   (Release _ n1) == (Release _ n2) = n1 == n2

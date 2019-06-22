@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 -- ShipmentRegularity.hs ---
 --
 -- Filename: ShipmentRegularity.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 5
+--     Update #: 6
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,13 +41,14 @@ module SimSim.Shipment.Regularity
     ) where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 
 -- | Decides on how often finished orders are shipped.
 data ShipmentRegularity
   = ShipEndOfPeriod
   | ShipWhenStoppedAndEndOfPeriod
   --  | ShipEvery Rational -- need to add the step size in Runner.simulation
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Generic, NFData)
 
 
 --

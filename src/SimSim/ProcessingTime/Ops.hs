@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 27
+--     Update #: 35
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,41 +38,24 @@ module SimSim.ProcessingTime.Ops where
 
 import           ClassyPrelude
 
-import           Control.Monad
-import           Control.Monad.IO.Class
 import           Control.Monad.State.Strict
-import           Control.Monad.Trans.Class
-import qualified Data.List.NonEmpty         as NL
 import qualified Data.Map.Strict            as M
-import           Data.Monoid                ((<>))
-import           Data.Text                  (Text)
-import           Data.Void
-import           Pipes
-import           Pipes.Core
-import           Pipes.Lift
-import qualified Pipes.Prelude              as Pipe
-import           System.Random
+import System.Random.MWC
 
 import           SimSim.Block
 import           SimSim.Order.Type
-import           SimSim.ProductType
-import           SimSim.Routing
-import           SimSim.Runner.Dispatch
-import           SimSim.Runner.Util
 import           SimSim.Simulation.Type
 import           SimSim.Time
 
-import           Debug.Trace
 
-
-getProcessingTime :: (MonadState SimSim m) => Block -> Order -> m Time
+getProcessingTime :: (MonadIO m, MonadState SimSim m) => Block -> Order -> m Time
 getProcessingTime block order = do
-  r <- getNextRand
+  g <- gets (simRandGen . simInternal)
   mTime <- gets (simProcessingTimes . simInternal)
   let f = do
         mType <- M.lookup block mTime
         M.lookup (productType order) mType
-  return $ fromMaybe (error $ "no processing time specified for " ++ show (productType order) ++ " on " ++ show block) (f <*> Just r)
+  liftIO $ fromMaybe (error $ "no processing time specified for " ++ show (productType order) ++ " on " ++ show block) (f <*> Just g)
 
 
 --

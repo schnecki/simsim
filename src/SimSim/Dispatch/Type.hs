@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass      #-}
+{-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -12,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 148
+--     Update #: 149
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +42,7 @@
 module SimSim.Dispatch.Type where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 import           GHC.Exts          (Constraint)
 
 import           Data.Dynamic
@@ -54,7 +57,7 @@ type DispatchFunction = Block -> [Order] -> [Order]
 data Dispatch = Dispatch
   { dispatcher         :: DispatchFunction
   , uniqueDispatchName :: Text
-  }
+  } deriving (Generic, NFData)
 
 instance Eq Dispatch where
   (Dispatch _ n1) == (Dispatch _ n2) = n1 == n2

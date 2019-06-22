@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 20
+--     Update #: 24
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,6 +43,7 @@ module SimSim.Shipment.Type
     ) where
 
 import           ClassyPrelude
+import           Control.DeepSeq
 
 import           SimSim.Order
 import           SimSim.Shipment.Regularity
@@ -53,7 +56,7 @@ data Shipment = Shipment
   { shipmentRegularity :: ShipmentRegularity
   , shipment           :: ShipmentFun
   , uniqueShipmentName :: Text
-  }
+  } deriving (Generic, NFData)
 
 instance Eq Shipment where
   (Shipment r1 _ n1) == (Shipment r2 _ n2) = r1 == r2 && n1 == n2

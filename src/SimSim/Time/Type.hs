@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 12
+--     Update #: 13
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +40,7 @@ module SimSim.Time.Type where
 
 
 import           ClassyPrelude
+import           Control.DeepSeq
 import           Data.Ratio
 import           Data.Serialize
 import           GHC.Generics
@@ -53,7 +54,7 @@ type DueDate = Time
 
 
 newtype Time = Time Rational
-  deriving (Ord, Eq, Show, Read, Generic, Serialize)
+  deriving (Ord, Eq, Show, Read, Generic, Serialize, NFData)
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t
