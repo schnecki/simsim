@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 21
+--     Update #: 22
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -46,8 +46,9 @@ import           SimSim.Simulation.Ops          (newSimSim, newSimSimIO, resetSt
                                                  setSimEndTime)
 import           SimSim.Simulation.Pretty
 import           SimSim.Simulation.Serialisable
-import           SimSim.Simulation.Type         (SimSim (..), fromSerialisable,
-                                                 productTypes, toSerialisable)
+import           SimSim.Simulation.Type         (SimInternal (..), SimSim (..),
+                                                 fromSerialisable, productTypes,
+                                                 toSerialisable)
 
 --
 -- Simulation.hs ends here
