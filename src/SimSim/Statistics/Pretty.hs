@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 106
+--     Update #: 119
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module SimSim.Statistics.Pretty where
 import           ClassyPrelude                hiding (empty, (<>))
 import qualified Data.Map.Strict              as M
 import           Text.PrettyPrint.ANSI.Leijen
+import           Text.Printf
 
 import           SimSim.Block
 import           SimSim.Order.Type
@@ -48,8 +49,16 @@ import           SimSim.Statistics.Type
 import           SimSim.Time
 
 
-time :: Rational -> Doc
-time = double . fromRational
+time :: Bool -> Rational -> Doc
+time False = text . printFloat . fromRational
+time True  = double . fromRational
+
+
+commas :: Int
+commas = 4
+
+printFloat :: Double -> String
+printFloat = printf ("%." ++ show commas ++ "f")
 
 prettySimStatistics :: Bool -> SimSim -> Doc
 prettySimStatistics isTest sim = prettySimStatisticsInternal isTest curTime (simStatistics sim)
@@ -76,32 +85,36 @@ prettyStats isTest (StatsFlowTime nr time mTard) =
 prettyOrderTime :: Bool -> Integer -> StatsOrderTime -> Doc
 prettyOrderTime False nr stats@(StatsOrderTime _ _ partial) =
   text "mean: " <+>
-  time
+  time False
     (if nr == 0
        then 0
        else sumTime / fromInteger nr) <+>
-  text "standard deviation:" <+> time stdDev
+  text "standard deviation:" <+> prettyStdDev False stdDev
   where
     sumTime = maybe (statsSumTime stats) statsSumTime partial
     stdDev = maybe (statsStdDevTime stats) statsStdDevTime partial
 prettyOrderTime True nr stats@(StatsOrderTime sumTime stdDev _) =
-  parens (time sumTime <+> char '/' <+> integer nr <> ";" <+> text (show $ stats {statsLastUpdatePartial = Nothing})) <$$> text "standard deviation:" <+> time stdDev
+  parens (time True sumTime <+> char '/' <+> integer nr <> ";" <+> text (show $ stats {statsLastUpdatePartial = Nothing})) <$$> text "standard deviation:" <+> prettyStdDev True stdDev
+
+prettyStdDev :: Bool -> StatsStdDev -> Doc
+prettyStdDev True stdDev = text $ show stdDev
+prettyStdDev False stdDev = text $ maybe ("not enough data") (printFloat . sqrt . fromRational) (getWelfordVariance stdDev)
 
 
 prettyOrderTardiness :: Bool -> Integer -> StatsOrderTard -> Doc
 prettyOrderTardiness isTest nr stats@(StatsOrderTard nrTard sumTime stdDev) =
   text "tardiness in %:" <+>
-  time
+  time isTest
     (if nr == 0
        then 0
        else 100 * fromInteger nrTard / fromInteger nr) <$$>
   text "mean: " <+>
-  time
+  time isTest
     (if nr == 0
        then 0
        else sumTime / fromInteger nr) <$$>
   text "standard deviation:" <+>
-  time stdDev <+>
+  prettyStdDev isTest stdDev <+>
   if isTest
     then text $ show stats
     else empty
@@ -110,10 +123,10 @@ prettyOrderTardiness isTest nr stats@(StatsOrderTard nrTard sumTime stdDev) =
 prettyBlockTime :: Bool -> Block -> Time -> StatsProcTime -> Doc
 prettyBlockTime isTest bl curTime (StatsProcTime pTime) =
   text "Processing in %:" <+>
-  time (100 * procTime / t) <$$> text "Idle in %:" <+>
-  time (100 * (t - procTime) / t) <+>
+  time isTest (100 * procTime / t) <$$> text "Idle in %:" <+>
+  time isTest (100 * (t - procTime) / t) <+>
   if isTest
-    then parens (time pTime)
+    then parens (time isTest pTime)
     else empty
   where
     isIdleTime = not $ isMachine bl

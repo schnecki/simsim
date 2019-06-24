@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 85
+--     Update #: 86
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,7 +50,7 @@ import           SimSim.Statistics.Pretty
 import           SimSim.Time
 
 instance Pretty SimSim where
-  pretty = prettySimulation True prettyOrderDue
+  pretty = prettySimulation False prettyOrderDue
 
 
 prettySimSim :: SimSim -> Text

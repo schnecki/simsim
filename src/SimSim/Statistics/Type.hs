@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 86
+--     Update #: 93
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,7 +74,7 @@ data StatsFlowTime = StatsFlowTime
 
 data StatsOrderTime = StatsOrderTime
   { statsSumTime           :: Rational
-  , statsStdDevTime        :: Rational
+  , statsStdDevTime        :: StatsStdDev
   , statsLastUpdatePartial :: Maybe StatsOrderTime -- ^ Only used if last update was partial. Holds the previous
                                                    -- ``StatsOrderTime``.
   } deriving (Show, Ord, Generic, Serialize, NFData)
@@ -86,7 +86,7 @@ instance Eq StatsOrderTime where
 data StatsOrderTard = StatsOrderTard
   { statsNrTardOrders   :: Integer
   , statsSumTardiness   :: Rational
-  , statsStdDevTardTime :: Rational
+  , statsStdDevTardTime :: StatsStdDev
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 data StatsOrderCost = StatsOrderCost
@@ -98,7 +98,14 @@ data StatsOrderCost = StatsOrderCost
 
 data StatsProcTime = StatsProcTime
   { statsBlockTime :: Rational  -- ^ Processing time for Machine, idle time for OrderPool, Queue and FGI.
-  -- , statsBroken
+
+  --  Todo: , statsBroken
+  } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
+
+data StatsStdDev = StatsStdDev  -- ^ Standard Deviation using Welford's algorithm.
+  { statsStdDevCount :: Integer
+  , statsStdDevMean  :: Rational
+  , statsStdDevM2    :: Rational
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 
@@ -109,10 +116,10 @@ emptyStats :: StatsFlowTime
 emptyStats = StatsFlowTime 0 emptyStatsOrderTime Nothing
 
 emptyStatsOrderTime :: StatsOrderTime
-emptyStatsOrderTime = StatsOrderTime 0 0 Nothing
+emptyStatsOrderTime = StatsOrderTime 0 (StatsStdDev 0 0 0) Nothing
 
 emptyStatsOrderTard :: StatsOrderTard
-emptyStatsOrderTard = StatsOrderTard 0 0 0
+emptyStatsOrderTard = StatsOrderTard 0 0 (StatsStdDev 0 0 0)
 
 emptyStatsOrderCost :: StatsOrderCost
 emptyStatsOrderCost = StatsOrderCost 0 0 0 0

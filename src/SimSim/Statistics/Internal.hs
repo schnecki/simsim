@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 40
+--     Update #: 49
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -57,11 +57,14 @@ data Update
 updateStatsOrderTime :: Bool -> Update -> Order -> StatsOrderTime -> StatsOrderTime
 updateStatsOrderTime isPartial up order st@(StatsOrderTime tSum stdDev _) =
   StatsOrderTime
-    (tSum + getBlockFlowTime up order)
-    (stdDev)
+    (tSum + val)
+    (if isPartial
+       then stdDev
+       else updateStatsStdDev val stdDev)
     (if isPartial
        then Just $ st {statsLastUpdatePartial = Nothing}
        else Nothing)
+  where val = getBlockFlowTime up order
 
 -- | Updates ``StatsOrderTard`` as part of ``StatsFlowTime``.
 updateTardiness :: Update -> Order -> StatsOrderTard -> StatsOrderTard
@@ -70,12 +73,21 @@ updateTardiness up order st@(StatsOrderTard nr tardSum stdDev) =
     EndProd ->
       case orderTardinessProduction order of
         Nothing -> st
-        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (stdDev) -- TODO
+        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (updateStatsStdDev (fromTime x) stdDev)
     Shipped ->
       case orderTardinessShipped order of
         Nothing -> st
-        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (stdDev) -- TODO
+        Just x  -> StatsOrderTard (nr + 1) (tardSum + fromTime x) (updateStatsStdDev (fromTime x) stdDev)
     _ -> st
+
+updateStatsStdDev :: Rational -> StatsStdDev -> StatsStdDev
+updateStatsStdDev val (StatsStdDev counter mean m2) = StatsStdDev counter' mean' m2'
+  where counter' = counter + 1
+        delta = val - mean
+        mean' = mean + delta / fromIntegral counter'
+        delta2 = val - mean'
+        m2' = m2 + delta * delta2
+
 
 -- | Updates the ``StatsOrderCost``.
 updateCosts :: Update -> Order -> StatsOrderCost -> StatsOrderCost

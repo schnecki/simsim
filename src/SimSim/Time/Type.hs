@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 15
+--     Update #: 24
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -54,7 +54,14 @@ type DueDate = Time
 
 
 newtype Time = Time Rational
-  deriving (Ord, Eq, Show, Read, Generic, Serialize, NFData)
+  deriving (Ord, Eq, Generic, Serialize, NFData)
+
+instance Show Time where
+  show (Time x) = printFloat (fromRational x)
+    where
+      printFloat :: Double -> String
+      printFloat = printf ("%." ++ show commas ++ "f")
+      commas = 2 :: Int
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t
@@ -84,6 +91,9 @@ instance RealFrac Time where
   properFraction (Time x) = (a, Time b)
     where (a,b) = properFraction x
 
+instance Enum Time where
+  toEnum x = Time $ toEnum x
+  fromEnum (Time x) = fromInteger (truncate x)
 
 --
 -- Type.hs ends here
