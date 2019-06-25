@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 12
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -36,13 +36,13 @@
 -- Code:
 
 module SimSim.Release
-    ( module ImRe
+    ( module SimSim.Release.ImmediateRelease
+    , module SimSim.Release.BackwardInfiniteLoading
     , module SimSim.Release.Type
     ) where
 
-import           ClassyPrelude
-
-import           SimSim.Release.ImmediateRelease as ImRe
+import           SimSim.Release.BackwardInfiniteLoading
+import           SimSim.Release.ImmediateRelease
 import           SimSim.Release.Type
 
 
