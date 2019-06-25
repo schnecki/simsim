@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 11
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -46,7 +46,7 @@ import           GHC.Generics
 
 newtype ProductType =
   Product Int                   -- ^ Product types must start with 1.
-  deriving (Show, Eq, Ord, Generic, Serialize, NFData)
+  deriving (Show, Read, Eq, Ord, Generic, Serialize, NFData)
 
 
 --

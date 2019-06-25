@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 11
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,17 +39,8 @@ module SimSim.Release.ImmediateRelease
     ) where
 
 import           ClassyPrelude
-import qualified Data.List.NonEmpty         as NL
-import qualified Data.Map.Strict            as M
-import           System.Random
-
-import           SimSim.Block
 import           SimSim.Order.Type
-import           SimSim.Period
-import           SimSim.ProcessingTime.Type
-import           SimSim.ProductType
 import           SimSim.Release.Type
-import           SimSim.Routing
 import           SimSim.Time
 
 

@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE InstanceSigs   #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -11,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 24
+--     Update #: 26
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,6 +45,8 @@ import           Control.DeepSeq
 import           Data.Ratio
 import           Data.Serialize
 import           GHC.Generics
+import           GHC.Read
+import           Prelude         (read)
 import           Text.Printf
 
 
@@ -62,6 +65,10 @@ instance Show Time where
       printFloat :: Double -> String
       printFloat = printf ("%." ++ show commas ++ "f")
       commas = 2 :: Int
+
+instance Read Time where
+  readsPrec _ str = [(Time $ toRational (read str :: Double),"")]
+
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t

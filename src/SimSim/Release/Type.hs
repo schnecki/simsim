@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 10
+--     Update #: 18
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,11 +38,11 @@
 
 module SimSim.Release.Type
     ( Release (..)
-    , ReleaseFun (..)
+    , ReleaseFun
     ) where
 
 import           ClassyPrelude
-import           Control.DeepSeq
+import           Data.Serialize
 
 import           SimSim.Order.Type
 import           SimSim.Time
@@ -64,9 +64,6 @@ instance Ord Release where
 
 instance Show Release where
   show = unpack . uniqueReleaseName
-
--- instance Read Release where
---   readsPrec =
 
 
 --
