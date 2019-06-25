@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 18
+--     Update #: 19
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -42,7 +42,6 @@ module SimSim.Release.Type
     ) where
 
 import           ClassyPrelude
-import           Data.Serialize
 
 import           SimSim.Order.Type
 import           SimSim.Time

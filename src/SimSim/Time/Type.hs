@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 26
+--     Update #: 50
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,11 +44,14 @@ import           ClassyPrelude
 import           Control.DeepSeq
 import           Data.Ratio
 import           Data.Serialize
-import           GHC.Generics
+import           GHC.Generics    hiding (prec)
 import           GHC.Read
-import           Prelude         (read)
+import           GHC.Real        (ratioPrec)
 import           Text.Printf
+import           Text.Read
+import qualified Text.Read.Lex   as L
 
+import           Debug.Trace
 
 -- Synonyms
 type CurrentTime = Time
@@ -67,8 +70,18 @@ instance Show Time where
       commas = 2 :: Int
 
 instance Read Time where
-  readsPrec _ str = [(Time $ toRational (read str :: Double),"")]
+  readPrec     = readNumber convertFrac
+    where convertFrac (L.Ident "NaN")      = return $ Time $ toRational (0 / 0)
+          convertFrac (L.Ident "Infinity") = return $ Time $ toRational (1 / 0)
+          convertFrac (L.Number n) = let resRange = floatRange (undefined :: a)
+                                     in case L.numberToRangedRational resRange n of
+                                        Nothing  -> return $ Time $ toRational (1 / 0)
+                                        Just rat -> return $ Time rat
+          convertFrac _            = pfail
 
+
+  readListPrec = readListPrecDefault
+  readList     = readListDefault
 
 fromTime :: Time -> Rational
 fromTime (Time t) = t
