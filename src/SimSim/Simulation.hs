@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 22
+--     Update #: 23
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,7 +48,7 @@ import           SimSim.Simulation.Pretty
 import           SimSim.Simulation.Serialisable
 import           SimSim.Simulation.Type         (SimInternal (..), SimSim (..),
                                                  fromSerialisable, productTypes,
-                                                 toSerialisable)
+                                                 setSimulationRandomGen, toSerialisable)
 
 --
 -- Simulation.hs ends here

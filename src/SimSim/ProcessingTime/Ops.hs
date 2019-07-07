@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 35
+--     Update #: 36
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -50,7 +50,7 @@ import           SimSim.Time
 
 getProcessingTime :: (MonadIO m, MonadState SimSim m) => Block -> Order -> m Time
 getProcessingTime block order = do
-  g <- gets (simRandGen . simInternal)
+  g <- gets (simRandGenProcTimes . simInternal)
   mTime <- gets (simProcessingTimes . simInternal)
   let f = do
         mType <- M.lookup block mTime

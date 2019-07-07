@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 -- Instances.hs ---
 --
 -- Filename: Instances.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 1
+--     Update #: 3
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -38,6 +39,7 @@
 module TestSimSim.Time.Instances where
 
 import           ClassyPrelude
+import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
 
@@ -45,8 +47,17 @@ import           SimSim.Time
 
 instance Arbitrary Time where
   arbitrary = Time <$> arbitrary
+
+instance Arbitrary (IO Time) where
+  arbitrary = return . Time <$> arbitrary
+
+
 instance CoArbitrary Time where
   coarbitrary (Time t) = variant 0 . coarbitrary t
+
+
+instance CoArbitrary (IO Time) where
+  coarbitrary ioT = variant 0 . coarbitrary (unsafePerformIO ioT)
 
 
 --

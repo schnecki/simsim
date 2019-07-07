@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 60
+--     Update #: 61
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -62,11 +62,14 @@ import           SimSim.Time
 newSimSimIO :: Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> IO SimSim
 newSimSimIO routesE procTimes periodLen release dispatch shipment = do
   g <- createSystemRandom
-  return $ newSimSim g routesE procTimes periodLen release dispatch shipment
+  (g1,g2) <- splitRandGen g
+  return $ newSimSim g1 g2 routesE procTimes periodLen release dispatch shipment
 
+type RandGenDemand = GenIO
+type RandGenProcTimes = GenIO
 
-newSimSim :: GenIO -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> SimSim
-newSimSim g routesE procTimes periodLen release dispatch shipment =
+newSimSim :: RandGenDemand -> RandGenProcTimes -> Routes -> ProcTimes -> PeriodLength -> Release -> Dispatch -> Shipment -> SimSim
+newSimSim gDemand gPt routesE procTimes periodLen release dispatch shipment =
   case NL.nonEmpty (filter ((/= Sink) . snd) routesE) of
     Nothing -> error "Routing cannot be empty, and must include an OrderPool! Connections to the Sink, e.g. ((Product 1, OrderPool) --> Sink), do not count."
     Just routes ->
@@ -85,7 +88,7 @@ newSimSim g routesE procTimes periodLen release dispatch shipment =
                mempty
                mempty
                emptyStatistics
-               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) g (-periodLen) (M.fromList topSorts) (M.fromList lastOccur))
+               (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) gDemand gPt (-periodLen) (M.fromList topSorts) (M.fromList lastOccur))
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps)) &&
                     (productTypes == map Product [1..length productTypes] || error "Product types must read Product 1, Product 2, Product 3, ...")

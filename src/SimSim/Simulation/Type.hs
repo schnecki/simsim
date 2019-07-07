@@ -14,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 438
+--     Update #: 446
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,6 +44,7 @@ module SimSim.Simulation.Type where
 import           ClassyPrelude
 import qualified Data.List.NonEmpty             as NL
 import qualified Data.Map.Strict                as M
+import qualified Data.Vector                    as V
 import           System.IO.Unsafe
 import           System.Random.MWC
 
@@ -114,21 +115,22 @@ data SimInternal = SimInternal
   , simEndTime             :: !Time
   , simMaxMachines         :: !Int
   , simProcessingTimes     :: !ProcessingTimes
-  , simRandGen             :: !GenIO
+  , simRandGenDemand       :: !GenIO
+  , simRandGenProcTimes    :: !GenIO
   , simOrderGenerationTime :: !Time
   , simProductRoutes       :: !(M.Map ProductType [Block])
   , simBlockLastOccur      :: !(M.Map Block Int)
   } deriving (Generic)
 
 instance NFData SimInternal where
-  rnf (SimInternal bl tim end max pct !_ !ordGen route lastBl) = rnf bl `seq` rnf tim `seq` rnf end `seq` rnf max `seq` rnf pct `seq` rnf ordGen `seq` rnf route `seq` rnf lastBl
+  rnf (SimInternal bl tim end max pct !_ !_ !ordGen route lastBl) = rnf bl `seq` rnf tim `seq` rnf end `seq` rnf max `seq` rnf pct `seq` rnf ordGen `seq` rnf route `seq` rnf lastBl
 
 instance Eq SimInternal where
-  (SimInternal bl1 tim1 end1 maxM1 _ _ ordGen1 routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 _ _ ordGen2 routes2 lastOcc2) =
+  (SimInternal bl1 tim1 end1 maxM1 _ _ _ ordGen1 routes1 lastOcc1) == (SimInternal bl2 tim2 end2 maxM2 _ _ _ ordGen2 routes2 lastOcc2) =
     bl1 == bl2 && tim1 == tim2 && end1 == end2 && maxM1 == maxM2 && routes1 == routes2 && lastOcc1 == lastOcc2 && ordGen1 == ordGen2
 
 instance Ord SimInternal where
-  compare (SimInternal bl1 tim1 end1 maxM1 _ _ ordGen1 routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 _ _ ordGen2 routes2 lastOcc2) =
+  compare (SimInternal bl1 tim1 end1 maxM1 _ _ _ ordGen1 routes1 lastOcc1) (SimInternal bl2 tim2 end2 maxM2 _ _ _ ordGen2 routes2 lastOcc2) =
     compare (bl1,tim1,end1,maxM1,ordGen1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,ordGen2,routes2,lastOcc2)
 
 
@@ -136,12 +138,26 @@ productTypes :: SimSim -> [ProductType]
 productTypes  = M.keys . simProductRoutes . simInternal
 
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
-toSerialisableInternal (SimInternal bl t e m _ ran ordGen rout last) =
-  SimInternalSerialisable bl t e m (unsafePerformIO (fromSeed <$> save ran)) ordGen rout last
+toSerialisableInternal (SimInternal bl t e m _ randD randPt ordGen rout last) =
+  SimInternalSerialisable bl t e m (unsafePerformIO (fromSeed <$> save randD)) (unsafePerformIO (fromSeed <$> save randPt)) ordGen rout last
 
 fromSerialisableInternal :: ProcessingTimes -> SimInternalSerialisable -> SimInternal
-fromSerialisableInternal procTimes (SimInternalSerialisable bl t e m ran ordGen rout last) =
-  SimInternal bl t e m procTimes (unsafePerformIO $ restore $ toSeed ran) ordGen rout last
+fromSerialisableInternal procTimes (SimInternalSerialisable bl t e m randD randPt ordGen rout last) =
+  SimInternal bl t e m procTimes (unsafePerformIO $ restore $ toSeed randD) (unsafePerformIO $ restore $ toSeed randPt) ordGen rout last
+
+
+setSimulationRandomGen :: GenIO -> SimSim -> IO SimSim
+setSimulationRandomGen g sim = do
+  (g1, g2) <- splitRandGen g
+  return $ sim { simInternal = (simInternal sim) { simRandGenDemand = g1, simRandGenProcTimes = g2 }}
+
+
+splitRandGen :: GenIO -> IO (GenIO, GenIO)
+splitRandGen g = do
+  initVals <- replicateM len (uniform g)
+  g' <- initialize (V.fromList initVals)
+  return (g, g')
+  where len = 258
 
 
 --

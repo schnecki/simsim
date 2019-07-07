@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 138
+--     Update #: 139
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,7 +74,7 @@ generateOrdersContDueDateDistr sim dInterarrival dProductType (minTime, dueDateS
   return $ zipWith3 newOrder productTypes arrivals dueDates
   where
     currentTime = simCurrentTime sim
-    gen = simRandGen $ simInternal sim
+    gen = simRandGenDemand $ simInternal sim
     periodLen = timeToDouble $ simPeriodLength sim
     pts = productTypes sim
 
@@ -92,7 +92,7 @@ generateOrdersDiscDueDateDistr sim dInterarrival dProductType (minTime, dueDateS
   return $ zipWith3 newOrder productTypes arrivals dueDates
   where
     currentTime = simCurrentTime sim
-    gen = simRandGen $ simInternal sim
+    gen = simRandGenDemand $ simInternal sim
     periodLen = timeToDouble $ simPeriodLength sim
     pts = productTypes sim
 
@@ -113,7 +113,7 @@ generateOrdersFixedDueDateSlack sim dInterarrival dProductType dueDateSlack = do
   where
     currentTimeMinusPeriod = currentTime - timeFromDouble periodLen
     currentTime = simCurrentTime sim
-    gen = simRandGen $ simInternal sim
+    gen = simRandGenDemand $ simInternal sim
     periodLen = timeToDouble $ simPeriodLength sim
     pts = productTypes sim
 
@@ -127,7 +127,7 @@ generateOrdersUniform sim minOrders maxOrders dueDateSlack = do
   return $ zipWith3 newOrder productTypes arrivals dueDates
   where
     currentTime = simCurrentTime sim
-    gen = simRandGen $ simInternal sim
+    gen = simRandGenDemand $ simInternal sim
     pts = productTypes sim
 
 

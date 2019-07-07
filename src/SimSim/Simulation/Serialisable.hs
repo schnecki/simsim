@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 16
+--     Update #: 17
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -92,7 +92,8 @@ data SimInternalSerialisable = SimInternalSerialisable
   , serSimMaxMachines         :: !Int
   -- , simProcessingTimes :: !ProcessingTimes
   -- , serSimRandomNumbers  :: !(NL.NonEmpty Double)
-  , serSimRandGen             :: !(V.Vector Word32)
+  , serSimRandGenDemand       :: !(V.Vector Word32)
+  , serSimRandGenProcTimes    :: !(V.Vector Word32)
   , serSimOrderGenerationTime :: Time
   , serSimProductRoutes       :: !(M.Map ProductType [Block])
   , serSimBlockLastOccur      :: !(M.Map Block Int)

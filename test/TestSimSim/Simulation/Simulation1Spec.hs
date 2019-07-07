@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 209
+--     Update #: 210
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -86,10 +86,10 @@ periodLen :: Time
 periodLen = 10
 
 procTimes :: ProcTimes
-procTimes = [(Machine 1,[(Product 1, const 3)
-                        ,(Product 2, const 2)])
-            ,(Machine 2,[(Product 1, const 2)
-                        ,(Product 2, const 4)])
+procTimes = [(Machine 1,[(Product 1, const . return 3)
+                        ,(Product 2, const . return 2)])
+            ,(Machine 2,[(Product 1, const . return 2)
+                        ,(Product 2, const . return 4)])
             ]
 
 
