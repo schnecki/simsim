@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 52
+--     Update #: 55
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,12 +39,11 @@ module SimSim.Routing where
 import           ClassyPrelude
 import qualified Data.List.NonEmpty as NL
 import           Data.Serialize
-import           GHC.Generics
 
 import           SimSim.Block
-import           SimSim.Order.Type
 import           SimSim.ProductType
 
+(-->) :: a -> b -> (a,b)
 a --> b = (a,b)
 infixl 2 -->
 
