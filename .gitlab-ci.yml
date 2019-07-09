@@ -1,5 +1,6 @@
 image: fpco/stack-build:lts-9.11
 
+
 # If you have dependencies that aren't included in the Dockerfile.
 # You might also consider making a new Docker image based on stack-build
 # and pushing it to GitLab's registry to save on build time.
