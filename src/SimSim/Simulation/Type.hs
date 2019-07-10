@@ -14,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 446
+--     Update #: 452
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -134,8 +134,14 @@ instance Ord SimInternal where
     compare (bl1,tim1,end1,maxM1,ordGen1,routes1,lastOcc1) (bl2,tim2,end2,maxM2,ordGen2,routes2,lastOcc2)
 
 
+allBlocks :: SimSim -> [Block]
+allBlocks sim = NL.toList $ simBlocks (simInternal sim)
+
+queues :: SimSim -> [Block]
+queues = filter isQueue . allBlocks
+
 productTypes :: SimSim -> [ProductType]
-productTypes  = M.keys . simProductRoutes . simInternal
+productTypes = M.keys . simProductRoutes . simInternal
 
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
 toSerialisableInternal (SimInternal bl t e m _ randD randPt ordGen rout last) =

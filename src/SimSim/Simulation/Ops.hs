@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 -- Ops.hs ---
 --
@@ -10,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 61
+--     Update #: 64
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -83,7 +84,7 @@ newSimSim gDemand gPt routesE procTimes periodLen release dispatch shipment =
                dispatch
                shipment
                mempty
-               mempty
+               (M.fromList $ map (,[]) (filter isMachine (NL.toList uniqueBlocks)))
                mempty
                mempty
                mempty
