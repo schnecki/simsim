@@ -10,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 230
+--     Update #: 237
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +40,7 @@ module SimSim.Runner.Runner
     , simulateUntil
     , simulateLogging
     , simulateUntilLogging
+    , addAdditionalOrdersToOrderPool
     ) where
 
 import           ClassyPrelude              hiding (replicate)
@@ -90,7 +91,6 @@ import           SimSim.Runner.Util
 -- the production system.
 simulation :: (MonadLogger m, MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimSim
 simulation sim simEnd incomingOrders = do
-
   let timeNextPeriodEnd = (Time $ toRational $ floor ((simCurrentTime sim + simPeriodLength sim) / simPeriodLength sim)) * simPeriodLength sim
   let stSim = setSimEndTime (min timeNextPeriodEnd simEnd) sim
   simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
@@ -107,9 +107,9 @@ simulation sim simEnd incomingOrders = do
     finalize sim = addStatsCosts $ mapBlockTimes (max endT) $ fixIdleTimeQueues $ fixIdleTimeFgi $ setSimCurrentTime endT sim
       where
         endT = simEndTime $ simInternal sim
-    addStatsCosts sim | isPeriodEnd sim = statsEndPeriodAddCosts sim
-                      | otherwise = sim
-
+    addStatsCosts sim
+      | isPeriodEnd sim = statsEndPeriodAddCosts sim
+      | otherwise = sim
     fixIdleTimeQueues sim = foldl' (\s bl -> statsAddBlockPartialUpdate ProcTime bl dummyOrder s) sim blsQueues
       where
         blsMachines = filter isMachine (toList $ simBlocks $ simInternal sim) -- queue is idle
@@ -162,6 +162,10 @@ simulateUntil simEnd sim incomingOrders = runNoLoggingT $ runEffect $ simulation
 simulateUntilLogging :: (LoggingT IO SimSim -> IO SimSim) -> Time -> SimSim -> [Order] -> IO SimSim
 simulateUntilLogging loggingFun simEnd sim incomingOrders = simulateLoggingEnd loggingFun simEnd sim incomingOrders
 
+
+-- | This function can be used to feed orders to the order pool without simulating.
+addAdditionalOrdersToOrderPool :: SimSim -> [Order] -> IO SimSim
+addAdditionalOrdersToOrderPool sim orders = runNoLoggingT $ runEffect $ execStateP sim (mkPipeOrderPool sim orders)
 
 -------------------- Helper functions --------------------
 

@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 247
+--     Update #: 248
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -39,6 +39,7 @@ module SimSim.Runner
   , simulateLogging
   , simulateUntil
   , simulateUntilLogging
+  , addAdditionalOrdersToOrderPool
   ) where
 
 import           SimSim.Runner.Runner
