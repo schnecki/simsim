@@ -3,3 +3,4 @@
 *.tags
 TAGS
 *.cabal
+/stack.yaml.lock
