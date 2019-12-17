@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 259
+--     Update #: 262
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -159,7 +159,7 @@ updateStatsProcTime :: BlockTimes -> Update -> Order -> StatsProcTime -> StatsPr
 updateStatsProcTime _ up@(UpBlock Machine {}) order (StatsProcTime pT) = StatsProcTime (pT + getBlockFlowTime up order)
 updateStatsProcTime blTimes up@(UpBlock bl) order (StatsProcTime pT) = StatsProcTime (pT + fromTime (max 0 $ blockStartTime order - blTime))
   where
-    blTime = fromMaybe (error $ "empty block time for " ++ show bl ++ " in updateStatsProcTime") (M.lookup bl blTimes)
+    blTime = fromMaybe (error $ "empty block time for " ++ show bl ++ " in updateStatsProcTime. Check your routing, in particular that you connected to/from " <> show bl <> "!") (M.lookup bl blTimes)
 
 
 -- | This function updates the ``StatsFlowTime`` according to the given order and for the given block. The Boolean, decides
