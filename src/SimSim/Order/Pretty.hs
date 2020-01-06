@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 12
+--     Update #: 14
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -37,7 +37,7 @@
 module SimSim.Order.Pretty where
 
 
-import           ClassyPrelude                (isJust, maybe, show, ($), (.))
+import           ClassyPrelude                (maybe, show, ($), (.))
 import           Text.PrettyPrint.ANSI.Leijen
 
 import           SimSim.Order.Type
@@ -47,7 +47,7 @@ prettyOrderId :: Order -> Doc
 prettyOrderId order = text "Order" <+> integer (orderId order)
 
 prettyOrderDue :: Order -> Doc
-prettyOrderDue order = prettyOrderId order <+> parens (text "due:" <+> prettyTime (dueDate order))
+prettyOrderDue order = prettyOrderId order <+> parens (text (show $ productType order) <> comma <+> text "due:" <+> prettyTime (dueDate order))
 
 prettyOrder :: Order -> Doc
 prettyOrder order =
