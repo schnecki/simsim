@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 26
+--     Update #: 27
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -49,8 +49,8 @@ import           System.Random
 -- Idea: recursive Block datatype? to model full work centers etc.
 data Block
   = OrderPool                   -- ^. This block feds the orders into the system.
-  | Queue Int                   -- ^. This block queues the orders until dispatched.
-  | Machine Int                 -- ^. This block is a machine.
+  | Queue !Int                  -- ^. This block queues the orders until dispatched.
+  | Machine !Int                -- ^. This block is a machine.
   | FGI                         -- ^. This block is a finished goods inventory.
   | Sink                        -- ^. This block removes the orders from the system.
   deriving (Show, Eq, Ord, Generic, Serialize, NFData)

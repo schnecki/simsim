@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 17
+--     Update #: 19
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -80,7 +80,7 @@ data SimSimSerialisable = SimSimSerialisable
   , serSimOrdersMachine   :: !(M.Map Block (Order, Time)) -- ^ Order and left over processing time for this order.
   , serSimOrdersFgi       :: ![Order]
   , serSimOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
-  , serSimStatistics      :: SimStatistics
+  , serSimStatistics      :: !SimStatistics
   , serSimInternal        :: !SimInternalSerialisable
   } deriving (Eq, Ord, Generic, Serialize)
 
@@ -94,7 +94,7 @@ data SimInternalSerialisable = SimInternalSerialisable
   -- , serSimRandomNumbers  :: !(NL.NonEmpty Double)
   , serSimRandGenDemand       :: !(V.Vector Word32)
   , serSimRandGenProcTimes    :: !(V.Vector Word32)
-  , serSimOrderGenerationTime :: Time
+  , serSimOrderGenerationTime :: !Time
   , serSimProductRoutes       :: !(M.Map ProductType [Block])
   , serSimBlockLastOccur      :: !(M.Map Block Int)
   } deriving (Eq, Ord, Generic, Serialize)

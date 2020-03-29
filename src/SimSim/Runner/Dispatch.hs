@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 -- Dispatch.hs ---
 --
 -- Filename: Dispatch.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 42
+--     Update #: 44
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -62,7 +63,7 @@ import           SimSim.Routing
 
 
 dispatch :: Routing -> Block -> Order -> Order
-dispatch routes lastBl order =
+dispatch !routes !lastBl !order =
   case find ((== (productType order, lastBl)) . fst) routes of
     Just (_, n) ->
       if n == FGI
@@ -72,9 +73,9 @@ dispatch routes lastBl order =
 
 
 dispatchReverse :: Routing -> Block -> [Block]
-dispatchReverse routes nxtBl = map fst $ filter ((== nxtBl) . snd) routesWoProducts
+dispatchReverse !routes !nxtBl = map fst $ filter ((== nxtBl) . snd) routesWoProducts
   where
-    routesWoProducts = toList $ map (first snd) routes
+    !routesWoProducts = toList $ map (first snd) routes
 
 
 --

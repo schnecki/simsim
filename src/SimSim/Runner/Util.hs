@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TemplateHaskell #-}
 -- Util.hs ---
 --
@@ -10,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 75
+--     Update #: 76
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -93,17 +94,17 @@ getBlockTimeM = gets . getBlockTime
 
 getBlockTime :: Block -> SimSim -> Time
 getBlockTime Sink _ = error "called block time for a sink"
-getBlockTime block sim = fromMaybe (error $ "no block time for block: " ++ show block) (M.lookup block m)
+getBlockTime !block !sim = fromMaybe (error $ "no block time for block: " ++ show block) (M.lookup block m)
   where
     m = simBlockTimes $ simInternal sim
 
 
 mapBlockTimes :: (Time -> Time) -> SimSim -> SimSim
-mapBlockTimes f s = s {simInternal = (simInternal s) {simBlockTimes = M.map f (simBlockTimes $ simInternal s)}}
+mapBlockTimes !f !s = s {simInternal = (simInternal s) {simBlockTimes = M.map f (simBlockTimes $ simInternal s)}}
 
 
 logger :: (MonadLogger m, MonadState SimSim m) => Maybe Time -> Text -> Proxy a b c d m ()
-logger Nothing txt = do
+logger !Nothing !txt = do
   m <- gets (simBlockTimes . simInternal)
   let t = Prelude.maximum (M.elems m)
   logger (Just t) txt
@@ -111,7 +112,7 @@ logger (Just t) txt = $(logDebug) $ "t=" ++ tshow (pretty t) ++ ": " ++ txt
 
 
 isPeriodEnd :: SimSim -> Bool
-isPeriodEnd sim
+isPeriodEnd !sim
   | simCurrentTime sim /= 0 && denominator (fromTime (simCurrentTime sim) / fromTime (simPeriodLength sim)) == 1 = True
   | otherwise = False
 

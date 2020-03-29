@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 -- Server.hs ---
 --
 -- Filename: Server.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 25
+--     Update #: 26
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -67,17 +68,17 @@ import           SimSim.Time
 
 
 server :: (MonadLogger m, MonadIO m) => SimSim -> [Order] -> Server Block Order (StateT SimSim m) ()
-server _ [] = return ()  -- set new order id for upcoming orders
-server sim (o:os) = do
+server !_ [] = return ()  -- set new order id for upcoming orders
+server !sim (o:os) = do
   logger Nothing $ "Server orders: " ++ tshow (map orderId (o:os))
-  let t = simCurrentTime sim
-  nr <- state getNextOrderId
+  let !t = simCurrentTime sim
+  !nr <- state getNextOrderId
   respond $ setOrderId nr $ setOrderBlockStartTime t $ setOrderCurrentTime t o
   server sim os
 
 
 orderPoolSink :: (MonadIO m) => Order -> Client Block Order (StateT SimSim m) ()
-orderPoolSink order = do
+orderPoolSink !order = do
   modify (addOrderToOrderPool order)
   request OrderPool >>= orderPoolSink
 

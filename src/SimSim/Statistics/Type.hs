@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 93
+--     Update #: 95
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,11 +48,11 @@ import           GHC.Generics
 import           SimSim.Block
 
 data SimStatistics = SimStatistics
-  { simStatsBlockFlowTimes  :: M.Map Block StatsFlowTime -- ^ Statistics for blocks, like nr of orders, flow time.
-  , simStatsBlockProcTimes  :: M.Map Block StatsProcTime    -- ^ Lists the (processing) times only for the machines and queues.
-  , simStatsShopFloor       :: StatsFlowTime       -- ^ Shop floor (from release until entry of finished goods inventory)
-  , simStatsShopFloorAndFgi :: StatsFlowTime       -- ^ Shop floor (from release until shipping)
-  , simStatsOrderCosts      :: StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
+  { simStatsBlockFlowTimes  :: !(M.Map Block StatsFlowTime) -- ^ Statistics for blocks, like nr of orders, flow time.
+  , simStatsBlockProcTimes  :: !(M.Map Block StatsProcTime)    -- ^ Lists the (processing) times only for the machines and queues.
+  , simStatsShopFloor       :: !StatsFlowTime       -- ^ Shop floor (from release until entry of finished goods inventory)
+  , simStatsShopFloorAndFgi :: !StatsFlowTime       -- ^ Shop floor (from release until shipping)
+  , simStatsOrderCosts      :: !StatsOrderCost -- ^ Nr of orders (costs) to pay split into earnings, wip, backorder and
                                               -- holding.
   } deriving (Show, Ord, Generic, Serialize, NFData)
 
@@ -67,15 +67,15 @@ instance Eq SimStatistics where
       ]
 
 data StatsFlowTime = StatsFlowTime
-  { statsNrOrders       :: Integer              -- ^ Nr of orders.
-  , statsOrderFlowTime  :: StatsOrderTime       -- ^ Flow time statistics.
-  , statsOrderTardiness :: Maybe StatsOrderTard -- ^ Only tardy orders for shop floor and shop floor plus FGI.
+  { statsNrOrders       :: !Integer              -- ^ Nr of orders.
+  , statsOrderFlowTime  :: !StatsOrderTime       -- ^ Flow time statistics.
+  , statsOrderTardiness :: !(Maybe StatsOrderTard) -- ^ Only tardy orders for shop floor and shop floor plus FGI.
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 data StatsOrderTime = StatsOrderTime
-  { statsSumTime           :: Rational
-  , statsStdDevTime        :: StatsStdDev
-  , statsLastUpdatePartial :: Maybe StatsOrderTime -- ^ Only used if last update was partial. Holds the previous
+  { statsSumTime           :: !Rational
+  , statsStdDevTime        :: !StatsStdDev
+  , statsLastUpdatePartial :: !(Maybe StatsOrderTime) -- ^ Only used if last update was partial. Holds the previous
                                                    -- ``StatsOrderTime``.
   } deriving (Show, Ord, Generic, Serialize, NFData)
 
@@ -84,28 +84,28 @@ instance Eq StatsOrderTime where
 
 
 data StatsOrderTard = StatsOrderTard
-  { statsNrTardOrders   :: Integer
-  , statsSumTardiness   :: Rational
-  , statsStdDevTardTime :: StatsStdDev
+  { statsNrTardOrders   :: !Integer
+  , statsSumTardiness   :: !Rational
+  , statsStdDevTardTime :: !StatsStdDev
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 data StatsOrderCost = StatsOrderCost
-  { statsEarnings :: Integer    -- ^ Nr of earnings (sum of finished orders).
-  , statsWipCosts :: Integer    -- ^ Nr of WIP costs (sum of orders in WIP at end of period).
-  , statsBoCosts  :: Integer    -- ^ Nr of back order costs (sum of orders overdue at end of period per period).
-  , statsFgiCosts :: Integer    -- ^ Nr of holding costs (sum of orders in inventory at end of period).
+  { statsEarnings :: !Integer    -- ^ Nr of earnings (sum of finished orders).
+  , statsWipCosts :: !Integer    -- ^ Nr of WIP costs (sum of orders in WIP at end of period).
+  , statsBoCosts  :: !Integer    -- ^ Nr of back order costs (sum of orders overdue at end of period per period).
+  , statsFgiCosts :: !Integer    -- ^ Nr of holding costs (sum of orders in inventory at end of period).
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 data StatsProcTime = StatsProcTime
-  { statsBlockTime :: Rational  -- ^ Processing time for Machine, idle time for OrderPool, Queue and FGI.
+  { statsBlockTime :: !Rational  -- ^ Processing time for Machine, idle time for OrderPool, Queue and FGI.
 
   --  Todo: , statsBroken
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 data StatsStdDev = StatsStdDev  -- ^ Standard Deviation using Welford's algorithm.
-  { statsStdDevCount :: Integer
-  , statsStdDevMean  :: Rational
-  , statsStdDevM2    :: Rational
+  { statsStdDevCount :: !Integer
+  , statsStdDevMean  :: !Rational
+  , statsStdDevM2    :: !Rational
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
 

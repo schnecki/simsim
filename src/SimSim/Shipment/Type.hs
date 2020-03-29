@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 25
+--     Update #: 26
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -53,9 +53,9 @@ import           SimSim.Time
 type ShipmentFun = Time -> Order -> Bool
 
 data Shipment = Shipment
-  { shipmentRegularity :: ShipmentRegularity
-  , shipment           :: ShipmentFun
-  , uniqueShipmentName :: Text
+  { shipmentRegularity :: !ShipmentRegularity
+  , shipment           :: !ShipmentFun
+  , uniqueShipmentName :: !Text
   } deriving (Generic, NFData)
 
 instance Eq Shipment where

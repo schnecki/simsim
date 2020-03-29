@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns    #-}
 {-# LANGUAGE TemplateHaskell #-}
 -- Sink.hs ---
 --
@@ -10,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 41
+--     Update #: 42
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -68,8 +69,8 @@ import           SimSim.Time
 
 
 sink :: (MonadLogger m, MonadIO m) => Downstream -> Client Block Downstream (StateT SimSim m) ()
-sink (Left nr) = logger Nothing "No more orders: END OF SIMULATION"
-sink (Right order) = do
+sink (Left !nr) = logger Nothing "No more orders: END OF SIMULATION"
+sink (Right !order) = do
   case nextBlock order of
     Sink -> return ()           -- everything worked out
     bl   -> error $  "non Sink order at sink!!!: " ++ show order

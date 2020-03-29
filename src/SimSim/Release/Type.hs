@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 19
+--     Update #: 20
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -51,8 +51,8 @@ type ReleaseFun = Time -> [Order] -> IO [Order]
 
 
 data Release = Release
-  { releaser          :: ReleaseFun
-  , uniqueReleaseName :: Text
+  { releaser          :: !ReleaseFun
+  , uniqueReleaseName :: !Text
   } deriving (Generic, NFData)
 
 instance Eq Release where

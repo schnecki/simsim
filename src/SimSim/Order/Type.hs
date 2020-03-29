@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 86
+--     Update #: 87
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -66,7 +66,7 @@ data Order = Order
   , lastBlock        :: !Block
   , blockStartTime   :: !Time
   , nextBlock        :: !Block
-  , orderCurrentTime :: Time
+  , orderCurrentTime :: !Time
   } deriving (Ord, Show, Generic, Serialize, NFData)
 
 instance Eq Order where

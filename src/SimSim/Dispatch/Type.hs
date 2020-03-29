@@ -14,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 149
+--     Update #: 150
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -55,8 +55,8 @@ import           SimSim.Order.Type
 type DispatchFunction = Block -> [Order] -> [Order]
 
 data Dispatch = Dispatch
-  { dispatcher         :: DispatchFunction
-  , uniqueDispatchName :: Text
+  { dispatcher         :: !DispatchFunction
+  , uniqueDispatchName :: !Text
   } deriving (Generic, NFData)
 
 instance Eq Dispatch where

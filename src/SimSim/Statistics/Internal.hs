@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 -- Internal.hs ---
 --
 -- Filename: Internal.hs
@@ -9,7 +10,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 49
+--     Update #: 52
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -48,14 +49,14 @@ import           SimSim.Time
 
 
 data Update
-  = UpBlock Block               -- ^ For flow time through given block.
+  = UpBlock !Block               -- ^ For flow time through given block.
   | EndProd                     -- ^ For flow time through production.
   | Shipped                     -- ^ For flow time through whole system.
   deriving (Show)
 
 -- | Updates ``StatsOrderTime`` as part of ``StatsFlowTime``.
 updateStatsOrderTime :: Bool -> Update -> Order -> StatsOrderTime -> StatsOrderTime
-updateStatsOrderTime isPartial up order st@(StatsOrderTime tSum stdDev _) =
+updateStatsOrderTime !isPartial !up !order !st@(StatsOrderTime !tSum !stdDev !_) =
   StatsOrderTime
     (tSum + val)
     (if isPartial
@@ -68,7 +69,7 @@ updateStatsOrderTime isPartial up order st@(StatsOrderTime tSum stdDev _) =
 
 -- | Updates ``StatsOrderTard`` as part of ``StatsFlowTime``.
 updateTardiness :: Update -> Order -> StatsOrderTard -> StatsOrderTard
-updateTardiness up order st@(StatsOrderTard nr tardSum stdDev) =
+updateTardiness !up !order !st@(StatsOrderTard !nr !tardSum !stdDev) =
   case up of
     EndProd ->
       case orderTardinessProduction order of
@@ -81,7 +82,7 @@ updateTardiness up order st@(StatsOrderTard nr tardSum stdDev) =
     _ -> st
 
 updateStatsStdDev :: Rational -> StatsStdDev -> StatsStdDev
-updateStatsStdDev val (StatsStdDev counter mean m2) = StatsStdDev counter' mean' m2'
+updateStatsStdDev !val (StatsStdDev !counter !mean !m2) = StatsStdDev counter' mean' m2'
   where counter' = counter + 1
         delta = val - mean
         mean' = mean + delta / fromIntegral counter'
@@ -91,7 +92,7 @@ updateStatsStdDev val (StatsStdDev counter mean m2) = StatsStdDev counter' mean'
 
 -- | Updates the ``StatsOrderCost``.
 updateCosts :: Update -> Order -> StatsOrderCost -> StatsOrderCost
-updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
+updateCosts !up !order !st@(StatsOrderCost !earn !wip !bo !fgi) =
   case up of
     Shipped -> StatsOrderCost (earn+1) wip bo fgi -- just shipped
     _       -> st
@@ -99,7 +100,7 @@ updateCosts up order st@(StatsOrderCost earn wip bo fgi) =
 
 -- | Returns the flow time of an order according to the given update block sequence.
 getBlockFlowTime :: Update -> Order -> Rational
-getBlockFlowTime bl order =
+getBlockFlowTime !bl !order =
   case bl of
     UpBlock bl ->
       case bl of

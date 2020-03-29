@@ -14,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 453
+--     Update #: 454
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -75,7 +75,7 @@ data SimSim = SimSim
   , simOrdersMachine   :: !(M.Map Block (Order, Time)) -- ^ Order and left over processing time for this order.
   , simOrdersFgi       :: ![Order]
   , simOrdersShipped   :: ![Order] -- ^ Orders which have been shipped in last period.
-  , simStatistics      :: SimStatistics
+  , simStatistics      :: !SimStatistics
   , simInternal        :: !SimInternal
   } deriving (Ord, Generic, NFData)
 
