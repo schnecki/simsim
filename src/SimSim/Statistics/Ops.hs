@@ -1,4 +1,6 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- Ops.hs ---
 --
 -- Filename: Ops.hs
@@ -10,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 267
+--     Update #: 279
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,22 +65,23 @@ import           SimSim.Statistics.Type
 import           SimSim.Time
 
 
-data UpdateType = FlowAndProcTime | FlowTime | ProcTime
+data UpdateType
+  = FlowAndProcTime
+  | FlowTime
+  | ProcTime
   deriving (Show)
 
 
--- | This function reports the given order as released. The invariant is that the release date is set, otherwise an
--- error will be called.
+-- | This function reports the given order as released. The invariant is that the release date is set, otherwise error will be called.
 statsAddRelease :: Order -> SimSim -> SimSim
-statsAddRelease !order !sim = sim {simStatistics = updateBlockOrder False blTimes FlowAndProcTime (UpBlock OrderPool) order (simStatistics sim)} -- TODO: FlowAndProcTime is wrong
-  where blTimes = simBlockTimes $ simInternal sim
+statsAddRelease !order !sim = sim {simStatistics = updateBlockOrder False blTimes FlowAndProcTime (UpBlock OrderPool) order (simStatistics sim)}
+  where
+    blTimes = simBlockTimes $ simInternal sim
 
 -- | This function reports an order as finished with production (now entering the FGI). It updates the statistics
 -- according to the given order.
 statsAddEndProduction :: Order -> SimSim -> SimSim
 statsAddEndProduction !order !sim = sim {simStatistics = updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
-  -- | wasEmpty = sim {simStatistics = updateBlockOrder False blTimes ProcTime (UpBlock FGI) order  }
-  -- | otherwise = sim {simStatistics = updateShopFloorOrder blTimes EndProd order (simStatistics sim)}
   where
     !blTimes = simBlockTimes $ simInternal sim
     !wasEmpty = null $ simOrdersFgi sim
@@ -141,7 +144,7 @@ updateShopFloorOrder !blTimes !up !order !simStatistics = simStatistics {simStat
 
 
 updateBlockOrder :: Bool -> BlockTimes -> UpdateType -> Update -> Order -> SimStatistics -> SimStatistics
-updateBlockOrder !isPartial !blTimes !upType !up@(UpBlock !bl) !order !simStatistics =
+updateBlockOrder !isPartial !blTimes !upType up@(UpBlock !bl) !order !simStatistics =
   case upType of
     ProcTime -> simStatistics {simStatsBlockProcTimes = M.insert bl (updateStatsProcTime blTimes up order statsBlTimes) (simStatsBlockProcTimes simStatistics)}
     FlowTime -> simStatistics {simStatsBlockFlowTimes = M.insert bl (updateStatsFlowTime isPartial up order stats) (simStatsBlockFlowTimes simStatistics)}
@@ -158,8 +161,8 @@ updateBlockOrder !_ !_ !_ !bl !_ !_ = error ("called updateBlockOrder on a non b
 
 -- | This function updates the ``StatsProcTime
 updateStatsProcTime :: BlockTimes -> Update -> Order -> StatsProcTime -> StatsProcTime
-updateStatsProcTime !_ !up@(UpBlock Machine {}) !order (StatsProcTime !pT) = StatsProcTime (pT + getBlockFlowTime up order)
-updateStatsProcTime !blTimes !up@(UpBlock bl) !order (StatsProcTime !pT) = StatsProcTime (pT + fromTime (max 0 $ blockStartTime order - blTime))
+updateStatsProcTime !_ up@(UpBlock Machine {}) !order (StatsProcTime !pT) = StatsProcTime (pT + getBlockFlowTime up order)
+updateStatsProcTime !blTimes up@(UpBlock bl) !order (StatsProcTime !pT) = StatsProcTime (pT + fromTime (max 0 $ blockStartTime order - blTime))
   where
     !blTime = fromMaybe (error $ "empty block time for " ++ show bl ++ " in updateStatsProcTime. Check your routing, in particular that you connected to/from " <> show bl <> "!") (M.lookup bl blTimes)
 
@@ -171,7 +174,7 @@ updateStatsFlowTime !isPartial !up !order (StatsFlowTime !nr !ft !mTard) = case 
   UpBlock{} -> StatsFlowTime nr' (updateStatsOrderTime isPartial up order ft) Nothing
   _         -> StatsFlowTime nr' (updateStatsOrderTime isPartial up order ft) (Just $ updateTardiness up order (fromMaybe emptyStatsOrderTard mTard))
   where !nr' | isPartial = nr
-            | otherwise = nr+1
+             | otherwise = nr+1
 
 
 getWelfordVariance :: StatsStdDev -> Maybe Rational

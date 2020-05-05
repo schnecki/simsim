@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- Instances.hs ---
 --
 -- Filename: Instances.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 4
+--     Update #: 5
 -- URL:
 -- Doc URL:
 -- Keywords:

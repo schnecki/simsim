@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 1
+--     Update #: 4
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,6 +43,7 @@ import           Test.Hspec
 import           Test.QuickCheck
 
 import           SimSim.Order.Type
+import           SimSim.ProductType
 
 import           TestSimSim.Block.Instances
 import           TestSimSim.ProductType.Instances
@@ -56,10 +57,10 @@ fixTimes o@(Order _ _ _ _ rel pS pE sh _ _ _ _) =
     bind xs = last <$> sequence xs
 
 instance Arbitrary Order where
-  arbitrary = do
+  arbitrary = sized $ \n -> do
     arrDt <- arbitrary
     fixTimes <$>
-      (Order <$> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*>
+      (Order <$> arbitrary <*> (Product <$> choose (1, n)) <*> pure arrDt <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> pure arrDt <*> arbitrary <*>
        arbitrary)
 instance CoArbitrary Order where
   coarbitrary (Order oid pt aD dD rT psT peT shT lB lastStart nB cT) =

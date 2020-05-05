@@ -1,4 +1,5 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 -- Dispatch.hs ---
 --
 -- Filename: Dispatch.hs
@@ -10,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 44
+--     Update #: 45
 -- URL:
 -- Doc URL:
 -- Keywords:

@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- OnDueDate.hs ---
 --
 -- Filename: OnDueDate.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 19
+--     Update #: 21
 -- URL:
 -- Doc URL:
 -- Keywords:

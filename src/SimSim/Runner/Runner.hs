@@ -1,5 +1,7 @@
-{-# LANGUAGE BangPatterns    #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
 -- Runner.hs ---
 --
 -- Filename: Runner.hs
@@ -11,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 238
+--     Update #: 239
 -- URL:
 -- Doc URL:
 -- Keywords:

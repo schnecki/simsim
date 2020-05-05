@@ -2,6 +2,7 @@
 {-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE DeriveAnyClass      #-}
 {-# LANGUAGE DeriveGeneric       #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE RankNTypes          #-}
 -- Type.hs ---
 --
@@ -14,7 +15,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 454
+--     Update #: 456
 -- URL:
 -- Doc URL:
 -- Keywords:

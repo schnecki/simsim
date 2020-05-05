@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- Pretty.hs ---
 --
 -- Filename: Pretty.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 86
+--     Update #: 87
 -- URL:
 -- Doc URL:
 -- Keywords:

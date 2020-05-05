@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- Util.hs ---
 --
 -- Filename: Util.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 27
+--     Update #: 28
 -- URL:
 -- Doc URL:
 -- Keywords:

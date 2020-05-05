@@ -1,5 +1,6 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -11,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 87
+--     Update #: 93
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -100,14 +101,14 @@ orderFinishedAndTardyShipped :: Order -> Bool
 orderFinishedAndTardyShipped order = maybe False (> dueDate order) (shipped order)
 
 orderTardinessProduction :: Order -> Maybe Time
-orderTardinessProduction order = maybe (fail "order not yet finished production") (packTardy . subtract (dueDate order)) (prodEnd order)
+orderTardinessProduction order = packTardy . subtract (dueDate order) =<< prodEnd order
   where packTardy x | x > 0 = return x
-                    | otherwise = fail "not tardy"
+                    | otherwise = Nothing -- "not tardy"
 
 orderTardinessShipped :: Order -> Maybe Time
-orderTardinessShipped order = maybe (fail "order not yet finished production") (packTardy . subtract (dueDate order)) (shipped order)
+orderTardinessShipped order = packTardy . subtract (dueDate order) =<< shipped order
   where packTardy x | x > 0 = return x
-                    | otherwise = fail "not tardy"
+                    | otherwise = Nothing -- "not shipped"
 
 
 setOrderId :: OrderId -> Order -> Order

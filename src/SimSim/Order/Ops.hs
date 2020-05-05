@@ -1,7 +1,9 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
-{-# LANGUAGE GADTs          #-}
-{-# LANGUAGE TypeFamilies   #-}
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE GADTs             #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies      #-}
 -- Ops.hs ---
 --
 -- Filename: Ops.hs
@@ -13,7 +15,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 139
+--     Update #: 141
 -- URL:
 -- Doc URL:
 -- Keywords:

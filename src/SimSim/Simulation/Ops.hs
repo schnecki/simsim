@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 65
+--     Update #: 68
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -92,7 +92,7 @@ newSimSim gDemand gPt routesE procTimes periodLen release dispatch shipment =
                (SimInternal uniqueBlocks blTimes 1 maxMachines (fromProcTimes procTimes) gDemand gPt (-periodLen) (M.fromList topSorts) (M.fromList lastOccur))
         else error "wrong setup"
       where check = (hasSource || error "Routing must include an OrderPool!") && (all ((== 1) . length) comps || error ("At least one route has a gap!" ++ show comps)) &&
-                    (productTypes == map Product [1..length productTypes] || error "Product types must read Product 1, Product 2, Product 3, ...")
+                    (productTypes == map Product [1..length productTypes] || error ("Product types must read Product 1, Product 2, Product 3, ... Found: " ++ show topSorts))
             productTypes = sort $ nub $ map fst topSorts
             allBlocks = fmap snd routes <> fmap (snd . fst) routes
             uniqueBlocks = NL.fromList $ ordNub $ NL.toList allBlocks

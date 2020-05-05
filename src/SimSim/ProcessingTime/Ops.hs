@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- Ops.hs ---
 --
 -- Filename: Ops.hs
@@ -9,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 36
+--     Update #: 38
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,7 +43,7 @@ import           ClassyPrelude
 
 import           Control.Monad.State.Strict
 import qualified Data.Map.Strict            as M
-import System.Random.MWC
+import           System.Random.MWC
 
 import           SimSim.Block
 import           SimSim.Order.Type

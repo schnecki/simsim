@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- BackwardInfiniteLoading.hs ---
 --
 -- Filename: BackwardInfiniteLoading.hs

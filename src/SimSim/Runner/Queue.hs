@@ -1,7 +1,10 @@
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE BangPatterns          #-}
+{-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoImplicitPrelude     #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE TemplateHaskell       #-}
 -- Queue.hs ---
 --
 -- Filename: Queue.hs
@@ -13,7 +16,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 348
+--     Update #: 350
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -44,17 +47,17 @@ module SimSim.Runner.Queue
 
 import           ClassyPrelude
 
-import           Control.Monad hiding (forM_, mapM_)
+import           Control.Monad              hiding (forM_, mapM_)
 import           Control.Monad.IO.Class
-import           Control.Monad.State.Strict hiding (foldM_,forM_, mapM_)
+import           Control.Monad.Logger
+import           Control.Monad.State.Strict hiding (foldM_, forM_, mapM_)
 import           Control.Monad.Trans.Class
+import qualified Data.List                  as L
 import qualified Data.Map.Strict            as M
 import           Data.Text                  (Text)
 import           Data.Void
-import qualified Data.List as L
 import           Debug.Trace
 import           Pipes
-import Control.Monad.Logger
 import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
@@ -62,7 +65,6 @@ import qualified Prelude                    as Prelude
 import           System.Random
 
 import           SimSim.Block
-import SimSim.Statistics
 import           SimSim.Order.Type
 import           SimSim.ProcessingTime.Ops
 import           SimSim.ProductType
@@ -72,6 +74,7 @@ import           SimSim.Runner.Machine
 import           SimSim.Runner.Util
 import           SimSim.Simulation.Ops
 import           SimSim.Simulation.Type
+import           SimSim.Statistics
 
 type QueueResponse = Maybe Order
 

@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- Instances.hs ---
 --
 -- Filename: Instances.hs
@@ -10,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 3
+--     Update #: 4
 -- URL:
 -- Doc URL:
 -- Keywords:

@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 95
+--     Update #: 99
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -43,6 +43,7 @@ import           Control.DeepSeq
 import qualified Data.Map.Strict as M
 import           Data.Serialize
 import           GHC.Generics
+import qualified Prelude
 
 
 import           SimSim.Block
@@ -58,7 +59,7 @@ data SimStatistics = SimStatistics
 
 instance Eq SimStatistics where
   stats1 == stats2 =
-    and
+    Prelude.and
       [ simStatsBlockFlowTimes stats1 == simStatsBlockFlowTimes stats2
       , simStatsBlockProcTimes stats1 == simStatsBlockProcTimes stats2
       , simStatsShopFloor stats1 == simStatsShopFloor stats2
@@ -67,8 +68,8 @@ instance Eq SimStatistics where
       ]
 
 data StatsFlowTime = StatsFlowTime
-  { statsNrOrders       :: !Integer              -- ^ Nr of orders.
-  , statsOrderFlowTime  :: !StatsOrderTime       -- ^ Flow time statistics.
+  { statsNrOrders       :: !Integer                -- ^ Nr of orders.
+  , statsOrderFlowTime  :: !StatsOrderTime         -- ^ Flow time statistics.
   , statsOrderTardiness :: !(Maybe StatsOrderTard) -- ^ Only tardy orders for shop floor and shop floor plus FGI.
   } deriving (Eq, Show, Ord, Generic, Serialize, NFData)
 
@@ -76,7 +77,7 @@ data StatsOrderTime = StatsOrderTime
   { statsSumTime           :: !Rational
   , statsStdDevTime        :: !StatsStdDev
   , statsLastUpdatePartial :: !(Maybe StatsOrderTime) -- ^ Only used if last update was partial. Holds the previous
-                                                   -- ``StatsOrderTime``.
+                                                      -- ``StatsOrderTime``.
   } deriving (Show, Ord, Generic, Serialize, NFData)
 
 instance Eq StatsOrderTime where

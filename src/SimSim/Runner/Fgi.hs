@@ -1,5 +1,7 @@
-{-# LANGUAGE BangPatterns    #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
 -- Fgi.hs ---
 --
 -- Filename: Fgi.hs
@@ -11,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 90
+--     Update #: 91
 -- URL:
 -- Doc URL:
 -- Keywords:

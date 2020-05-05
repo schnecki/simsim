@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 12
+--     Update #: 16
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -74,12 +74,12 @@ instance CoArbitrary StatsOrderCost where
   coarbitrary (StatsOrderCost ear wip bo fgi) = variant 0 . coarbitrary (ear, wip, bo, fgi)
 
 instance Arbitrary StatsOrderTime where
-  arbitrary = StatsOrderTime <$> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal)) <*> arbitrary
+  arbitrary = StatsOrderTime <$> (toR <$> choose (0, maxVal)) <*> arbitrary <*> arbitrary
 instance CoArbitrary StatsOrderTime where
   coarbitrary (StatsOrderTime sumT stdDevT partial) = variant 0 . coarbitrary (sumT, stdDevT, partial)
 
 instance Arbitrary StatsOrderTard where
-  arbitrary = StatsOrderTard <$> choose (0, maxVal) <*> (toR <$> choose (0, maxVal)) <*> (toR <$> choose (0, maxVal))
+  arbitrary = StatsOrderTard <$> choose (0, maxVal) <*> (toR <$> choose (0, maxVal)) <*> arbitrary
 instance CoArbitrary StatsOrderTard where
   coarbitrary (StatsOrderTard nr s stdDev) = variant 0 . coarbitrary (nr, s, stdDev)
 
@@ -98,6 +98,12 @@ instance Arbitrary SimStatistics where
         arbitrary
 instance CoArbitrary SimStatistics where
   coarbitrary (SimStatistics bl blTimes fl flFgi csts) = variant 0 . coarbitrary (bl, blTimes, fl, flFgi, csts)
+
+instance Arbitrary StatsStdDev where
+  arbitrary = StatsStdDev <$> choose (0, maxVal) <*> arbitrary <*> arbitrary
+
+instance CoArbitrary StatsStdDev where
+  coarbitrary (StatsStdDev c m m2) = variant 0 . coarbitrary (c, m, m2)
 
 
 sizedUpdate :: Gen [Update]

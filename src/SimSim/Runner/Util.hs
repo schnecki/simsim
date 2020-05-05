@@ -1,5 +1,8 @@
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
 -- Util.hs ---
 --
 -- Filename: Util.hs
@@ -11,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 76
+--     Update #: 79
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,22 +44,22 @@ module SimSim.Runner.Util where
 import           ClassyPrelude
 
 import           Control.Monad
-import           Control.Monad.Logger
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Class
-import qualified Data.List.NonEmpty         as NL
-import qualified Data.Map.Strict            as M
-import           Data.Monoid                ((<>))
-import           Data.Text                  (Text)
+import qualified Data.List.NonEmpty           as NL
+import qualified Data.Map.Strict              as M
+import           Data.Monoid                  ((<>))
+import           Data.Ratio                   (denominator)
+import           Data.Text                    (Text)
 import           Data.Void
-import Data.Ratio (denominator)
 import           Debug.Trace
-import qualified Prelude
 import           Pipes
 import           Pipes.Core
 import           Pipes.Lift
-import qualified Pipes.Prelude              as Pipe
+import qualified Pipes.Prelude                as Pipe
+import qualified Prelude
 import           System.Random
 import           Text.PrettyPrint.ANSI.Leijen
 

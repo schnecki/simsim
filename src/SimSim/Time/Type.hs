@@ -1,6 +1,7 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
-{-# LANGUAGE InstanceSigs   #-}
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE InstanceSigs      #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -12,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 50
+--     Update #: 51
 -- URL:
 -- Doc URL:
 -- Keywords:

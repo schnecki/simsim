@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 9
+--     Update #: 14
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -41,6 +41,7 @@ import qualified Data.Map.Strict                     as M
 import           Prelude
 import           System.IO.Unsafe
 import           System.Random
+import           System.Random.MWC
 import           Test.Hspec
 import           Test.QuickCheck
 
@@ -62,11 +63,14 @@ maxPer = 10^8
 
 instance Arbitrary SimSim where
   arbitrary = do
-    let g = unsafePerformIO $ newStdGen
+    let (gDemand, gProcTimes) =
+          unsafePerformIO $ do
+            g <- createSystemRandom
+            splitRandGen g
     routes <- sizedRoutes
     procTimes <- sizedProcTimes
-    pLen <- (Time . toRational) <$> choose (0,maxPer)
-    newSimSim g routes procTimes pLen <$> arbitrary <*> arbitrary <*> arbitrary
+    pLen <- Time . toRational <$> choose (0, maxPer)
+    newSimSim gDemand gProcTimes routes procTimes pLen <$> arbitrary <*> arbitrary <*> arbitrary
 
 
 --

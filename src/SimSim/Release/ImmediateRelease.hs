@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- ImmediateRelease.hs ---
 --
 -- Filename: ImmediateRelease.hs
@@ -9,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 11
+--     Update #: 12
 -- URL:
 -- Doc URL:
 -- Keywords:

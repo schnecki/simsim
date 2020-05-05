@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 7
+--     Update #: 9
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -63,12 +63,13 @@ sizedRoutes :: Gen Routes
 sizedRoutes = sized $ \n -> do
       let bls = sizedBlocks n
           machines = filter isMachine bls
-      shuffledPts <- return (sizedProductTypes n) >>= shuffle
+          products = sizedProductTypes n
+      shuffledPts <- shuffle products
       prds <- (head shuffledPts:) <$>  sublistOf (tail shuffledPts)
-      let mkRouting prd ms = (\(xs, last) -> xs ++ [((prd, last), FGI)]) $ foldl mkRoute ([], OrderPool) ms
+      let mkRouting prd ms = (\(xs, lastX) -> xs ++ [((prd, lastX), FGI)]) $ foldl mkRoute ([], OrderPool) ms
             where mkRoute :: ([((ProductType,Block), Block)],Block) -> Block -> ([((ProductType,Block), Block)],Block)
-                  mkRoute (acc, last) ms@(Machine n) = (acc ++ [((prd, last), Queue n), ((prd, Queue n), ms)], ms)
-      routes <- mapM (\p -> sublistOf machines >>= shuffle >>= return . mkRouting p) prds
+                  mkRoute (acc, lastX) ms@(Machine n) = (acc ++ [((prd, lastX), Queue n), ((prd, Queue n), ms)], ms)
+      routes <- mapM (\p -> sublistOf machines >>= shuffle >>= return . mkRouting p) products
       return $ concat routes
 
 --
