@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 -- Main.hs ---
 --
@@ -11,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 258
+--     Update #: 259
 -- URL:
 -- Doc URL:
 -- Keywords:
