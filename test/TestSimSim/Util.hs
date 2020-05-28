@@ -11,7 +11,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 28
+--     Update #: 38
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -40,6 +40,8 @@ module TestSimSim.Util
     ( (===)
     , (====)
     , eqPretty
+    , eqEps
+    , inRange
     ) where
 
 import           ClassyPrelude                as P
@@ -61,9 +63,18 @@ infix 4 ===
 (===) :: (Pretty a, Eq a) => a -> a -> Property
 x === y = eqPretty x pretty y pretty
 
+-- | Check for `expected - eps <= nr <= expected + eps`.
+eqEps :: (Num a, Ord a, Show a) => a -> a -> a -> Property
+eqEps eps expected = inRange (expected - eps) (expected + eps)
+
+-- | Check for `minNr <= nr <= maxNr`.
+inRange :: (Ord a, Show a) => a -> a -> a -> Property
+inRange low high v = counterexample (show low ++ " <= " ++ show v ++ " <= " ++ show high) res
+  where
+    res = low <= v && v <= high
 
 -- | Like '==', but prints a counterexample when it fails.
-eqPretty :: (Pretty a, Eq a) => a -> (a -> Doc) -> a -> (a -> Doc) -> Property
+eqPretty :: (Eq a) => a -> (a -> Doc) -> a -> (a -> Doc) -> Property
 eqPretty x xDocF y yDocF =
   counterexample (show xDoc ++ interpret res ++ show yDoc ++ "\n\tDiff: " ++ ppDiff diffs) res
   where

@@ -15,7 +15,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 141
+--     Update #: 147
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -52,6 +52,7 @@ import           Control.DeepSeq
 import           Data.Serialize
 import           GHC.Generics
 import           Statistics.Distribution
+import           Statistics.Distribution.DiscreteUniform
 import           Statistics.Distribution.Uniform
 import           System.Random.MWC
 
@@ -123,7 +124,7 @@ generateOrdersUniform :: SimSim -> Int -> Int -> Time -> IO [Order]
 generateOrdersUniform sim minOrders maxOrders dueDateSlack = do
   nrOrders <- round <$> genContVar (uniformDistr (fromIntegral minOrders-0.4999) (fromIntegral maxOrders+0.4999)) gen
   let arrivals = replicate nrOrders currentTime
-  -- productTypes <- map (Product . (+ 1) . (`mod` length pts)) <$> mapM (\_ -> genDiscreteVar dProductType gen) arrivals
+  -- productTypes <- map Product <$> mapM (\_ -> genDiscreteVar (discreteUniform (length pts)) gen) arrivals
   productTypes <- map (Product . round) <$> mapM (\_ -> genContVar (uniformDistr 0.5001 (fromIntegral (length pts)+0.4999)) gen) arrivals
   let dueDates = replicate (length arrivals) (currentTime + dueDateSlack)
   return $ zipWith3 newOrder productTypes arrivals dueDates
