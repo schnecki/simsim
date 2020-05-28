@@ -9,7 +9,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 46
+--     Update #: 47
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -91,7 +91,7 @@ prop_generateOrdersUniformMean sim minNr maxNr =
     return $ eqEps eps tar (avg :: Double)
   where
     nr = 2*10 ^ (4 :: Int)
-    eps = 0.30
+    eps = 0.50
 
 prop_generateOrdersUniformNrProductTypes :: SimSim -> Int -> Int -> Property
 prop_generateOrdersUniformNrProductTypes sim minNr maxNr =
