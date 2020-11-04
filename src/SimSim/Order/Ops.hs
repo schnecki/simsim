@@ -15,7 +15,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 147
+--     Update #: 155
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -107,8 +107,8 @@ generateOrdersFixedDueDateSlack sim dInterarrival dProductType dueDateSlack = do
           then ((acc + interArr) :) <$> repeatUntilTime (acc + interArr)
           else return []
   arrivals <- map ((+currentTimeMinusPeriod) . timeFromDouble) <$> repeatUntilTime 0
-  print currentTimeMinusPeriod
-  print $ map timeToDouble arrivals
+  -- print currentTimeMinusPeriod
+  -- print $ map timeToDouble arrivals
   -- productTypes <- map (Product . (+ 1) . (`mod` length pts)) <$> mapM (\_ -> genDiscreteVar dProductType gen) arrivals
   productTypes <- map (Product . (+ 1) . (`mod` length pts) . round) <$> mapM (\_ -> genContVar dProductType gen) arrivals
   let dueDates = replicate (length arrivals) (currentTime + dueDateSlack)
