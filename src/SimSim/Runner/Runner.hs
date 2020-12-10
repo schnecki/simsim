@@ -13,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 240
+--     Update #: 247
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -65,8 +65,8 @@ import           Pipes.Core
 import           Pipes.Lift
 import qualified Pipes.Prelude              as Pipe
 import qualified Prelude
+import           System.IO.Unsafe           (unsafePerformIO)
 import           System.Random
-
 
 import           SimSim.Block
 import           SimSim.Order
@@ -181,18 +181,37 @@ mkPipeOrderPool !sim !incomingOrders = server sim incomingOrders >>~ orderPoolSi
 
 -- | This function creates the pipe which simulates the production system.
 mkPipeProdSys :: (MonadLogger m, MonadIO m) => SimSim -> [Order] -> Proxy X () () X (StateT SimSim m) ()
-mkPipeProdSys !sim !ordersToRelease =
-  release sim routes ordersToRelease >>~
-  foldl' -- repeat machine & queues often enough
-    (>~>)
-    (queue "QPipe1" routes >~> machine "MPipe1" routes)
-    (map (\x -> queue ("QPipe" ++ tshow x) routes >~> machine ("MPipe" ++ tshow x) routes) [2 .. maxMs + 1]) >~>
-  fgi >~>
-  sink
+mkPipeProdSys !sim !ordersToRelease = do
+  pipe <- liftIO $ getPipe sim
+  release sim routes ordersToRelease >>~ pipe
+  where
+    routes = simRouting sim
+
+-- | Caches the pipe, so we don't need to recreate it every time.
+cachedPipe :: (MonadLogger m) => MVar (Maybe (Downstream -> Proxy Upstream Downstream () X (StateT SimSim m) ()))
+cachedPipe = unsafePerformIO $ newMVar mempty
+{-# NOINLINE cachedPipe #-}
+
+-- | Get the pipe, either from the cache or create it and store it in the cache.
+getPipe :: (MonadLogger m, MonadIO m) => SimSim -> IO (Downstream -> Proxy Upstream Downstream () X (StateT SimSim m) ())
+getPipe sim = do
+  p <- tryReadMVar cachedPipe
+  case join p of
+    Just pipe -> return pipe
+    Nothing -> do
+      let pipe =
+            foldl' -- repeat machine & queues often enough
+              (>~>)
+              (queue "QPipe1" routes >~> machine "MPipe1" routes)
+              (map (\x -> queue ("QPipe" ++ tshow x) routes >~> machine ("MPipe" ++ tshow x) routes) [2 .. maxMs + 1])
+          fullPipe = pipe >~> fgi >~> sink
+      void $ tryPutMVar cachedPipe (Just fullPipe)
+      return fullPipe
   where
     maxMs = simMaxMachines (simInternal sim)
-    lastOccur = Prelude.maximum $ M.elems (simBlockLastOccur $ simInternal sim)
     routes = simRouting sim
+    -- lastOccur = Prelude.maximum $ M.elems (simBlockLastOccur $ simInternal sim)
+
 
 --
 -- Runner.hs ends here
