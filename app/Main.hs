@@ -12,7 +12,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 259
+--     Update #: 273
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -81,13 +81,13 @@ routing =
   ]
 
 periodLen :: Time
-periodLen = 10
+periodLen = 1
 
 procTimes :: ProcTimes
-procTimes = [(Machine 1,[(Product 1, return . const 3)
-                        ,(Product 2, return . const 2)])
-            ,(Machine 2,[(Product 1, return . const 2)
-                        ,(Product 2, return . const 4)])
+procTimes = [(Machine 1,[(Product 1, return . const 0.15)
+                        ,(Product 2, return . const 0.15)])
+            ,(Machine 2,[(Product 1, return . const 0.15)
+                        ,(Product 2, return . const 0.15)])
             ]
 
 
@@ -115,7 +115,14 @@ main =
     sim <- newSimSimIO routing procTimes periodLen releaseImmediate dispatchFirstComeFirstServe shipOnDueDate
     -- sim'' <- foldM (simulateLogging runStderrLoggingT) sim ([incomingOrders] ++ replicate 1 [])
     sim' <- simulateUntilLogging runStderrLoggingT 0.833 sim incomingOrders
-    sim'' <- simulateUntilLogging runStderrLoggingT 11 sim' []
+    let runSim !s 0 = return s
+        runSim !s p = do
+          ords <- generateOrdersUniform s 1 11 10
+          !s' <- simulate s ords
+          runSim s' (p - 1)
+    sim'' <- runSim sim' 1000
+
+    -- sim'' <- simulateUntil 11000 sim' []
     -- sim'' <- simulateUntilLogging runStderrLoggingT 3 sim' [] -- incomingOrders
     -- putStrLn $ "\n\nProduct routes: " ++ tshow (simProductRoutes $ simInternal sim')
     -- putStrLn $ "OP: " ++ tshow (fmap orderId $ simOrderPoolOrders sim')
@@ -125,9 +132,7 @@ main =
     --                              simOrdersFgi sim')
     -- putStrLn $ "Finished: " ++ tshow (map orderId $ simOrdersFinished sim')
     -- putStrLn $ "Block times: " ++ tshow (simBlockTimes $ simInternal sim')
-
     -- putDoc $ prettySimStatistics (simStatistics sim')
-
     -- putStrLn $ prettySimSim sim'
     putStrLn $ prettySimSim sim''
 

@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass    #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE Strict            #-}
 -- Type.hs ---
 --
 -- Filename: Type.hs
@@ -12,7 +13,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 93
+--     Update #: 94
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -68,7 +69,12 @@ data Order = Order
   , blockStartTime   :: !Time
   , nextBlock        :: !Block
   , orderCurrentTime :: !Time
-  } deriving (Ord, Show, Generic, Serialize, NFData)
+  } deriving (Ord, Show, Generic, Serialize)
+
+instance NFData Order where
+  rnf (Order i tp ar dd rel st end sh last blSt nBl t) =
+    rnf i `seq` rnf tp `seq` rnf ar `seq` rnf dd `seq` rnf1 rel `seq` rnf1 st `seq` rnf1 end `seq` rnf1 sh `seq` rnf last `seq` rnf blSt `seq` rnf nBl `seq` rnf t
+
 
 instance Eq Order where
   x == y = orderId x == orderId y

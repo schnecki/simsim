@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE ViewPatterns      #-}
 -- Runner.hs ---
 --
 -- Filename: Runner.hs
@@ -13,7 +14,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 247
+--     Update #: 252
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -94,7 +95,7 @@ import           SimSim.Runner.Util
 -- one feds the orders into the system, whereas the second one releases the orders from the order pool and feds it into
 -- the production system.
 simulation :: (MonadLogger m, MonadIO m) => SimSim -> Time -> [Order] -> Proxy X () () X m SimSim
-simulation !sim !simEnd !incomingOrders = do
+simulation !sim !simEnd (force -> !incomingOrders) = do
   let !timeNextPeriodEnd = Time (toRational $ floor ((simCurrentTime sim + simPeriodLength sim) / simPeriodLength sim)) * simPeriodLength sim
   let !stSim = setSimEndTime (min timeNextPeriodEnd simEnd) sim
   !simOp <- execStateP stSim (mkPipeOrderPool stSim incomingOrders)
@@ -104,9 +105,10 @@ simulation !sim !simEnd !incomingOrders = do
   !relOrds <- liftIO $ releaser (simRelease simOp) (simCurrentTime simOp) arrivedOpOrders
   let !simRel = removeOrdersFromOrderPool relOrds simOp
   !sim' <- finalize <$!> execStateP simRel (mkPipeProdSys simRel relOrds)
-  if simEnd > simCurrentTime sim'
-    then simulation sim' simEnd []
-    else return sim'
+  force <$>
+    if simEnd > simCurrentTime sim'
+      then simulation sim' simEnd []
+      else return sim'
   where
     finalize !sim = addStatsCosts $ mapBlockTimes (max endT) $ fixIdleTimeQueues $ fixIdleTimeFgi $ setSimCurrentTime endT sim
       where
