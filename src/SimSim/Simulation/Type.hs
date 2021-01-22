@@ -15,7 +15,7 @@
 -- Package-Requires: ()
 -- Last-Updated:
 --           By:
---     Update #: 457
+--     Update #: 459
 -- URL:
 -- Doc URL:
 -- Keywords:
@@ -143,6 +143,13 @@ queues = filter isQueue . allBlocks
 
 productTypes :: SimSim -> [ProductType]
 productTypes = M.keys . simProductRoutes . simInternal
+
+isRoutedOver :: Routes -> ProductType -> Block -> Bool
+isRoutedOver routes pt bl = bl `elem` blocks
+  where
+    rts = filter ((== pt) . fst . fst) routes
+    blocks = map snd rts ++ map (snd . fst) rts
+
 
 toSerialisableInternal :: SimInternal -> SimInternalSerialisable
 toSerialisableInternal (SimInternal bl t e m _ randD randPt ordGen rout last) =
